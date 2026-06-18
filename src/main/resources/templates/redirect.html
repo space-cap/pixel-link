@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${link.title != null && !#strings.isEmpty(link.title) ? link.title : '연결 중...'}">연결 중...</title>
+    <meta name="description" th:content="${link.description != null ? link.description : ''}">
+    
+    <!-- OpenGraph SEO 메타 태그 (SNS 미리보기 최적화) -->
+    <meta property="og:title" th:content="${link.title != null && !#strings.isEmpty(link.title) ? link.title : 'Pixel-Link'}">
+    <meta property="og:description" th:content="${link.description != null ? link.description : '안전하게 이동 중입니다.'}">
+    <meta property="og:image" th:content="${link.ogImage != null && !#strings.isEmpty(link.ogImage) ? link.ogImage : ''}">
+    <meta property="og:type" content="website">
+
+    <!-- 1. Facebook Pixel Code 삽입 (Starter 이상 요금제 전용) -->
+    <script th:if="${link.fbPixelId != null && !#strings.isEmpty(link.fbPixelId)}" th:inline="javascript">
+        /*<![CDATA[*/
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', /*[[${link.fbPixelId}]]*/ '');
+        fbq('track', 'PageView');
+        /*]]>*/
+    </script>
+    
+    <!-- 2. Google Analytics Tag (gtag.js) 삽입 (Starter 이상 요금제 전용) -->
+    <script th:if="${link.gaTrackingId != null && !#strings.isEmpty(link.gaTrackingId)}" th:src="@{'https://www.googletagmanager.com/gtag/js?id=' + ${link.gaTrackingId}}" async></script>
+    <script th:if="${link.gaTrackingId != null && !#strings.isEmpty(link.gaTrackingId)}" th:inline="javascript">
+        /*<![CDATA[*/
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', /*[[${link.gaTrackingId}]]*/ '');
+        /*]]>*/
+    </script>
+
+    <!-- 3. Custom Script 삽입 (Premium 요금제 전용) -->
+    <script th:if="${link.customScript != null && !#strings.isEmpty(link.customScript)}" th:utext="${link.customScript}"></script>
+
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            background-image: radial-gradient(circle at center, #eff6ff 0%, #f8fafc 100%);
+        }
+        .container {
+            text-align: center;
+            animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(29, 78, 216, 0.08);
+            border-radius: 50%;
+            border-top-color: #1d4ed8;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 24px auto;
+            box-shadow: 0 0 15px rgba(29, 78, 216, 0.1);
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        h1 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #475569;
+            letter-spacing: -0.025em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="spinner"></div>
+        <h1 th:text="#{redirect.loading}">안전한 목적지로 연결 중입니다...</h1>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        // 픽셀 스크립트가 실행될 최소 대기 시간을 확보한 후 리다이렉트 실행
+        let targetUrl = /*[[${link.defaultTargetUrl}]]*/ 'https://example.com';
+        const delay = /*[[${link.adTimerSeconds != null ? link.adTimerSeconds * 1000 : 1000}]]*/ 1000;
+        
+        // 상대경로 오독 방지용 스키마 자동 보정
+        if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+            targetUrl = 'https://' + targetUrl;
+        }
+
+        setTimeout(() => {
+            // 화면 페이드 아웃 모션
+            document.body.style.transition = 'opacity 0.3s ease';
+            document.body.style.opacity = '0';
+            setTimeout(() => {
+                window.location.replace(targetUrl);
+            }, 300);
+        }, delay);
+        /*]]>*/
+    </script>
+</body>
+</html>

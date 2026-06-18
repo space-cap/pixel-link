@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:pixel-link-local.db
+  sql:
+    init:
+      schema-locations: classpath:db/schema-sqlite.sql

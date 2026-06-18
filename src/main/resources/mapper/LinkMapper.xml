@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pixellink.mapper.LinkMapper">
+
+  <select id="findById" resultType="com.pixellink.model.Link">
+    SELECT * FROM links WHERE id = #{id}
+  </select>
+
+  <select id="findByShortCode" resultType="com.pixellink.model.Link">
+    SELECT * FROM links WHERE short_code = #{shortCode}
+  </select>
+
+  <select id="findByUserId" resultType="com.pixellink.model.Link">
+    SELECT * FROM links WHERE user_id = #{userId} ORDER BY created_at DESC
+  </select>
+
+  <insert id="insert">
+    INSERT INTO links (
+      id, user_id, short_code, default_target_url, title, description, og_image, 
+      fb_pixel_id, ga_tracking_id, custom_script, is_ad_enabled, ad_timer_seconds, 
+      is_paywalled, price, clicks_count
+    ) VALUES (
+      #{id}, #{userId}, #{shortCode}, #{defaultTargetUrl}, #{title}, #{description}, #{ogImage}, 
+      #{fbPixelId}, #{gaTrackingId}, #{customScript}, #{isAdEnabled}, #{adTimerSeconds}, 
+      #{isPaywalled}, #{price}, #{clicksCount}
+    )
+  </insert>
+
+  <update id="update">
+    UPDATE links
+    SET 
+      default_target_url = #{defaultTargetUrl},
+      title = #{title},
+      description = #{description},
+      og_image = #{ogImage},
+      fb_pixel_id = #{fbPixelId},
+      ga_tracking_id = #{gaTrackingId},
+      custom_script = #{customScript},
+      is_ad_enabled = #{isAdEnabled},
+      ad_timer_seconds = #{adTimerSeconds},
+      is_paywalled = #{isPaywalled},
+      price = #{price}
+    WHERE id = #{id}
+  </update>
+
+  <delete id="delete">
+    DELETE FROM links WHERE id = #{id}
+  </delete>
+
+  <update id="incrementClicksCount">
+    UPDATE links
+    SET clicks_count = clicks_count + 1
+    WHERE id = #{id}
+  </update>
+
+</mapper>

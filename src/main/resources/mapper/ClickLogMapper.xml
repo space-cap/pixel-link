@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pixellink.mapper.ClickLogMapper">
+
+  <insert id="insert">
+    INSERT INTO click_logs (
+      id, link_id, user_agent, ip_hash, referrer, device_type, os_type, 
+      is_ad_clicked, is_converted
+    ) VALUES (
+      #{id}, #{linkId}, #{userAgent}, #{ipHash}, #{referrer}, #{deviceType}, #{osType}, 
+      #{isAdClicked}, #{isConverted}
+    )
+  </insert>
+
+  <select id="countByLinkId" resultType="int">
+    SELECT COUNT(*) FROM click_logs WHERE link_id = #{linkId}
+  </select>
+
+  <select id="getClicksByDevice" resultType="map">
+    SELECT COALESCE(device_type, 'UNKNOWN') as name, COUNT(*) as value
+    FROM click_logs
+    WHERE link_id = #{linkId}
+    GROUP BY device_type
+  </select>
+
+  <select id="getClicksByOs" resultType="map">
+    SELECT COALESCE(os_type, 'UNKNOWN') as name, COUNT(*) as value
+    FROM click_logs
+    WHERE link_id = #{linkId}
+    GROUP BY os_type
+  </select>
+
+  <select id="getClicksByReferrer" resultType="map">
+    SELECT COALESCE(referrer, 'DIRECT') as name, COUNT(*) as value
+    FROM click_logs
+    WHERE link_id = #{linkId}
+    GROUP BY referrer
+  </select>
+
+  <!-- SQLite용 일별 클릭 수 집계 -->
+  <select id="getDailyClicks" resultType="map" databaseId="sqlite">
+    SELECT SUBSTR(timestamp, 1, 10) as date, COUNT(*) as clicks
+    FROM click_logs
+    WHERE link_id = #{linkId}
+    GROUP BY SUBSTR(timestamp, 1, 10)
+    ORDER BY date ASC
+    LIMIT 30
+  </select>
+
+  <!-- PostgreSQL용 일별 클릭 수 집계 -->
+  <select id="getDailyClicks" resultType="map" databaseId="postgresql">
+    SELECT TO_CHAR(timestamp, 'YYYY-MM-DD') as date, COUNT(*) as clicks
+    FROM click_logs
+    WHERE link_id = #{linkId}
+    GROUP BY TO_CHAR(timestamp, 'YYYY-MM-DD')
+    ORDER BY date ASC
+    LIMIT 30
+  </select>
+
+</mapper>

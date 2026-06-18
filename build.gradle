@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.5'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.pixellink'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '21'
+targetCompatibility = '21'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    
+    // MyBatis (Spring Boot 3.x 및 Java 17+ 호환을 위해 3.0.3 사용)
+    implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+    
+    // Database Drivers
+    implementation 'org.xerial:sqlite-jdbc:3.45.1.0'
+    implementation 'org.postgresql:postgresql'
+    
+    // Lombok
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    
+    // DevTools
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}

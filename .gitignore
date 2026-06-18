@@ -1,0 +1,33 @@
+# Gradle
+.gradle/
+build/
+.gradletasknamecache
+
+# IDEs and Editors
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+.vscode/
+.classpath
+.project
+.settings/
+bin/
+
+# Local databases and runtime data
+*.db
+*.sqlite
+pixel-link-local.db
+
+# Log files
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

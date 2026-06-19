@@ -216,10 +216,10 @@ print(response.json())</pre>
                         <td style="padding: 12px; font-weight: bold; color: #334155;">${key.name || 'API Key'}</td>
                         <td style="padding: 12px; font-family: monospace; color: #475569;">
                             <span title="${keyString}">${maskedKey}</span>
-                            <button type="button" class="action-btn" style="padding: 2px 8px; font-size: 0.75rem; margin-left: 8px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" onclick="copyToClipboard('${keyString}', this)">복사</button>
+                            <button type="button" class="action-btn" style="width: auto; height: auto; padding: 6px 12px; font-size: 0.75rem; margin-left: 8px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; line-height: 1;" onclick="copyToClipboard('${keyString}', this)">복사</button>
                         </td>
                         <td style="padding: 12px; text-align: center;">
-                            <button type="button" class="action-btn btn-delete" style="padding: 4px 8px; font-size: 0.8rem; border-radius: 4px;" onclick="revokeApiKey('${key.id}')">무효화</button>
+                            <button type="button" class="action-btn btn-delete" style="width: auto; height: auto; padding: 6px 12px; font-size: 0.8rem; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center; line-height: 1; margin: 0 auto;" onclick="revokeApiKey('${key.id}')">무효화</button>
                         </td>
                     `;
                     tbody.appendChild(tr);

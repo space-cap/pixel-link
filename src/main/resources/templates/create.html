@@ -175,6 +175,39 @@
         </div>
     </div>
 
+    <!-- 단축 성공 모달창 Overlay -->
+    <div class="modal-overlay" id="successModal">
+        <div class="success-modal-content">
+            <div class="success-icon-circle">✔</div>
+            <h3 class="card-title" style="justify-content: center; margin-bottom: 8px;">단축 링크 생성 완료!</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">링크가 성공적으로 단축되었습니다. 아래 주소를 즉시 복사하실 수 있습니다.</p>
+            
+            <div class="success-url-display-box">
+                <span class="success-url-text" id="successShortenedUrl">http://localhost:8090/xxxx</span>
+                <button class="btn" id="successCopyBtn" onclick="copySuccessUrl()">📋 복사하기</button>
+            </div>
+
+            <!-- 실제 QR 코드 영역 -->
+            <div class="qr-code-section">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">📱 모바일 스캔 QR 코드</div>
+                <img class="qr-code-image" id="successQrImage" src="" alt="QR Code">
+            </div>
+
+            <!-- 실제 작동하는 소셜 공유 버튼 -->
+            <div style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">📢 SNS 채널에 공유하기</div>
+            <div class="social-share-group">
+                <a class="social-btn social-btn-twitter" id="shareTwitterBtn" href="" target="_blank">
+                    <span>X (트위터)</span>
+                </a>
+                <a class="social-btn social-btn-facebook" id="shareFacebookBtn" href="" target="_blank">
+                    <span>Facebook</span>
+                </a>
+            </div>
+
+            <button class="btn btn-secondary" onclick="closeSuccessModal()" style="margin-top: 16px;">확인 (닫기)</button>
+        </div>
+    </div>
+
     <!-- 토스트 메시지 안내 컴포넌트 -->
     <div class="toast" id="globalToast">
         <span class="toast-icon"></span>
@@ -313,15 +346,58 @@
             .then(json => {
                 if (json.success) {
                     showToast(translations.createSuccess, 'success');
-                    setTimeout(() => {
-                        window.location.href = '/dashboard/links?userId=' + currentUserId;
-                    }, 1000);
+                    openSuccessModal(json.data.shortenedUrl);
                 } else {
                     showToast(json.error.message, 'error');
                 }
             })
             .catch(err => {
                 showToast(translations.genericError, 'error');
+            });
+        }
+
+        // 성공 모달 열기 및 데이터 주입
+        function openSuccessModal(shortenedUrl) {
+            document.getElementById('successShortenedUrl').innerText = shortenedUrl;
+            
+            // 실시간 QR 코드 API 주입
+            const qrImg = document.getElementById('successQrImage');
+            qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(shortenedUrl)}`;
+            
+            // X (트위터) 공유 링크 바인딩
+            const twitterBtn = document.getElementById('shareTwitterBtn');
+            twitterBtn.href = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shortenedUrl)}&text=${encodeURIComponent('Pixel-Link 단축 주소 공유!')}`;
+            
+            // 페이스북 공유 링크 바인딩
+            const facebookBtn = document.getElementById('shareFacebookBtn');
+            facebookBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shortenedUrl)}`;
+            
+            // 복사 버튼 상태 초기화
+            const copyBtn = document.getElementById('successCopyBtn');
+            copyBtn.innerHTML = '📋 복사하기';
+            copyBtn.style.backgroundColor = '';
+            
+            const modal = document.getElementById('successModal');
+            modal.classList.add('active');
+        }
+
+        // 성공 모달 닫기 (링크 관리 페이지 리다이렉션)
+        function closeSuccessModal() {
+            const modal = document.getElementById('successModal');
+            modal.classList.remove('active');
+            window.location.href = '/dashboard/links?userId=' + currentUserId;
+        }
+
+        // 성공 모달 내 URL 복사
+        function copySuccessUrl() {
+            const urlText = document.getElementById('successShortenedUrl').innerText;
+            navigator.clipboard.writeText(urlText).then(() => {
+                const copyBtn = document.getElementById('successCopyBtn');
+                copyBtn.innerHTML = '✔ 복사 완료';
+                copyBtn.style.backgroundColor = 'var(--color-success)';
+                showToast(translations.copySuccess, 'success');
+            }).catch(err => {
+                showToast('Copy failed.', 'error');
             });
         }
 

@@ -952,3 +952,112 @@ table.stats-table tbody tr:hover {
   opacity: 1;
   padding: 20px;
 }
+
+/* --- 단축 성공 모달 (Success Modal) 스타일 --- */
+.success-modal-content {
+  width: 90%;
+  max-width: 500px;
+  background: #ffffff;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 32px;
+  text-align: center;
+  position: relative;
+  transform: translateY(20px);
+  transition: transform var(--transition-normal);
+}
+
+.modal-overlay.active .success-modal-content {
+  transform: translateY(0);
+}
+
+.success-icon-circle {
+  width: 64px;
+  height: 64px;
+  background: #ecfdf5;
+  border: 2px solid #a7f3d0;
+  color: var(--color-success);
+  font-size: 1.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin: 0 auto 20px auto;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.1);
+}
+
+.success-url-display-box {
+  background: var(--bg-main);
+  border: 1px dashed rgba(29, 78, 216, 0.25);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin: 20px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.success-url-text {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  word-break: break-all;
+}
+
+.qr-code-section {
+  margin: 12px 0 24px 0;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-md);
+  display: inline-block;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.qr-code-image {
+  width: 130px;
+  height: 130px;
+  display: block;
+}
+
+.social-share-group {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.social-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition-fast);
+  color: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.social-btn-twitter {
+  background: #1da1f2;
+}
+.social-btn-twitter:hover {
+  background: #0d8ddb;
+}
+
+.social-btn-facebook {
+  background: #1877f2;
+}
+.social-btn-facebook:hover {
+  background: #0c63d4;
+}

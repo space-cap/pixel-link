@@ -62,7 +62,7 @@ public class WebSecurityConfig {
                 // 단축 주소 리다이렉트 패턴 허용 (알파뉴메릭 1자 이상)
                 .requestMatchers("/{shortCode:[a-zA-Z0-9]+}").permitAll()
                 // 대시보드는 무조건 보호
-                .requestMatchers("/dashboard/**").authenticated()
+                .requestMatchers("/dashboard", "/dashboard/**").authenticated()
                 // 나머지 요청들은 permitAll 또는 컨트롤러에서 추가 검증 수행
                 .anyRequest().permitAll()
             )

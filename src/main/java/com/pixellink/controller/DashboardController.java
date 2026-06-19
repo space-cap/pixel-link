@@ -34,6 +34,9 @@ public class DashboardController {
     @Autowired
     private com.pixellink.mapper.SettlementMapper settlementMapper;
 
+    @Autowired
+    private HttpSession httpSession;
+
     @Value("${spring.profiles.active:local}")
     private String activeProfile;
 
@@ -85,10 +88,10 @@ public class DashboardController {
 
     @GetMapping("/app/dashboard")
     public String showDashboard(
-            @AuthenticationPrincipal SessionUser sessionUser,
             HttpServletRequest request,
             Model model) {
         
+        SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
         String userId = (sessionUser != null) ? sessionUser.getId() : "test-user";
         // 1. 유저 조회 (없으면 기본값 test-user 강제)
         User user = userMapper.findById(userId);
@@ -108,11 +111,14 @@ public class DashboardController {
         List<LinkResponse> quickLinks = linkService.getLinksByUserIdPaged(userId, null, 1, 5, baseUrl);
 
         // 5. 목 테스트 유저 목록 (대시보드 상단 전환기 제공용)
-        List<User> mockUsers = Arrays.asList(
+        List<User> mockUsers = new java.util.ArrayList<>(Arrays.asList(
             userMapper.findById("admin"),
             userMapper.findById("test-user"),
             userMapper.findById("free-user")
-        );
+        ));
+        if (user != null && !userId.equals("admin") && !userId.equals("test-user") && !userId.equals("free-user")) {
+            mockUsers.add(user);
+        }
 
         // 6. 관리자 설정용 비회원 만료일 조회
         String expiryDays = linkService.getSystemSetting("anon_link_expiry_days", "30");
@@ -136,9 +142,9 @@ public class DashboardController {
 
     @GetMapping("/app/create")
     public String showAdvancedCreate(
-            @AuthenticationPrincipal SessionUser sessionUser,
             Model model) {
         
+        SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
         String userId = (sessionUser != null) ? sessionUser.getId() : "test-user";
         User user = userMapper.findById(userId);
         if (user == null) {
@@ -146,11 +152,14 @@ public class DashboardController {
             userId = "test-user";
         }
 
-        List<User> mockUsers = Arrays.asList(
+        List<User> mockUsers = new java.util.ArrayList<>(Arrays.asList(
             userMapper.findById("admin"),
             userMapper.findById("test-user"),
             userMapper.findById("free-user")
-        );
+        ));
+        if (user != null && !userId.equals("admin") && !userId.equals("test-user") && !userId.equals("free-user")) {
+            mockUsers.add(user);
+        }
 
         model.addAttribute("currentUser", user);
         model.addAttribute("currentUserId", userId);
@@ -161,13 +170,13 @@ public class DashboardController {
 
     @GetMapping("/app/links")
     public String showLinks(
-            @AuthenticationPrincipal SessionUser sessionUser,
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
             HttpServletRequest request,
             Model model) {
         
+        SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
         String userId = (sessionUser != null) ? sessionUser.getId() : "test-user";
         User user = userMapper.findById(userId);
         if (user == null) {
@@ -185,11 +194,14 @@ public class DashboardController {
             totalPages = 1;
         }
 
-        List<User> mockUsers = Arrays.asList(
+        List<User> mockUsers = new java.util.ArrayList<>(Arrays.asList(
             userMapper.findById("admin"),
             userMapper.findById("test-user"),
             userMapper.findById("free-user")
-        );
+        ));
+        if (user != null && !userId.equals("admin") && !userId.equals("test-user") && !userId.equals("free-user")) {
+            mockUsers.add(user);
+        }
 
         model.addAttribute("currentUser", user);
         model.addAttribute("links", links);
@@ -204,9 +216,9 @@ public class DashboardController {
 
     @GetMapping("/app/monetization")
     public String showMonetization(
-            @AuthenticationPrincipal SessionUser sessionUser,
             Model model) {
         
+        SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
         String userId = (sessionUser != null) ? sessionUser.getId() : "test-user";
         User user = userMapper.findById(userId);
         if (user == null) {
@@ -221,11 +233,14 @@ public class DashboardController {
 
         List<com.pixellink.model.Settlement> settlements = settlementMapper.findByUserId(userId);
 
-        List<User> mockUsers = Arrays.asList(
+        List<User> mockUsers = new java.util.ArrayList<>(Arrays.asList(
             userMapper.findById("admin"),
             userMapper.findById("test-user"),
             userMapper.findById("free-user")
-        );
+        ));
+        if (user != null && !userId.equals("admin") && !userId.equals("test-user") && !userId.equals("free-user")) {
+            mockUsers.add(user);
+        }
 
         model.addAttribute("currentUser", user);
         model.addAttribute("currentUserId", userId);
@@ -238,9 +253,9 @@ public class DashboardController {
 
     @GetMapping("/app/developer")
     public String showDeveloper(
-            @AuthenticationPrincipal SessionUser sessionUser,
             Model model) {
         
+        SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
         String userId = (sessionUser != null) ? sessionUser.getId() : "test-user";
         User user = userMapper.findById(userId);
         if (user == null) {
@@ -248,11 +263,14 @@ public class DashboardController {
             userId = "test-user";
         }
 
-        List<User> mockUsers = Arrays.asList(
+        List<User> mockUsers = new java.util.ArrayList<>(Arrays.asList(
             userMapper.findById("admin"),
             userMapper.findById("test-user"),
             userMapper.findById("free-user")
-        );
+        ));
+        if (user != null && !userId.equals("admin") && !userId.equals("test-user") && !userId.equals("free-user")) {
+            mockUsers.add(user);
+        }
 
         model.addAttribute("currentUser", user);
         model.addAttribute("currentUserId", userId);

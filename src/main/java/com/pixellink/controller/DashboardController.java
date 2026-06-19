@@ -211,16 +211,6 @@ public class DashboardController {
         return "developer";
     }
 
-    @GetMapping({"/dashboard", "/dashboard/**"})
-    public String redirectOldDashboard(HttpServletRequest request) {
-        String uri = request.getRequestURI();
-        String newUri = uri.replace("/dashboard", "/app");
-        if ("/app".equals(newUri) || "/app/".equals(newUri)) {
-            newUri = "/app/dashboard";
-        }
-        return "redirect:" + newUri;
-    }
-
     private String getBaseUrl(HttpServletRequest request) {
         String scheme = request.getScheme(); // http or https
         String serverName = request.getServerName(); // localhost or domain

@@ -57,9 +57,7 @@ public class WebSecurityConfig {
                     "/monetization/**", 
                     "/api/links", 
                     "/api/links/*/ad-click", 
-                    "/api/links/*/payments/confirm",
-                    "/dashboard",
-                    "/dashboard/**"
+                    "/api/links/*/payments/confirm"
                 ).permitAll()
                 // 대시보드는 무조건 보호
                 .requestMatchers("/app", "/app/**").authenticated()

@@ -1,0 +1,67 @@
+name: Java CI/CD with Gradle and Deploy to Oracle Cloud
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    # Gradle 빌드 속도를 위한 캐싱 설정
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    - name: Build with Gradle
+      # 무결성 검증을 위해 단위/통합 테스트를 통과한 결과물만 빌드하도록 빌드 시 자동 테스트를 포함시킵니다.
+      run: ./gradlew clean bootJar
+
+    # SCP를 통해 오라클 클라우드 우분투 서버로 JAR 파일 전송
+    - name: Transfer JAR file via SCP
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: 22
+        source: "build/libs/pixel-link-0.0.1-SNAPSHOT.jar"
+        target: "/home/ubuntu/deploy-temp/"
+        strip_components: 2 # build/libs 디렉토리를 떼고 파일만 전송
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Execute remote ssh commands to deploy
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.SSH_KEY }}
+        port: 22
+        script: |
+          # 1. 임시 디렉토리에서 메인 구동 위치로 배포본 이동 및 명칭 단일화
+          mv /home/ubuntu/deploy-temp/pixel-link-0.0.1-SNAPSHOT.jar /home/ubuntu/pixel-link.jar
+          
+          # 2. systemd 서비스 재시작
+          sudo systemctl restart pixellink
+          
+          # 3. 서비스 구동 상태 모니터링 출력
+          sleep 3
+          sudo systemctl status pixellink --no-pager

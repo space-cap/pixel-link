@@ -18,111 +18,106 @@
         <div th:replace="~{fragments :: sidebar(activeMenu='dashboard', currentUserId=${currentUserId}, currentUser=${currentUser})}"></div>
 
         <div class="content-area">
-            <div class="content-grid-2">
-                <!-- 좌측: 링크 생성 폼 (구독 요금제 별 제약 연동) -->
+            <div class="content-wide">
+                
+                <!-- 1. 단축 링크 생성 카드 -->
                 <section class="card" style="width: 100%;">
-            <h2 class="card-title">
-                <span th:text="#{dashboard.create_title}">Create Short Link</span>
-                <span class="logo-badge" th:text="${currentUser.subscriptionTier}">FREE</span>
-            </h2>
-            <form id="createLinkForm" onsubmit="handleCreateLink(event)">
-                
-                <div class="form-group">
-                    <label class="form-label" for="defaultTargetUrl" th:text="#{dashboard.target_url}">Destination URL *</label>
-                    <input class="form-input" type="text" id="defaultTargetUrl" name="defaultTargetUrl" required 
-                           th:placeholder="#{dashboard.target_placeholder}">
-                </div>
-
-                <button class="btn" type="submit" th:text="#{dashboard.submit_btn}">Create Link</button>
-                <div style="margin-top: 16px; text-align: center;">
-                    <a th:href="@{/dashboard/create(userId=${currentUserId})}" style="font-size: 0.85rem; color: var(--accent-secondary); font-weight: 600; text-decoration: underline;">➕ 고급 설정(맞춤 경로, 스마트 라우팅 등) 추가하여 생성하기</a>
-                </div>
-            </form>
-
-        </section>
-
-        <!-- [관리자 전용] 시스템 설정 변경 카드 -->
-        <section class="card" th:if="${currentUserId == 'admin'}" style="margin-top: 24px;">
-            <h2 class="card-title">
-                <span>⚙️ 시스템 설정 (관리자 전용)</span>
-            </h2>
-            <form id="adminSettingsForm" onsubmit="handleSaveSettings(event)">
-                <div class="form-group">
-                    <label class="form-label" for="anonLinkExpiryDays">비회원 링크 만료 기간 (일)</label>
-                    <input class="form-input" type="number" id="anonLinkExpiryDays" name="anonLinkExpiryDays" min="1" required 
-                           th:value="${anonLinkExpiryDays}">
-                </div>
-                <button class="btn" type="submit" style="background: var(--accent-secondary);">설정 저장하기</button>
-            </form>
-        </section>
-
-        <!-- 우측: 통계 요약 및 링크 목록 -->
-        <section class="dashboard-right">
-            
-            <!-- 상단 요약 카드 그리드 -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-label" th:text="#{dashboard.stats_total}">Total Clicks</div>
-                    <div class="stat-val" th:text="${totalClicks}">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label" th:text="#{dashboard.stats_count}">Link Count</div>
-                    <div class="stat-val" th:text="${links.size()}">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label" th:text="#{dashboard.stats_tier}">Subscription Status</div>
-                    <div class="stat-val" style="color: var(--accent-secondary); font-size:1.4rem; padding-top:6px;" th:text="${currentUser.subscriptionTier}">FREE</div>
-                </div>
-            </div>
-
-            <!-- 링크 리스트 카드 섹션 -->
-            <div class="card" style="padding: 24px;">
-                <h3 class="card-title" style="margin-bottom: 20px;">⏱️ 최근 생성된 단축 링크 (최근 5개)</h3>
-                
-                <!-- 빈 목록 예외 대응 -->
-                <div class="empty-state" th:if="${links.isEmpty()}">
-                    <div class="empty-state-icon">🔗</div>
-                    <p th:text="#{dashboard.empty}">No short links generated. Create a new link using the left form.</p>
-                </div>
-
-                <!-- 링크 목록 목록 루프 -->
-                <div class="link-list" th:if="${!links.isEmpty()}">
-                    <div class="link-card" th:each="link : ${links}" th:id="'card-' + ${link.id}">
-                        <div class="link-info">
-                            <div class="link-header">
-                                <a th:href="${link.shortenedUrl}" target="_blank" class="short-url-link" th:text="${link.shortenedUrl}">https://pixel-link.com/code</a>
-                                <div class="link-badge-container">
-                                    <span class="badge badge-fb" th:if="${link.fbPixelId != null && !#strings.isEmpty(link.fbPixelId)}">FB</span>
-                                    <span class="badge badge-ga" th:if="${link.gaTrackingId != null && !#strings.isEmpty(link.gaTrackingId)}">GA</span>
-                                    <span class="badge badge-custom" th:if="${link.customScript != null && !#strings.isEmpty(link.customScript)}">Custom</span>
-                                    <span class="badge" style="background: #e11d48; color: white;" th:if="${link.adEnabled}">AD</span>
-                                    <span class="badge" style="background: #d97706; color: white;" th:if="${link.paywalled}" th:text="'PAY (' + ${link.price} + '원)'">PAY</span>
-                                </div>
-                            </div>
-
-                            <div class="target-url" th:text="'Target: ' + ${link.defaultTargetUrl}">Target: https://example.com/target-url</div>
-                            <div class="created-date" th:text="#{dashboard.created_date} + ${#temporals.format(link.createdAt, 'yyyy-MM-dd HH:mm:ss')}">생성일: 2026-06-18</div>
+                    <h2 class="card-title">
+                        <span th:text="#{dashboard.create_title}">Create Short Link</span>
+                        <span class="logo-badge" th:text="${currentUser.subscriptionTier}">FREE</span>
+                    </h2>
+                    <form id="createLinkForm" onsubmit="handleCreateLink(event)">
+                        <div class="form-group" style="margin-bottom: 20px;">
+                            <label class="form-label" for="defaultTargetUrl" th:text="#{dashboard.target_url}" style="font-size: 0.95rem;">Destination URL *</label>
+                            <input class="form-input" type="text" id="defaultTargetUrl" name="defaultTargetUrl" required 
+                                   th:placeholder="#{dashboard.target_placeholder}" style="padding: 14px 16px; font-size: 0.95rem;">
                         </div>
 
-                        <div class="clicks-display">
-                            <span class="clicks-num" th:text="${link.clicksCount}">0</span>
-                            <span class="clicks-lbl">Clicks</span>
+                        <button class="btn" type="submit" th:text="#{dashboard.submit_btn}">Create Link</button>
+                        <div style="margin-top: 16px; text-align: center;">
+                            <a th:href="@{/dashboard/create(userId=${currentUserId})}" style="font-size: 0.85rem; color: var(--accent-secondary); font-weight: 600; text-decoration: underline;">➕ 고급 설정(맞춤 경로, 스마트 라우팅 등) 추가하여 생성하기</a>
                         </div>
+                    </form>
+                </section>
 
-                        <div class="link-actions">
-                            <button class="action-btn" th:title="#{dashboard.action_copy}" th:onclick="copyToClipboard([[${link.shortenedUrl}]], this)">📋</button>
-                            <button class="action-btn" th:title="#{dashboard.action_stats}" th:onclick="openStatsModal([[${link.id}]])">📊</button>
-                            <button class="action-btn btn-delete" th:title="#{dashboard.action_delete}" th:onclick="deleteLink([[${link.id}]])">🗑️</button>
+                <!-- [관리자 전용] 시스템 설정 변경 카드 -->
+                <section class="card" th:if="${currentUserId == 'admin'}">
+                    <h2 class="card-title">
+                        <span>⚙️ 시스템 설정 (관리자 전용)</span>
+                    </h2>
+                    <form id="adminSettingsForm" onsubmit="handleSaveSettings(event)">
+                        <div class="form-group">
+                            <label class="form-label" for="anonLinkExpiryDays">비회원 링크 만료 기간 (일)</label>
+                            <input class="form-input" type="number" id="anonLinkExpiryDays" name="anonLinkExpiryDays" min="1" required 
+                                   th:value="${anonLinkExpiryDays}">
                         </div>
+                        <button class="btn" type="submit" style="background: var(--accent-secondary);">설정 저장하기</button>
+                    </form>
+                </section>
+
+                <!-- 2. 통계 요약 카드 그리드 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label" th:text="#{dashboard.stats_total}">Total Clicks</div>
+                        <div class="stat-val" th:text="${totalClicks}">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label" th:text="#{dashboard.stats_count}">Link Count</div>
+                        <div class="stat-val" th:text="${links.size()}">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label" th:text="#{dashboard.stats_tier}">Subscription Status</div>
+                        <div class="stat-val" style="color: var(--accent-secondary); font-size:1.4rem; padding-top:6px;" th:text="${currentUser.subscriptionTier}">FREE</div>
                     </div>
                 </div>
 
-                <!-- 전체 단축 링크 관리 바로가기 이동 버튼 -->
-                <div style="margin-top: 24px; text-align: center;" th:if="${!links.isEmpty()}">
-                    <a th:href="@{/dashboard/links(userId=${currentUserId})}" class="btn btn-secondary" style="width: auto; padding: 10px 24px; font-size: 0.85rem; border-radius: 6px; display: inline-flex;">🔗 전체 단축 링크 관리 바로가기</a>
+                <!-- 3. 최근 생성된 단축 링크 카드 -->
+                <div class="card" style="padding: 24px; width: 100%;">
+                    <h3 class="card-title" style="margin-bottom: 20px;">⏱️ 최근 생성된 단축 링크 (최근 5개)</h3>
+                    
+                    <!-- 빈 목록 예외 대응 -->
+                    <div class="empty-state" th:if="${links.isEmpty()}">
+                        <div class="empty-state-icon">🔗</div>
+                        <p th:text="#{dashboard.empty}">No short links generated. Create a new link using the left form.</p>
+                    </div>
+
+                    <!-- 링크 목록 목록 루프 -->
+                    <div class="link-list" th:if="${!links.isEmpty()}">
+                        <div class="link-card" th:each="link : ${links}" th:id="'card-' + ${link.id}">
+                            <div class="link-info">
+                                <div class="link-header">
+                                    <a th:href="${link.shortenedUrl}" target="_blank" class="short-url-link" th:text="${link.shortenedUrl}">https://pixel-link.com/code</a>
+                                    <div class="link-badge-container">
+                                        <span class="badge badge-fb" th:if="${link.fbPixelId != null && !#strings.isEmpty(link.fbPixelId)}">FB</span>
+                                        <span class="badge badge-ga" th:if="${link.gaTrackingId != null && !#strings.isEmpty(link.gaTrackingId)}">GA</span>
+                                        <span class="badge badge-custom" th:if="${link.customScript != null && !#strings.isEmpty(link.customScript)}">Custom</span>
+                                        <span class="badge" style="background: #e11d48; color: white;" th:if="${link.adEnabled}">AD</span>
+                                        <span class="badge" style="background: #d97706; color: white;" th:if="${link.paywalled}" th:text="'PAY (' + ${link.price} + '원)'">PAY</span>
+                                    </div>
+                                </div>
+
+                                <div class="target-url" th:text="'Target: ' + ${link.defaultTargetUrl}">Target: https://example.com/target-url</div>
+                                <div class="created-date" th:text="#{dashboard.created_date} + ${#temporals.format(link.createdAt, 'yyyy-MM-dd HH:mm:ss')}">생성일: 2026-06-18</div>
+                            </div>
+
+                            <div class="clicks-display">
+                                <span class="clicks-num" th:text="${link.clicksCount}">0</span>
+                                <span class="clicks-lbl">Clicks</span>
+                            </div>
+
+                            <div class="link-actions">
+                                <button class="action-btn" th:title="#{dashboard.action_copy}" th:onclick="copyToClipboard([[${link.shortenedUrl}]], this)">📋</button>
+                                <button class="action-btn" th:title="#{dashboard.action_stats}" th:onclick="openStatsModal([[${link.id}]])">📊</button>
+                                <button class="action-btn btn-delete" th:title="#{dashboard.action_delete}" th:onclick="deleteLink([[${link.id}]])">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 전체 단축 링크 관리 바로가기 이동 버튼 -->
+                    <div style="margin-top: 24px; text-align: center;" th:if="${!links.isEmpty()}">
+                        <a th:href="@{/dashboard/links(userId=${currentUserId})}" class="btn btn-secondary" style="width: auto; padding: 10px 24px; font-size: 0.85rem; border-radius: 6px; display: inline-flex;">🔗 전체 단축 링크 관리 바로가기</a>
+                    </div>
                 </div>
-            </div>
-        </section>
 
             </div>
         </div>

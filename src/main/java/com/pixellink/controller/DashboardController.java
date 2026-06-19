@@ -6,14 +6,20 @@ import com.pixellink.mapper.UserMapper;
 import com.pixellink.model.User;
 import com.pixellink.service.LinkService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -28,14 +34,51 @@ public class DashboardController {
     @Autowired
     private com.pixellink.mapper.SettlementMapper settlementMapper;
 
+    @Value("${spring.profiles.active:local}")
+    private String activeProfile;
+
     @GetMapping("/")
     public String showLanding(HttpServletRequest request, Model model) {
         return "landing";
     }
 
     @GetMapping("/app/login")
-    public String showLogin() {
+    public String showLogin(Model model) {
+        model.addAttribute("activeProfile", activeProfile);
         return "login";
+    }
+
+    @GetMapping("/app/login/mock")
+    public String mockSocialLogin(
+            @RequestParam("provider") String provider,
+            @RequestParam("id") String mockId,
+            @RequestParam("email") String mockEmail,
+            HttpServletRequest request) {
+        
+        if (!"local".equals(activeProfile)) {
+            throw new SecurityException("로컬 개발 환경에서만 허용되는 디버그 엔드포인트입니다.");
+        }
+
+        String userId = provider + "_" + mockId;
+        User user = userMapper.findById(userId);
+        if (user == null) {
+            user = new User();
+            user.setId(userId);
+            user.setEmail(mockEmail);
+            user.setSubscriptionTier("FREE");
+            userMapper.insert(user);
+        }
+
+        SessionUser sessionUser = new SessionUser(user);
+        HttpSession httpSession = request.getSession();
+        httpSession.setAttribute("user", sessionUser);
+
+        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                sessionUser, null, Collections.singletonList(authority));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        return "redirect:/app/dashboard";
     }
 
     @GetMapping("/app/dashboard")

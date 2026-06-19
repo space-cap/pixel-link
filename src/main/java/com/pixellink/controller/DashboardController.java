@@ -23,7 +23,15 @@ public class DashboardController {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private com.pixellink.mapper.SettlementMapper settlementMapper;
+
     @GetMapping("/")
+    public String showLanding(HttpServletRequest request, Model model) {
+        return "landing";
+    }
+
+    @GetMapping("/dashboard")
     public String showDashboard(
             @RequestParam(value = "userId", defaultValue = "test-user") String userId,
             HttpServletRequest request,
@@ -52,11 +60,23 @@ public class DashboardController {
             userMapper.findById("free-user")
         );
 
+        // 6. 관리자 설정용 비회원 만료일 조회
+        String expiryDays = linkService.getSystemSetting("anon_link_expiry_days", "30");
+
+        // 7. 정산금 잔액 조회
+        Integer settlementBalance = settlementMapper.sumAmountByUserId(userId);
+        if (settlementBalance == null) {
+            settlementBalance = 0;
+        }
+
         model.addAttribute("currentUser", user);
         model.addAttribute("links", links);
         model.addAttribute("totalClicks", totalClicks);
         model.addAttribute("mockUsers", mockUsers);
         model.addAttribute("currentUserId", userId);
+        model.addAttribute("anonLinkExpiryDays", expiryDays);
+        model.addAttribute("settlementBalance", settlementBalance);
+
 
         return "dashboard";
     }

@@ -23,6 +23,9 @@ public class RedirectionService {
     @Autowired
     private ClickLogMapper clickLogMapper;
 
+    @Autowired
+    private com.pixellink.mapper.RouteRuleMapper routeRuleMapper;
+
     @Transactional
     public Link getLinkAndRecordClick(String shortCode, String userAgent, String clientIp, String referrer) {
         Link link = linkMapper.findByShortCode(shortCode);
@@ -54,8 +57,30 @@ public class RedirectionService {
         // 4. 단축 링크의 단순 클릭수 즉시 증가
         linkMapper.incrementClicksCount(link.getId());
 
+        // 5. [2단계] 스마트 라우팅 규칙 매칭
+        java.util.List<com.pixellink.model.RouteRule> rules = routeRuleMapper.findByLinkId(link.getId());
+        if (rules != null && !rules.isEmpty()) {
+            for (com.pixellink.model.RouteRule rule : rules) {
+                boolean match = false;
+                if ("OS".equalsIgnoreCase(rule.getRuleType())) {
+                    if (rule.getRuleValue() != null && rule.getRuleValue().equalsIgnoreCase(osType)) {
+                        match = true;
+                    }
+                } else if ("DEVICE".equalsIgnoreCase(rule.getRuleType())) {
+                    if (rule.getRuleValue() != null && rule.getRuleValue().equalsIgnoreCase(deviceType)) {
+                        match = true;
+                    }
+                }
+                if (match) {
+                    link.setDefaultTargetUrl(rule.getTargetUrl());
+                    break; // 첫 번째 일치 규칙 우선 적용
+                }
+            }
+        }
+
         return link;
     }
+
 
     private String hashIpAddress(String ip) {
         if (ip == null) ip = "127.0.0.1";

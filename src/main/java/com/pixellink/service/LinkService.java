@@ -4,6 +4,7 @@ import com.pixellink.dto.LinkCreateRequest;
 import com.pixellink.dto.LinkResponse;
 import com.pixellink.mapper.ClickLogMapper;
 import com.pixellink.mapper.LinkMapper;
+import com.pixellink.mapper.SystemSettingMapper;
 import com.pixellink.mapper.UserMapper;
 import com.pixellink.model.Link;
 import com.pixellink.model.User;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,11 +29,28 @@ public class LinkService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private SystemSettingMapper systemSettingMapper;
+
+    @Autowired
+    private com.pixellink.mapper.RouteRuleMapper routeRuleMapper;
+
+    @Autowired
+    private com.pixellink.mapper.SettlementMapper settlementMapper;
+
+    @Autowired
+    private com.pixellink.mapper.PaymentMapper paymentMapper;
+
     private static final String CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
     private final SecureRandom random = new SecureRandom();
+
 
     @Transactional
     public LinkResponse createLink(LinkCreateRequest request, String userId, String baseUrl) {
+        if (userId == null || userId.trim().isEmpty() || "anonymous".equalsIgnoreCase(userId)) {
+            userId = "anonymous";
+        }
         User user = userMapper.findById(userId);
         if (user == null) {
             throw new IllegalArgumentException("존재하지 않는 회원입니다.");
@@ -40,6 +59,23 @@ public class LinkService {
         // 1. 구독 요금제 제약 조건 검증 (01_monetization.md 에 정의됨)
         List<Link> existingLinks = linkMapper.findByUserId(userId);
         validateSubscriptionLimits(user, request, existingLinks.size());
+
+        // 비회원 전용 정책 적용: 커스텀 슬러그 사용 불가 및 만료일 지정
+        LocalDateTime expiredAt = null;
+        if ("anonymous".equals(userId)) {
+            request.setShortCode(null); // 커스텀 슬러그 강제 무효화
+            
+            com.pixellink.model.SystemSetting setting = systemSettingMapper.findByKey("anon_link_expiry_days");
+            int expiryDays = 30;
+            if (setting != null) {
+                try {
+                    expiryDays = Integer.parseInt(setting.getSettingValue());
+                } catch (NumberFormatException e) {
+                    // 폴백 사용
+                }
+            }
+            expiredAt = LocalDateTime.now().plusDays(expiryDays);
+        }
 
         String shortCode = request.getShortCode();
         if (shortCode == null || shortCode.trim().isEmpty()) {
@@ -63,22 +99,44 @@ public class LinkService {
         link.setFbPixelId(request.getFbPixelId());
         link.setGaTrackingId(request.getGaTrackingId());
         link.setCustomScript(request.getCustomScript());
-        link.setAdEnabled(false); // 1단계에서는 광고 미활성
+        
+        // 2~4단계 광고 및 페이월 모니타이제이션 속성 반영
+        link.setAdEnabled(request.isAdEnabled());
         link.setAdTimerSeconds(request.getAdTimerSeconds());
-        link.setPaywalled(false);
-        link.setPrice(0);
+        link.setPaywalled(request.isPaywalled());
+        link.setPrice(request.getPrice());
+        
         link.setClicksCount(0);
+        link.setExpiredAt(expiredAt);
 
         linkMapper.insert(link);
 
-        return LinkResponse.from(link, baseUrl);
+        // 2단계: 스마트 라우팅 규칙 저장
+        java.util.List<com.pixellink.model.RouteRule> routeRules = new java.util.ArrayList<>();
+        if (request.getRouteRules() != null && !request.getRouteRules().isEmpty()) {
+            for (com.pixellink.dto.LinkCreateRequest.RouteRuleRequest rReq : request.getRouteRules()) {
+                if (rReq.getRuleType() != null && rReq.getRuleValue() != null && rReq.getTargetUrl() != null) {
+                    com.pixellink.model.RouteRule rule = new com.pixellink.model.RouteRule();
+                    rule.setId(UUID.randomUUID().toString());
+                    rule.setLinkId(link.getId());
+                    rule.setRuleType(rReq.getRuleType());
+                    rule.setRuleValue(rReq.getRuleValue());
+                    rule.setTargetUrl(rReq.getTargetUrl());
+                    routeRuleMapper.insert(rule);
+                    routeRules.add(rule);
+                }
+            }
+        }
+
+        return LinkResponse.from(link, routeRules, baseUrl);
+
     }
 
     private void validateSubscriptionLimits(User user, LinkCreateRequest request, int currentLinkCount) {
         String tier = user.getSubscriptionTier();
 
-        // 1) 생성 가능 링크 수 체크
-        if ("FREE".equals(tier) && currentLinkCount >= 3) {
+        // 1) 생성 가능 링크 수 체크 (익명 비회원은 누적 개수 제한 예외 처리)
+        if ("FREE".equals(tier) && !"anonymous".equals(user.getId()) && currentLinkCount >= 3) {
             throw new IllegalStateException("FREE 등급은 최대 3개의 단축 링크만 생성 가능합니다. Starter 이상 요금제로 업그레이드하세요.");
         }
         if ("STARTER".equals(tier) && currentLinkCount >= 100) {
@@ -109,9 +167,13 @@ public class LinkService {
 
     public List<LinkResponse> getLinksByUserId(String userId, String baseUrl) {
         return linkMapper.findByUserId(userId).stream()
-                .map(link -> LinkResponse.from(link, baseUrl))
+                .map(link -> {
+                    java.util.List<com.pixellink.model.RouteRule> rules = routeRuleMapper.findByLinkId(link.getId());
+                    return LinkResponse.from(link, rules, baseUrl);
+                })
                 .collect(Collectors.toList());
     }
+
 
     @Transactional
     public void deleteLink(String id, String userId) {
@@ -177,4 +239,115 @@ public class LinkService {
         }
         throw new IllegalStateException("단축 코드 생성에 실패했습니다. 다시 시도해 주세요.");
     }
+
+    @Transactional
+    public void updateSystemSetting(String key, String value) {
+        if ("anon_link_expiry_days".equals(key)) {
+            try {
+                int days = Integer.parseInt(value);
+                if (days <= 0) {
+                    throw new IllegalArgumentException("만료 기간은 1일 이상이어야 합니다.");
+                }
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("만료 기간은 숫자 형식이어야 합니다.");
+            }
+        }
+        systemSettingMapper.updateValue(key, value);
+    }
+
+    public String getSystemSetting(String key, String defaultValue) {
+        com.pixellink.model.SystemSetting setting = systemSettingMapper.findByKey(key);
+        return setting != null ? setting.getSettingValue() : defaultValue;
+    }
+
+    @Transactional
+    public void recordAdClick(String linkId, String clientIp) {
+        Link link = linkMapper.findById(linkId);
+        if (link == null) {
+            throw new IllegalArgumentException("존재하지 않는 링크입니다.");
+        }
+
+        String ipHash = hashIpAddress(clientIp);
+        clickLogMapper.updateAdClicked(linkId, ipHash);
+
+        // 광고 클릭 70% 쉐어액 (70원) 적재
+        com.pixellink.model.Settlement settlement = new com.pixellink.model.Settlement();
+        settlement.setId(UUID.randomUUID().toString());
+        settlement.setUserId(link.getUserId());
+        settlement.setAmount(70);
+        settlement.setStatus("PENDING");
+        settlementMapper.insert(settlement);
+    }
+
+    private String hashIpAddress(String ip) {
+        if (ip == null) ip = "127.0.0.1";
+        String salt = java.time.LocalDate.now().toString(); // 매일 변경되는 일일 솔트
+        String input = ip + salt;
+        try {
+            java.security.MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(input.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (java.security.NoSuchAlgorithmException e) {
+            return String.valueOf(input.hashCode()); // 대체 폴백
+        }
+    }
+
+    @Transactional
+    public void withdrawSettlements(String userId) {
+        Integer balance = settlementMapper.sumAmountByUserId(userId);
+        if (balance == null || balance < 10000) {
+            throw new IllegalStateException("출금 신청 가능한 정산금이 부족합니다. (최소 10,000원)");
+        }
+        settlementMapper.updateStatusByUserId(userId, "COMPLETED");
+
+        // 잔액 차감을 위한 역정산 거래 기입
+        com.pixellink.model.Settlement balanceReset = new com.pixellink.model.Settlement();
+        balanceReset.setId(UUID.randomUUID().toString());
+        balanceReset.setUserId(userId);
+        balanceReset.setAmount(-balance);
+        balanceReset.setStatus("COMPLETED");
+        settlementMapper.insert(balanceReset);
+    }
+
+    @Transactional
+    public void confirmPayment(String linkId, String clientIp, int amount) {
+        Link link = linkMapper.findById(linkId);
+        if (link == null) {
+            throw new IllegalArgumentException("존재하지 않는 링크입니다.");
+        }
+
+        String ipHash = hashIpAddress(clientIp);
+        com.pixellink.model.Payment existing = paymentMapper.findByLinkIdAndIpHash(linkId, ipHash);
+        if (existing != null) {
+            return;
+        }
+
+        com.pixellink.model.Payment payment = new com.pixellink.model.Payment();
+        payment.setId(UUID.randomUUID().toString());
+        payment.setLinkId(linkId);
+        payment.setIpHash(ipHash);
+        payment.setAmount(amount);
+        paymentMapper.insert(payment);
+
+        // 수수료 5% 제하고 95% 판매 정산금 적재
+        int profit = (int) (amount * 0.95);
+        com.pixellink.model.Settlement settlement = new com.pixellink.model.Settlement();
+        settlement.setId(UUID.randomUUID().toString());
+        settlement.setUserId(link.getUserId());
+        settlement.setAmount(profit);
+        settlement.setStatus("PENDING");
+        settlementMapper.insert(settlement);
+    }
+
+    public boolean isLinkPaidByClient(String linkId, String clientIp) {
+        String ipHash = hashIpAddress(clientIp);
+        return paymentMapper.findByLinkIdAndIpHash(linkId, ipHash) != null;
+    }
 }
+

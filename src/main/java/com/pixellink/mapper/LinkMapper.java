@@ -14,4 +14,5 @@ public interface LinkMapper {
     int update(Link link);
     int delete(@Param("id") String id);
     int incrementClicksCount(@Param("id") String id);
+    int deleteExpiredLinks(@Param("now") java.time.LocalDateTime now);
 }

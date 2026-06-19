@@ -31,5 +31,17 @@ public class LinkCreateRequest {
 
     private String customScript;
 
+    private boolean adEnabled;
     private int adTimerSeconds = 1;
+    private boolean paywalled;
+    private int price;
+    private java.util.List<RouteRuleRequest> routeRules;
+
+    @lombok.Data
+    public static class RouteRuleRequest {
+        private String ruleType;
+        private String ruleValue;
+        private String targetUrl;
+    }
 }
+

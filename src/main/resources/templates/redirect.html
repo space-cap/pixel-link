@@ -86,30 +86,99 @@
 </head>
 <body>
     <div class="container">
-        <div class="spinner"></div>
-        <h1 th:text="#{redirect.loading}">안전한 목적지로 연결 중입니다...</h1>
+        <!-- 일반 리다이렉션 화면 -->
+        <div th:if="${!link.adEnabled}">
+            <div class="spinner"></div>
+            <h1 th:text="#{redirect.loading}">안전한 목적지로 연결 중입니다...</h1>
+        </div>
+
+        <!-- 3단계: 광고 노출 및 타이머 대기 화면 -->
+        <div th:if="${link.adEnabled}" style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div class="spinner" id="adSpinner"></div>
+            <h1 id="timerInfo" style="margin-bottom: 20px; font-size: 1.2rem; color: #1e293b;">
+                <span id="countdownSeconds" th:text="${link.adTimerSeconds}">5</span>초 후 목적지로 연결됩니다...
+            </h1>
+            
+            <!-- 가상 구글 애드센스 마케팅 배너 -->
+            <div onclick="handleAdClick()" style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); border-radius: 16px; padding: 30px; color: white; cursor: pointer; text-align: center; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2); transition: transform 0.2s; position: relative; overflow: hidden; margin-top: 30px;">
+                <span style="position: absolute; top: 10px; right: 15px; font-size: 0.7rem; background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px;">Sponsored AD</span>
+                <div style="font-size: 1.8rem; margin-bottom: 10px;">🎯</div>
+                <h3 style="margin: 0 0 8px 0; font-size: 1.3rem; font-weight: 800;">Pixel-Link 프리미엄 멤버십</h3>
+                <p style="margin: 0; font-size: 0.9rem; opacity: 0.9;">지금 가입하시면 무제한 링크 및 마케팅 픽셀 연동이 평생 무료!</p>
+                <div style="margin-top: 15px; display: inline-block; background: white; color: #1d4ed8; font-weight: bold; padding: 8px 18px; border-radius: 20px; font-size: 0.85rem;">자세히 보기 ➔</div>
+            </div>
+        </div>
     </div>
 
     <script th:inline="javascript">
         /*<![CDATA[*/
-        // 픽셀 스크립트가 실행될 최소 대기 시간을 확보한 후 리다이렉트 실행
         let targetUrl = /*[[${link.defaultTargetUrl}]]*/ 'https://example.com';
-        const delay = /*[[${link.adTimerSeconds != null ? link.adTimerSeconds * 1000 : 1000}]]*/ 1000;
+        const isAdEnabled = /*[[${link.adEnabled}]]*/ false;
+        let adSeconds = /*[[${link.adTimerSeconds != null ? link.adTimerSeconds : 5}]]*/ 5;
+        const linkId = /*[[${link.id}]]*/ '';
         
         // 상대경로 오독 방지용 스키마 자동 보정
-        if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+        if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://') && !targetUrl.includes('://')) {
             targetUrl = 'https://' + targetUrl;
         }
 
-        setTimeout(() => {
-            // 화면 페이드 아웃 모션
+        const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+        const hasAppSchema = targetUrl.includes('://') && !targetUrl.startsWith('http://') && !targetUrl.startsWith('https://');
+
+        // 광고 클릭 핸들러
+        function handleAdClick() {
+            // 새창으로 모의 광고 랜딩 페이지 연결
+            window.open('/?ref=ad-click', '_blank');
+            
+            // 광고 클릭 통계 수집 API 전송 (3단계 핵심 아키텍처)
+            fetch(`/api/links/${linkId}/ad-click`, {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(json => {
+                console.log('Ad click recorded:', json);
+            })
+            .catch(err => console.error(err));
+        }
+
+        function executeRedirect() {
             document.body.style.transition = 'opacity 0.3s ease';
             document.body.style.opacity = '0';
             setTimeout(() => {
-                window.location.replace(targetUrl);
+                if (isMobile && hasAppSchema) {
+                    // 모바일 앱 인텐트 실행
+                    window.location.href = targetUrl;
+                    setTimeout(() => {
+                        // 앱 미설치 시 가상 마켓 폴백
+                        if (!targetUrl.startsWith('intent://')) {
+                            window.location.replace('https://play.google.com/store'); // 모의 대체 마켓
+                        }
+                    }, 2000);
+                } else {
+                    window.location.replace(targetUrl);
+                }
             }, 300);
-        }, delay);
+        }
+
+        if (isAdEnabled) {
+            // 타이머 카운트다운 가동
+            const countdownEl = document.getElementById('countdownSeconds');
+            const timer = setInterval(() => {
+                adSeconds--;
+                if (countdownEl) {
+                    countdownEl.innerText = adSeconds;
+                }
+                if (adSeconds <= 0) {
+                    clearInterval(timer);
+                    executeRedirect();
+                }
+            }, 1000);
+        } else {
+            // 일반 연결은 1초 대기 후 즉시 이동
+            setTimeout(executeRedirect, 1000);
+        }
         /*]]>*/
     </script>
 </body>
 </html>
+

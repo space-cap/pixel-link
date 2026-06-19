@@ -20,11 +20,11 @@
     INSERT INTO links (
       id, user_id, short_code, default_target_url, title, description, og_image, 
       fb_pixel_id, ga_tracking_id, custom_script, is_ad_enabled, ad_timer_seconds, 
-      is_paywalled, price, clicks_count
+      is_paywalled, price, clicks_count, expired_at
     ) VALUES (
       #{id}, #{userId}, #{shortCode}, #{defaultTargetUrl}, #{title}, #{description}, #{ogImage}, 
       #{fbPixelId}, #{gaTrackingId}, #{customScript}, #{isAdEnabled}, #{adTimerSeconds}, 
-      #{isPaywalled}, #{price}, #{clicksCount}
+      #{isPaywalled}, #{price}, #{clicksCount}, #{expiredAt}
     )
   </insert>
 
@@ -54,5 +54,11 @@
     SET clicks_count = clicks_count + 1
     WHERE id = #{id}
   </update>
+
+  <delete id="deleteExpiredLinks">
+    DELETE FROM links
+    WHERE expired_at IS NOT NULL
+      AND expired_at &lt; #{now}
+  </delete>
 
 </mapper>

@@ -25,7 +25,7 @@ public class LinkApiController {
     @PostMapping
     public ResponseEntity<Map<String, Object>> createLink(
             @Valid @RequestBody LinkCreateRequest request,
-            @RequestParam("userId") String userId,
+            @RequestParam(value = "userId", required = false) String userId,
             HttpServletRequest httpServletRequest) {
         
         String baseUrl = getBaseUrl(httpServletRequest);
@@ -123,4 +123,93 @@ public class LinkApiController {
         }
         return url.toString();
     }
+
+    @PostMapping("/admin/settings")
+    public ResponseEntity<Map<String, Object>> updateSetting(
+            @RequestParam("key") String key,
+            @RequestParam("value") String value,
+            @RequestParam("userId") String userId) {
+        
+        if (!"admin".equals(userId)) {
+            throw new SecurityException("관리자 권한이 없습니다.");
+        }
+
+        linkService.updateSystemSetting(key, value);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        Map<String, Object> data = new HashMap<>();
+        data.put("message", "설정이 성공적으로 변경되었습니다.");
+        response.put("data", data);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/ad-click")
+    public ResponseEntity<Map<String, Object>> recordAdClick(
+            @PathVariable("id") String id,
+            HttpServletRequest request) {
+        
+        String clientIp = getClientIp(request);
+        linkService.recordAdClick(id, clientIp);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        Map<String, Object> data = new HashMap<>();
+        data.put("message", "광고 클릭 로그 및 70% 수익금이 성공적으로 수집/적재되었습니다.");
+        response.put("data", data);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/withdraw")
+    public ResponseEntity<Map<String, Object>> withdrawSettlements(
+            @RequestParam("userId") String userId) {
+        
+        linkService.withdrawSettlements(userId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        Map<String, Object> data = new HashMap<>();
+        data.put("message", "출금 신청 처리가 완결되었습니다. 은행 영업일 기준 3일 이내에 송금됩니다.");
+        response.put("data", data);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/payments/confirm")
+    public ResponseEntity<Map<String, Object>> confirmPayment(
+            @PathVariable("id") String id,
+            @RequestParam("amount") int amount,
+            HttpServletRequest request) {
+        
+        String clientIp = getClientIp(request);
+        linkService.confirmPayment(id, clientIp, amount);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        Map<String, Object> data = new HashMap<>();
+        data.put("message", "페이월 콘텐츠 접근 결제가 완료되었습니다.");
+        response.put("data", data);
+
+        return ResponseEntity.ok(response);
+    }
+
+    private String getClientIp(HttpServletRequest request) {
+        String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getHeader("WL-Proxy-Client-IP");
+        }
+        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+            ip = request.getRemoteAddr();
+        }
+        if (ip != null && ip.contains(",")) {
+            ip = ip.split(",")[0].trim();
+        }
+        return ip;
+    }
 }
+

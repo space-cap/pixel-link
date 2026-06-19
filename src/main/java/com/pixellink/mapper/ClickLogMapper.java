@@ -16,4 +16,6 @@ public interface ClickLogMapper {
     List<Map<String, Object>> getClicksByOs(@Param("linkId") String linkId);
     List<Map<String, Object>> getClicksByReferrer(@Param("linkId") String linkId);
     List<Map<String, Object>> getDailyClicks(@Param("linkId") String linkId);
+    void updateAdClicked(@Param("linkId") String linkId, @Param("ipHash") String ipHash);
 }
+

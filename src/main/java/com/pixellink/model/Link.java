@@ -21,4 +21,5 @@ public class Link {
     private int price;
     private int clicksCount;
     private LocalDateTime createdAt;
+    private LocalDateTime expiredAt;
 }

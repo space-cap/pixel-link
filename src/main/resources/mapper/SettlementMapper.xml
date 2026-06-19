@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pixellink.mapper.SettlementMapper">
+
+    <select id="findByUserId" resultType="com.pixellink.model.Settlement">
+        SELECT id, user_id, amount, status, settled_at
+        FROM settlements
+        WHERE user_id = #{userId}
+        ORDER BY settled_at DESC
+    </select>
+
+    <insert id="insert">
+        INSERT INTO settlements (id, user_id, amount, status)
+        VALUES (#{id}, #{userId}, #{amount}, #{status})
+    </insert>
+
+    <update id="updateStatus">
+        UPDATE settlements
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatusByUserId">
+        UPDATE settlements
+        SET status = #{status}
+        WHERE user_id = #{userId} AND status = 'PENDING'
+    </update>
+
+
+    <select id="sumAmountByUserId" resultType="java.lang.Integer">
+        SELECT COALESCE(SUM(amount), 0)
+        FROM settlements
+        WHERE user_id = #{userId}
+    </select>
+
+</mapper>

@@ -23,6 +23,16 @@ public class LinkResponse {
     private int price;
     private int clicksCount;
     private LocalDateTime createdAt;
+    private LocalDateTime expiredAt;
+    private java.util.List<RouteRuleResponse> routeRules;
+
+    @Data
+    public static class RouteRuleResponse {
+        private String id;
+        private String ruleType;
+        private String ruleValue;
+        private String targetUrl;
+    }
 
     public static LinkResponse from(Link link, String baseUrl) {
         LinkResponse response = new LinkResponse();
@@ -45,6 +55,23 @@ public class LinkResponse {
         response.setPrice(link.getPrice());
         response.setClicksCount(link.getClicksCount());
         response.setCreatedAt(link.getCreatedAt());
+        response.setExpiredAt(link.getExpiredAt());
+        return response;
+    }
+
+    public static LinkResponse from(Link link, java.util.List<com.pixellink.model.RouteRule> rules, String baseUrl) {
+        LinkResponse response = from(link, baseUrl);
+        if (rules != null) {
+            response.setRouteRules(rules.stream().map(r -> {
+                RouteRuleResponse rRes = new RouteRuleResponse();
+                rRes.setId(r.getId());
+                rRes.setRuleType(r.getRuleType());
+                rRes.setRuleValue(r.getRuleValue());
+                rRes.setTargetUrl(r.getTargetUrl());
+                return rRes;
+            }).collect(java.util.stream.Collectors.toList()));
+        }
         return response;
     }
 }
+

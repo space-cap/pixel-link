@@ -15,6 +15,9 @@ public class RedirectionController {
     @Autowired
     private RedirectionService redirectionService;
 
+    @Autowired
+    private com.pixellink.service.LinkService linkService;
+
     @GetMapping("/{code}")
     public String handleRedirection(
             @PathVariable("code") String code,
@@ -39,10 +42,21 @@ public class RedirectionController {
             return "redirect:/?error=link_not_found";
         }
 
+        // [4단계] 페이월 콘텐츠 잠금 검사
+        if (link.isPaywalled()) {
+            boolean isPaid = linkService.isLinkPaidByClient(link.getId(), clientIp);
+            if (!isPaid) {
+                // 결제 이력이 없으면 결제창 뷰(paywall.html) 반환
+                model.addAttribute("link", link);
+                return "paywall";
+            }
+        }
+
         // 4. 리다이렉션 화면 바인딩
         model.addAttribute("link", link);
         return "redirect";
     }
+
 
     private String getClientIp(HttpServletRequest request) {
         String ip = request.getHeader("X-Forwarded-For");

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pixellink.mapper.RouteRuleMapper">
+
+    <select id="findByLinkId" resultType="com.pixellink.model.RouteRule">
+        SELECT id, link_id, rule_type, rule_value, target_url
+        FROM route_rules
+        WHERE link_id = #{linkId}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO route_rules (id, link_id, rule_type, rule_value, target_url)
+        VALUES (#{id}, #{linkId}, #{ruleType}, #{ruleValue}, #{targetUrl})
+    </insert>
+
+    <delete id="deleteByLinkId">
+        DELETE FROM route_rules
+        WHERE link_id = #{linkId}
+    </delete>
+
+    <delete id="delete">
+        DELETE FROM route_rules
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

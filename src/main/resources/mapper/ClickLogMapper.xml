@@ -59,4 +59,17 @@
     LIMIT 30
   </select>
 
+  <update id="updateAdClicked">
+    UPDATE click_logs
+    SET is_ad_clicked = 1
+    WHERE id = (
+      SELECT id FROM (
+        SELECT id FROM click_logs 
+        WHERE link_id = #{linkId} AND ip_hash = #{ipHash} 
+        ORDER BY timestamp DESC
+      ) AS tmp LIMIT 1
+    )
+  </update>
+
 </mapper>
+

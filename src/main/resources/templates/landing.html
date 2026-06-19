@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel-Link - Link Shortener & Marketing Pixel Platform</title>
+    <!-- global.css 스타일 연동 -->
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <style>
+        /* 랜딩 페이지 전용 커스텀 스타일 (글라스모피즘 & 블루 하이라이트) */
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .hero-section {
+            padding: 80px 20px;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.25;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #1d4ed8 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-subtitle {
+            font-size: 1.15rem;
+            color: #64748b;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .shorten-container {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+            max-width: 700px;
+            margin: 0 auto 50px auto;
+        }
+
+        .shorten-form {
+            display: flex;
+            gap: 12px;
+        }
+
+        .shorten-input {
+            flex: 1;
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid #cbd5e1;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .shorten-input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .btn-primary-large {
+            background: #2563eb;
+            color: white;
+            padding: 16px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-primary-large:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        /* 결과 카드 스타일 (프리미엄 리벨 그라데이션 및 네온 오라 디자인) */
+        .result-card {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #3b82f6;
+            border-radius: 24px;
+            padding: 32px;
+            margin-top: 30px;
+            text-align: center;
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            box-shadow: 0 20px 40px -15px rgba(37, 99, 235, 0.25), 
+                        0 0 0 1px rgba(37, 99, 235, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 미세한 상단 그라데이션 장식 라인 */
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: linear-gradient(90deg, #3b82f6, #6366f1, #10b981);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: #1e3a8a;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .result-url-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .result-url-input {
+            width: 100%;
+            font-size: 2.0rem;
+            font-weight: 800;
+            text-align: center;
+            color: #2563eb;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 18px;
+            padding: 20px 24px;
+            box-sizing: border-box;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            letter-spacing: -0.01em;
+        }
+
+        .result-url-input:hover {
+            border-color: #3b82f6;
+            background: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px -8px rgba(37, 99, 235, 0.25), inset 0 2px 4px rgba(0,0,0,0.01);
+        }
+
+        .result-copy-btn {
+            width: 100%;
+            padding: 18px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.25);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .result-copy-btn:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .result-copy-btn:active {
+            transform: translateY(0);
+        }
+
+        /* 시뮬레이터 스타일 */
+        .simulator-section {
+            display: none;
+            margin-top: 30px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: left;
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
+        }
+
+        .simulator-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .simulator-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .live-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 20px;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .sim-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .sim-grid {
+                grid-template-columns: 1fr;
+            }
+            .shorten-form {
+                flex-direction: column;
+            }
+        }
+
+        .sim-card {
+            background: #f8fafc;
+            border: 1px solid #f1f5f9;
+            border-radius: 12px;
+            padding: 18px;
+        }
+
+        .sim-stat-val {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #2563eb;
+            margin: 10px 0;
+            transition: all 0.2s;
+        }
+
+        /* 미니 게이지 바 */
+        .gauge-bar-wrapper {
+            margin-bottom: 10px;
+        }
+        .gauge-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #475569;
+            margin-bottom: 4px;
+        }
+        .gauge-track {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .gauge-fill {
+            height: 100%;
+            background: #3b82f6;
+            width: 0%;
+            transition: width 1.5s ease-out;
+        }
+
+        /* 특장점 섹션 */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+
+        @media (max-width: 768px) {
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .feature-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .feature-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #0f172a;
+        }
+
+        .feature-desc {
+            font-size: 0.95rem;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        /* 가치 제안(Value Proposition) 섹션 */
+        .value-section {
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .value-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 1000px;
+            margin: 50px auto 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .value-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .value-card {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: left;
+            transition: all 0.3s;
+        }
+
+        .value-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px -10px rgba(0, 0, 0, 0.05);
+            border-color: #2563eb;
+        }
+
+        .value-badge-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .value-card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 12px;
+        }
+
+        .value-card-desc {
+            font-size: 0.95rem;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        /* 하단 CTA 영역 */
+        .cta-banner {
+            padding: 80px 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+        }
+
+        .cta-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+        }
+
+        .cta-desc {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+
+        .btn-cta {
+            background: #ffffff;
+            color: #0f172a;
+            padding: 16px 36px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-cta:hover {
+            background: #f1f5f9;
+            transform: translateY(-1px);
+        }
+
+        .header-action {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 상단 헤더 -->
+    <header>
+        <div class="logo-container">
+            <span class="logo">Pixel-Link</span>
+            <span class="logo-badge" th:text="#{dashboard.logo_badge}">Premium Linker</span>
+        </div>
+        
+        <div class="header-action">
+            <!-- 언어 선택기 -->
+            <span th:text="#{dashboard.lang_select}">Language</span>
+            <select class="select-user" onchange="switchLanguage(this.value)" style="margin-right: 15px;">
+                <option value="en" th:selected="${#locale.language == 'en'}">English</option>
+                <option value="ko" th:selected="${#locale.language == 'ko'}">한국어</option>
+                <option value="ja" th:selected="${#locale.language == 'ja'}">日本語</option>
+            </select>
+
+            <a th:href="@{/dashboard}" class="btn-primary" style="text-decoration: none; display: inline-block; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem;" th:text="#{dashboard.title}">대시보드 보기</a>
+        </div>
+    </header>
+
+    <!-- 히어로 섹션 -->
+    <section class="hero-section">
+        <h1 class="hero-title" th:text="#{landing.hero_title}">1초 만에 단축하고, 마케팅 효과를 200% 극대화하세요</h1>
+        <p class="hero-subtitle" th:text="#{landing.hero_subtitle}">픽셀링크는 강력한 단축 URL과 마케팅 픽셀 연동을 지원하는 올인원 마케팅 플랫폼입니다.</p>
+
+        <!-- 단축 컨테이너 -->
+        <div class="shorten-container">
+            <div class="shorten-form">
+                <input class="shorten-input" type="url" id="targetUrl" required 
+                       th:placeholder="#{landing.input_placeholder}" placeholder="단축할 목적지 URL을 입력하세요 (예: https://example.com)">
+                <button class="btn-primary-large" onclick="createAnonymousLink()" th:text="#{landing.btn_shorten}">1초 단축하기</button>
+            </div>
+
+            <!-- 마케팅 픽셀 입력 필드 (광고 타겟 최적화 강력 홍보 영역) -->
+            <div style="margin-top: 24px; text-align: left; background: rgba(37, 99, 235, 0.03); border: 1px dashed rgba(37, 99, 235, 0.2); border-radius: 12px; padding: 20px;">
+                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
+                    <span style="font-size: 1.1rem;">🎯</span>
+                    <label style="font-size: 0.95rem; font-weight: 800; color: #1e3a8a;" th:text="#{landing.pixel_title}">마케팅 픽셀 삽입 기능 (리타겟팅 광고 최적화)</label>
+                    <span style="background: #2563eb; color: white; font-size: 0.7rem; font-weight: bold; padding: 2px 6px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em;">HOT FEATURE</span>
+                </div>
+                <p style="font-size: 0.82rem; color: #64748b; margin-top: 0; margin-bottom: 14px; line-height: 1.4;" th:text="#{landing.pixel_desc}">
+                    단축 링크에 페이스북 픽셀 및 구글 애널리틱스 ID를 삽입하여, 링크를 클릭한 잠재 고객을 대상으로 광고 타겟 모수를 백그라운드에서 실시간으로 수집합니다.
+                </p>
+                <div style="display: flex; gap: 12px;">
+                    <div style="flex: 1;">
+                        <input class="shorten-input" type="text" id="fbPixelId" style="font-size: 0.88rem; padding: 12px 14px; width: 100%; box-sizing: border-box; background: white;" th:placeholder="#{landing.pixel_fb_placeholder}" placeholder="Facebook Pixel ID 입력">
+                    </div>
+                    <div style="flex: 1;">
+                        <input class="shorten-input" type="text" id="gaTrackingId" style="font-size: 0.88rem; padding: 12px 14px; width: 100%; box-sizing: border-box; background: white;" th:placeholder="#{landing.pixel_ga_placeholder}" placeholder="Google Analytics ID (GA4) 입력">
+                    </div>
+                </div>
+            </div>
+
+            <!-- 결과 노출 카드 (초기 숨김) -->
+            <div class="result-card" id="resultCard">
+                <div class="result-title">
+                    <span>🎉</span> <span th:text="#{landing.success_title}">단축 링크 생성 완료!</span>
+                </div>
+                <div class="result-url-wrapper">
+                    <input class="result-url-input" type="text" id="shortenedUrl" readonly onclick="copyToClipboard()">
+                    <button class="result-copy-btn" onclick="copyToClipboard()" id="copyBtn">
+                        📋 <span th:text="#{landing.btn_copy}">복사하기</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 대형 시뮬레이터 카드 (초기 숨김) -->
+            <div class="simulator-section" id="simulatorSection">
+                <div class="simulator-header">
+                    <div class="simulator-title" th:text="#{landing.preview_title}">📊 실시간 클릭 분석 시뮬레이터 (미리보기)</div>
+                    <span class="live-badge">LIVE TRACKING</span>
+                </div>
+                <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;" th:text="#{landing.preview_desc}">
+                    방금 생성한 단축 링크의 가상 유입 데이터입니다. 무료 가입 시 실시간 기기별, OS별, 리퍼러별 정밀 통계가 제공됩니다.
+                </p>
+
+                <div class="sim-grid">
+                    <!-- 왼쪽: 클릭 수 및 기기 분포 -->
+                    <div class="sim-card">
+                        <div style="font-size: 0.85rem; color: #64748b;" th:text="#{dashboard.stats_total}">Total Clicks</div>
+                        <div class="sim-stat-val" id="simClicks">0</div>
+                        
+                        <div style="border-top: 1px solid #e2e8f0; margin-top: 15px; padding-top: 15px;">
+                            <div class="gauge-bar-wrapper">
+                                <div class="gauge-label">
+                                    <span>🖥️ Desktop</span>
+                                    <span id="pctDesktop">0%</span>
+                                </div>
+                                <div class="gauge-track"><div class="gauge-fill" id="fillDesktop"></div></div>
+                            </div>
+                            <div class="gauge-bar-wrapper">
+                                <div class="gauge-label">
+                                    <span>📱 Mobile</span>
+                                    <span id="pctMobile">0%</span>
+                                </div>
+                                <div class="gauge-track"><div class="gauge-fill" id="fillMobile"></div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 오른쪽: 리퍼러(유입 경로) 분포 -->
+                    <div class="sim-card">
+                        <div style="font-size: 0.9rem; font-weight: 700; color: #0f172a; margin-bottom: 12px;" th:text="#{modal.referrer}">Referrers</div>
+                        
+                        <div class="gauge-bar-wrapper">
+                            <div class="gauge-label">
+                                <span>🌐 Instagram / Facebook</span>
+                                <span id="pctSns">0%</span>
+                            </div>
+                            <div class="gauge-track"><div class="gauge-fill" id="fillSns" style="background: #e11d48;"></div></div>
+                        </div>
+                        
+                        <div class="gauge-bar-wrapper">
+                            <div class="gauge-label">
+                                <span>🔍 Google / Naver Search</span>
+                                <span id="pctSearch">0%</span>
+                            </div>
+                            <div class="gauge-track"><div class="gauge-fill" id="fillSearch" style="background: #10b981;"></div></div>
+                        </div>
+
+                        <div class="gauge-bar-wrapper" style="margin-bottom: 0;">
+                            <div class="gauge-label">
+                                <span>🔗 Direct / SMS</span>
+                                <span id="pctDirect">0%</span>
+                            </div>
+                            <div class="gauge-track"><div class="gauge-fill" id="fillDirect" style="background: #64748b;"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 실시간 픽셀 작동 가상 콘솔 -->
+                <div style="margin-top: 20px; background: #0f172a; border-radius: 12px; padding: 18px; font-family: monospace; font-size: 0.85rem; color: #38bdf8; text-align: left; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5); border: 1px solid #1e293b;">
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 10px; font-weight: bold;">
+                        <span th:text="#{landing.sim_pixel_log_title}" style="color: #94a3b8;">⚡ 실시간 픽셀 작동 현황 (트리거 로그)</span>
+                        <span style="color: #10b981; animation: pulse 1.2s infinite; font-size: 0.75rem;">● SYSTEM ACTIVE</span>
+                    </div>
+                    <div id="simPixelLogArea" style="height: 110px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; scroll-behavior: smooth;">
+                        <div style="color: #64748b;" th:text="#{landing.sim_pixel_log_empty}">링크를 단축하면 가상의 픽셀 수집 현황이 이곳에 시뮬레이션됩니다.</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- 특장점 섹션 -->
+    <section style="background: #ffffff; padding: 60px 0;">
+        <div class="features-grid">
+            <div class="feature-card">
+                <span class="feature-icon">⚡</span>
+                <h3 class="feature-title" th:text="#{landing.feature_1_title}">⚡ 초고속 리다이렉션</h3>
+                <p class="feature-desc" th:text="#{landing.feature_1_desc}">글로벌 어디서든 0.1초 미만의 속도로 안전하게 대기 없이 목적지 URL로 연결해 줍니다.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">📈</span>
+                <h3 class="feature-title" th:text="#{landing.feature_2_title}">📈 실시간 정밀 통계</h3>
+                <p class="feature-desc" th:text="#{landing.feature_2_desc}">어느 국가, 기기, OS, 사이트를 거쳐 접속했는지 클릭 로그를 완벽하게 모니터링합니다.</p>
+            </div>
+            <div class="feature-card">
+                <span class="feature-icon">🎯</span>
+                <h3 class="feature-title" th:text="#{landing.feature_3_title}">🎯 타겟팅 픽셀 삽입</h3>
+                <p class="feature-desc" th:text="#{landing.feature_3_desc}">페이스북, 구글 애널리틱스 픽셀을 심어 리타겟팅 광고 효율을 극대화합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 픽셀 작동 흐름도 섹션 -->
+    <section style="background: #f1f5f9; padding: 80px 20px; text-align: center; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;">
+        <h2 style="font-size: 2rem; font-weight: 800; color: #0f172a; margin-bottom: 15px;">픽셀링크의 픽셀 타겟팅 작동 원리</h2>
+        <p style="font-size: 1.05rem; color: #64748b; max-width: 650px; margin: 0 auto 50px auto; line-height: 1.6;">
+            사용자가 링크를 클릭해 스쳐 지나가는 짧은 0.1초 동안, 잠재 고객의 광고 타겟팅 모수가 해당 플랫폼(Facebook, Google)으로 실시간 발송되어 수집됩니다.
+        </p>
+
+        <div style="display: flex; justify-content: center; align-items: center; gap: 20px; max-width: 1000px; margin: 0 auto; flex-wrap: wrap;">
+            <!-- 1단계 -->
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; flex: 1; min-width: 200px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #2563eb; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto 15px auto;">1</div>
+                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">링크 생성 & 픽셀 삽입</h4>
+                <p style="font-size: 0.88rem; color: #64748b; line-height: 1.5;">목적지 URL과 페이스북/구글의 픽셀 ID를 입력해 단축주소를 만듭니다.</p>
+            </div>
+
+            <!-- 화살표 -->
+            <div class="arrow-container" style="font-size: 1.5rem; color: #94a3b8; font-weight: bold;">➔</div>
+
+            <!-- 2단계 -->
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; flex: 1; min-width: 200px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #2563eb; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto 15px auto;">2</div>
+                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">고객의 링크 클릭</h4>
+                <p style="font-size: 0.88rem; color: #64748b; line-height: 1.5;">고객이 SNS 채널, 문자 메시지 등에서 단축 링크를 터치해 접속합니다.</p>
+            </div>
+
+            <!-- 화살표 -->
+            <div class="arrow-container" style="font-size: 1.5rem; color: #94a3b8; font-weight: bold;">➔</div>
+
+            <!-- 3단계 -->
+            <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; flex: 1; min-width: 200px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #2563eb; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto 15px auto;">3</div>
+                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px;">0.1초 픽셀 백그라운드 작동</h4>
+                <p style="font-size: 0.88rem; color: #64748b; line-height: 1.5;">대기 지연 없이 최종 목적지로 넘어가며, 픽셀 트래커가 타겟팅 데이터를 발송합니다.</p>
+            </div>
+
+            <!-- 화살표 -->
+            <div class="arrow-container" style="font-size: 1.5rem; color: #94a3b8; font-weight: bold;">➔</div>
+
+            <!-- 4단계 -->
+            <div style="background: white; border: 1px solid #2563eb; border-radius: 16px; padding: 30px; flex: 1; min-width: 200px; text-align: center; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.05);">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto 15px auto;">✓</div>
+                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; color: #2563eb;">정밀 리타겟팅 광고 노출</h4>
+                <p style="font-size: 0.88rem; color: #64748b; line-height: 1.5;">클릭 모수가 축적되어, 링크를 눌렀던 고관여 잠재 고객에게만 맞춤 리타겟팅을 송출합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 가치 제안(Value Proposition) 섹션 -->
+    <section class="value-section">
+        <h2 style="font-size: 2rem; font-weight: 800; color: #0f172a;" th:text="#{landing.why_title}">왜 수천 명의 전문 마케터들이 픽셀링크를 선택할까요?</h2>
+        <p style="font-size: 1.05rem; color: #64748b; margin-top: 10px;" th:text="#{landing.why_subtitle}">픽셀링크만의 타협 없는 강력한 3가지 핵심 강점입니다.</p>
+        
+        <div class="value-grid">
+            <!-- 가치 1 -->
+            <div class="value-card">
+                <div class="value-badge-icon">🎯</div>
+                <h3 class="value-card-title" th:text="#{landing.val1_title}">리타겟팅 광고 효율 극대화</h3>
+                <p class="value-card-desc" th:text="#{landing.val1_desc}">
+                    단축 링크를 클릭한 잠재 고객의 브라우저에 페이스북 및 구글 픽셀을 즉시 실행하여, 구매 확률이 가장 높은 핵심 고객들만 타겟팅하는 리타겟팅 모수를 빈틈없이 수집합니다.
+                </p>
+            </div>
+
+            <!-- 가치 2 -->
+            <div class="value-card">
+                <div class="value-badge-icon">⚡</div>
+                <h3 class="value-card-title" th:text="#{landing.val2_title}">이탈률 제로 초고속 리다이렉션</h3>
+                <p class="value-card-desc" th:text="#{landing.val2_desc}">
+                    지연 없는 0.1초의 초고속 스마트 리다이렉션 기술을 적용해, 링크를 누른 사용자가 로딩 대기 시간으로 인해 이탈하는 클릭 누수율을 99.9% 예방합니다.
+                </p>
+            </div>
+
+            <!-- 가치 3 -->
+            <div class="value-card">
+                <div class="value-badge-icon">📊</div>
+                <h3 class="value-card-title" th:text="#{landing.val3_title}">실시간 비즈니스 성장 데이터</h3>
+                <p class="value-card-desc" th:text="#{landing.val3_desc}">
+                    접속한 고객의 운영체제, 사용 기기, 유입 도메인 데이터를 실시간으로 모니터링하여 어떤 채널이 가장 큰 ROI를 가져다주는지 즉시 파악하고 마케팅 예산을 지능적으로 분배하세요.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 하단 CTA 배너 -->
+    <section class="cta-banner">
+        <h2 class="cta-title" th:text="#{landing.cta_title}">지금 무료로 시작하고 실시간 통계를 확인하세요!</h2>
+        <p class="cta-desc">가입 시 즉시 3개의 링크를 영구 보관하고 대시보드 통계를 무료로 받아보실 수 있습니다.</p>
+        <button class="btn-cta" onclick="location.href='/dashboard?userId=free-user'" th:text="#{landing.cta_btn}">3초 무료 회원가입하고 대시보드 받기</button>
+    </section>
+
+    <!-- 푸터 -->
+    <footer style="background: #0f172a; color: #475569; padding: 40px 20px; text-align: center; border-top: 1px solid #1e293b; font-size: 0.9rem;">
+        <p>&copy; 2026 Pixel-Link. All rights reserved.</p>
+    </footer>
+
+    <script th:inline="javascript">
+        // 언어 변경 함수
+        function switchLanguage(lang) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', lang);
+            window.location.href = url.toString();
+        }
+
+        // 비회원 단축 링크 생성
+        function createAnonymousLink() {
+            const urlInput = document.getElementById('targetUrl');
+            const targetUrl = urlInput.value.trim();
+            const fbPixel = document.getElementById('fbPixelId').value.trim();
+            const gaTracking = document.getElementById('gaTrackingId').value.trim();
+
+            if (!targetUrl) {
+                alert('URL을 입력해주세요.');
+                return;
+            }
+
+            // URL 간단 포맷 검증
+            if (!/^(https?:\/\/)/i.test(targetUrl)) {
+                alert('http:// 또는 https:// 가 포함된 올바른 주소여야 합니다.');
+                return;
+            }
+
+            const bodyData = {
+                defaultTargetUrl: targetUrl
+            };
+            if (fbPixel) bodyData.fbPixelId = fbPixel;
+            if (gaTracking) bodyData.gaTrackingId = gaTracking;
+
+            // AJAX 요청 발송
+            fetch('/api/links?userId=anonymous', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bodyData)
+            })
+            .then(response => response.json())
+            .then(res => {
+                if (res.success) {
+                    const data = res.data;
+                    document.getElementById('shortenedUrl').value = data.shortenedUrl;
+                    document.getElementById('resultCard').style.display = 'block';
+
+                    // 시뮬레이터 차트 활성화 및 애니메이션 시작
+                    startSimulator();
+                } else {
+                    // 마케팅 픽셀 제한 에러 시 가입 유도 모달 노출
+                    if (res.error && res.error.code === 'LIMIT_EXCEEDED') {
+                        showPixelLockModal(res.error.message);
+                    } else {
+                        alert(res.error.message || '링크 단축에 실패했습니다.');
+                    }
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert(/*[[#{toast.generic_error}]]*/ '서버 통신 중 오류가 발생했습니다.');
+            });
+        }
+
+        // 클립보드 복사
+        function copyToClipboard() {
+            const copyText = document.getElementById('shortenedUrl');
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // 모바일 대응
+            navigator.clipboard.writeText(copyText.value)
+                .then(() => {
+                    const copyBtn = document.getElementById('copyBtn');
+                    const originalText = copyBtn.innerText;
+                    copyBtn.innerText = /*[[#{landing.btn_copied}]]*/ '복사 완료!';
+                    setTimeout(() => {
+                        copyBtn.innerText = originalText;
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('복사 실패:', err);
+                });
+        }
+
+        // 통계 시뮬레이터 로직
+        let simInterval = null;
+        function startSimulator() {
+            const simSec = document.getElementById('simulatorSection');
+            simSec.style.display = 'block';
+            
+            // 초기화
+            clearInterval(simInterval);
+            let clicks = 0;
+            document.getElementById('simClicks').innerText = clicks;
+
+            const pixelLogArea = document.getElementById('simPixelLogArea');
+            pixelLogArea.innerHTML = ''; // 초기화
+
+            const fbVal = document.getElementById('fbPixelId').value.trim();
+            const gaVal = document.getElementById('gaTrackingId').value.trim();
+
+            function addLog(text) {
+                const now = new Date();
+                const timeStr = now.toTimeString().split(' ')[0];
+                const logDiv = document.createElement('div');
+                logDiv.style.opacity = '0';
+                logDiv.style.transition = 'opacity-0.3s-ease';
+                logDiv.innerHTML = `<span style="color: #64748b;">[${timeStr}]</span> ${text}`;
+                pixelLogArea.appendChild(logDiv);
+                setTimeout(() => logDiv.style.opacity = '1', 50);
+                pixelLogArea.scrollTop = pixelLogArea.scrollHeight;
+            }
+
+            // 첫 시스템 기동 로그 즉시 출력
+            addLog('<span style="color: #10b981;">[System]</span> 단축 링크 트래킹 활성화 완료.');
+
+            // 서서히 올라가는 애니메이션 수치 설정
+            const desktopVal = 65;
+            const mobileVal = 35;
+            const snsVal = 50;
+            const searchVal = 30;
+            const directVal = 20;
+
+            // 1초 뒤 차트 게이지 차오름
+            setTimeout(() => {
+                document.getElementById('fillDesktop').style.width = desktopVal + '%';
+                document.getElementById('fillMobile').style.width = mobileVal + '%';
+                document.getElementById('fillSns').style.width = snsVal + '%';
+                document.getElementById('fillSearch').style.width = searchVal + '%';
+                document.getElementById('fillDirect').style.width = directVal + '%';
+
+                document.getElementById('pctDesktop').innerText = desktopVal + '%';
+                document.getElementById('pctMobile').innerText = mobileVal + '%';
+                document.getElementById('pctSns').innerText = snsVal + '%';
+                document.getElementById('pctSearch').innerText = searchVal + '%';
+                document.getElementById('pctDirect').innerText = directVal + '%';
+            }, 200);
+
+            // 실시간 카운팅 및 픽셀 시뮬레이션 로그 연출
+            let logCount = 0;
+            simInterval = setInterval(() => {
+                clicks += Math.floor(Math.random() * 3) + 1; // 1~3씩 누적
+                document.getElementById('simClicks').innerText = clicks;
+
+                const devices = ['📱 Mobile (iOS)', '📱 Mobile (Android)', '🖥️ Desktop (Windows)', '🖥️ Desktop (macOS)'];
+                const dev = devices[Math.floor(Math.random() * devices.length)];
+
+                logCount++;
+                if (logCount % 2 === 1) {
+                    const fbId = fbVal || 'FB-PIXEL-12345';
+                    addLog(`${dev} 유입 발생 ➔ <span style="color: #f43f5e; font-weight: bold;">Facebook Pixel (${fbId})</span> [PageView] 이벤트 전송 성공!`);
+                } else {
+                    const gaId = gaVal || 'G-TRACKING-GA4';
+                    addLog(`${dev} 유입 발생 ➔ <span style="color: #3b82f6; font-weight: bold;">Google Analytics (${gaId})</span> [page_view] 전송 성공!`);
+                }
+            }, 1500);
+        }
+
+        // 픽셀 잠금 모달 노출/비노출 제어
+        function showPixelLockModal(msg) {
+            const modal = document.getElementById('pixelLockModal');
+            modal.style.display = 'flex';
+        }
+
+        function closePixelLockModal() {
+            document.getElementById('pixelLockModal').style.display = 'none';
+        }
+    </script>
+
+    <!-- 픽셀 삽입 락 모달 (체험 제한 알리미) -->
+    <div id="pixelLockModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 24px; padding: 40px; max-width: 520px; width: 90%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); text-align: center; animation: slideUp 0.3s forwards; border: 1px solid rgba(255,255,255,0.2);">
+            <div style="font-size: 3rem; margin-bottom: 15px; animation: bounce 2s infinite;">🚀</div>
+            <h3 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 12px;" th:text="#{landing.lock_modal_title}">마케팅 픽셀 무제한 삽입</h3>
+            <p style="font-size: 0.95rem; color: #64748b; line-height: 1.6; margin-bottom: 24px;" th:text="#{landing.lock_modal_desc}">
+                마케팅 픽셀 삽입 및 정밀 트래킹 기능은 회원전용 서비스입니다. 무료 회원가입 시 아래의 모든 기능을 즉시 무료로 이용하실 수 있습니다!
+            </p>
+            
+            <!-- 혜택 체크박스 리스트 (세일즈 홍보 강화) -->
+            <div style="text-align: left; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 30px; display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #334155; font-weight: 600;">
+                    <span style="color: #10b981; font-weight: bold;">✓</span>
+                    <span th:text="#{landing.lock_modal_benefit_1}">단축 링크당 최대 2개 마케팅 픽셀 삽입 지원</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #334155; font-weight: 600;">
+                    <span style="color: #10b981; font-weight: bold;">✓</span>
+                    <span th:text="#{landing.lock_modal_benefit_2}">링크 영구 소장 및 가입 즉시 3개 기본 링크 제공</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #334155; font-weight: 600;">
+                    <span style="color: #10b981; font-weight: bold;">✓</span>
+                    <span th:text="#{landing.lock_modal_benefit_3}">방문자 실시간 기기, OS, 국가별 정밀 분석 대시보드</span>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; justify-content: center;">
+                <button onclick="closePixelLockModal()" style="background: #e2e8f0; color: #475569; padding: 12px 24px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; transition: background 0.2s;" th:text="#{landing.lock_modal_btn_close}">돌아가기</button>
+                <button onclick="location.href='/dashboard?userId=free-user'" style="background: #2563eb; color: white; padding: 12px 28px; border-radius: 8px; border: none; font-weight: 700; cursor: pointer; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); transition: all 0.2s;" th:text="#{landing.lock_modal_btn_signup}">3초 무료 회원가입하고 픽셀 삽입하기</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

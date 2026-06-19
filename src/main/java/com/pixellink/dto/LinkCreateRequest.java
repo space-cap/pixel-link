@@ -9,7 +9,7 @@ import lombok.Data;
 public class LinkCreateRequest {
 
     @NotBlank(message = "목적지 URL은 필수 입력 항목입니다.")
-    @Pattern(regexp = "^(https?://)?[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}(/.*)?$", message = "올바른 URL 형식이어야 합니다.")
+    @Pattern(regexp = "^(https?://)?[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}(:[0-9]+)?(/.*)?$", message = "올바른 URL 형식이어야 합니다.")
     private String defaultTargetUrl;
 
     @Size(max = 50, message = "맞춤형 주소는 50자 이하여야 합니다.")

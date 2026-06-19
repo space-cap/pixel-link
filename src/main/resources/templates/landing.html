@@ -322,9 +322,14 @@
         }
 
         .feature-icon {
-            font-size: 2.5rem;
-            margin-bottom: 15px;
-            display: inline-block;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            margin: 0 auto 20px auto;
+            transition: transform 0.2s;
         }
 
         .feature-title {
@@ -485,8 +490,12 @@
 
             <!-- 마케팅 픽셀 입력 필드 (광고 타겟 최적화 강력 홍보 영역) -->
             <div style="margin-top: 24px; text-align: left; background: rgba(37, 99, 235, 0.03); border: 1px dashed rgba(37, 99, 235, 0.2); border-radius: 12px; padding: 20px;">
-                <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 6px;">
-                    <span style="font-size: 1.1rem;">🎯</span>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+                    <svg style="width: 18px; height: 18px; color: #2563eb; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="6"></circle>
+                        <circle cx="12" cy="12" r="2"></circle>
+                    </svg>
                     <label style="font-size: 0.95rem; font-weight: 800; color: #1e3a8a;" th:text="#{landing.pixel_title}">마케팅 픽셀 삽입 기능 (리타겟팅 광고 최적화)</label>
                     <span style="background: #2563eb; color: white; font-size: 0.7rem; font-weight: bold; padding: 2px 6px; border-radius: 10px; text-transform: uppercase; letter-spacing: 0.05em;">HOT FEATURE</span>
                 </div>
@@ -506,20 +515,32 @@
             <!-- 결과 노출 카드 (초기 숨김) -->
             <div class="result-card" id="resultCard">
                 <div class="result-title">
-                    <span>🎉</span> <span th:text="#{landing.success_title}">단축 링크 생성 완료!</span>
+                    <svg style="width: 24px; height: 24px; color: #10b981; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span th:text="#{landing.success_title}">단축 링크 생성 완료!</span>
                 </div>
                 <div class="result-url-wrapper">
                     <input class="result-url-input" type="text" id="shortenedUrl" readonly onclick="copyToClipboard()">
                     <button class="result-copy-btn" onclick="copyToClipboard()" id="copyBtn">
-                        📋 <span th:text="#{landing.btn_copy}">복사하기</span>
+                        <svg style="width: 18px; height: 18px; color: white; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                        </svg>
+                        <span th:text="#{landing.btn_copy}">복사하기</span>
                     </button>
                 </div>
             </div>
 
             <!-- 대형 시뮬레이터 카드 (초기 숨김) -->
             <div class="simulator-section" id="simulatorSection">
-                <div class="simulator-header">
-                    <div class="simulator-title" th:text="#{landing.preview_title}">📊 실시간 클릭 분석 시뮬레이터 (미리보기)</div>
+                <div class="simulator-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 20px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <svg style="width: 20px; height: 20px; color: #2563eb; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"></path>
+                        </svg>
+                        <div class="simulator-title" th:text="#{landing.preview_title}" style="font-size: 1.1rem; font-weight: 700; color: #0f172a;">실시간 클릭 분석 시뮬레이터 (미리보기)</div>
+                    </div>
                     <span class="live-badge">LIVE TRACKING</span>
                 </div>
                 <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 20px;" th:text="#{landing.preview_desc}">
@@ -535,14 +556,27 @@
                         <div style="border-top: 1px solid #e2e8f0; margin-top: 15px; padding-top: 15px;">
                             <div class="gauge-bar-wrapper">
                                 <div class="gauge-label">
-                                    <span>🖥️ Desktop</span>
+                                    <span style="display: flex; align-items: center; gap: 6px;">
+                                        <svg style="width: 14px; height: 14px; color: #475569; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                            <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                                            <line x1="8" y1="21" x2="16" y2="21"></line>
+                                            <line x1="12" y1="17" x2="12" y2="21"></line>
+                                        </svg>
+                                        Desktop
+                                    </span>
                                     <span id="pctDesktop">0%</span>
                                 </div>
                                 <div class="gauge-track"><div class="gauge-fill" id="fillDesktop"></div></div>
                             </div>
                             <div class="gauge-bar-wrapper">
                                 <div class="gauge-label">
-                                    <span>📱 Mobile</span>
+                                    <span style="display: flex; align-items: center; gap: 6px;">
+                                        <svg style="width: 14px; height: 14px; color: #475569; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                            <rect x="6" y="2" width="12" height="20" rx="2" ry="2"></rect>
+                                            <line x1="12" y1="18" x2="12" y2="18"></line>
+                                        </svg>
+                                        Mobile
+                                    </span>
                                     <span id="pctMobile">0%</span>
                                 </div>
                                 <div class="gauge-track"><div class="gauge-fill" id="fillMobile"></div></div>
@@ -556,7 +590,14 @@
                         
                         <div class="gauge-bar-wrapper">
                             <div class="gauge-label">
-                                <span>🌐 Instagram / Facebook</span>
+                                <span style="display: flex; align-items: center; gap: 6px;">
+                                    <svg style="width: 14px; height: 14px; color: #e11d48; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                                    </svg>
+                                    Instagram / Facebook
+                                </span>
                                 <span id="pctSns">0%</span>
                             </div>
                             <div class="gauge-track"><div class="gauge-fill" id="fillSns" style="background: #e11d48;"></div></div>
@@ -564,7 +605,13 @@
                         
                         <div class="gauge-bar-wrapper">
                             <div class="gauge-label">
-                                <span>🔍 Google / Naver Search</span>
+                                <span style="display: flex; align-items: center; gap: 6px;">
+                                    <svg style="width: 14px; height: 14px; color: #10b981; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                    Google / Naver Search
+                                </span>
                                 <span id="pctSearch">0%</span>
                             </div>
                             <div class="gauge-track"><div class="gauge-fill" id="fillSearch" style="background: #10b981;"></div></div>
@@ -572,7 +619,13 @@
 
                         <div class="gauge-bar-wrapper" style="margin-bottom: 0;">
                             <div class="gauge-label">
-                                <span>🔗 Direct / SMS</span>
+                                <span style="display: flex; align-items: center; gap: 6px;">
+                                    <svg style="width: 14px; height: 14px; color: #64748b; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                                    </svg>
+                                    Direct / SMS
+                                </span>
                                 <span id="pctDirect">0%</span>
                             </div>
                             <div class="gauge-track"><div class="gauge-fill" id="fillDirect" style="background: #64748b;"></div></div>
@@ -582,9 +635,17 @@
 
                 <!-- 실시간 픽셀 작동 가상 콘솔 -->
                 <div style="margin-top: 20px; background: #0f172a; border-radius: 12px; padding: 18px; font-family: monospace; font-size: 0.85rem; color: #38bdf8; text-align: left; box-shadow: inset 0 2px 8px rgba(0,0,0,0.5); border: 1px solid #1e293b;">
-                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 10px; font-weight: bold;">
-                        <span th:text="#{landing.sim_pixel_log_title}" style="color: #94a3b8;">⚡ 실시간 픽셀 작동 현황 (트리거 로그)</span>
-                        <span style="color: #10b981; animation: pulse 1.2s infinite; font-size: 0.75rem;">● SYSTEM ACTIVE</span>
+                    <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 8px; margin-bottom: 10px; font-weight: bold; align-items: center;">
+                        <span style="display: flex; align-items: center; gap: 6px; color: #94a3b8;">
+                            <svg style="width: 16px; height: 16px; color: #38bdf8;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                            <span th:text="#{landing.sim_pixel_log_title}">실시간 픽셀 작동 현황 (트리거 로그)</span>
+                        </span>
+                        <span style="color: #10b981; animation: pulse 1.2s infinite; font-size: 0.75rem; display: flex; align-items: center; gap: 4px;">
+                            <span style="width: 8px; height: 8px; background-color: #10b981; border-radius: 50%; display: inline-block;"></span>
+                            SYSTEM ACTIVE
+                        </span>
                     </div>
                     <div id="simPixelLogArea" style="height: 110px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; scroll-behavior: smooth;">
                         <div style="color: #64748b;" th:text="#{landing.sim_pixel_log_empty}">링크를 단축하면 가상의 픽셀 수집 현황이 이곳에 시뮬레이션됩니다.</div>
@@ -599,18 +660,33 @@
     <section style="background: #ffffff; padding: 60px 0;">
         <div class="features-grid">
             <div class="feature-card">
-                <span class="feature-icon">⚡</span>
-                <h3 class="feature-title" th:text="#{landing.feature_1_title}">⚡ 초고속 리다이렉션</h3>
+                <div class="feature-icon" style="background: rgba(37, 99, 235, 0.1); color: #2563eb;">
+                    <svg style="width: 32px; height: 32px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
+                <h3 class="feature-title" th:text="#{landing.feature_1_title}">초고속 리다이렉션</h3>
                 <p class="feature-desc" th:text="#{landing.feature_1_desc}">글로벌 어디서든 0.1초 미만의 속도로 안전하게 대기 없이 목적지 URL로 연결해 줍니다.</p>
             </div>
             <div class="feature-card">
-                <span class="feature-icon">📈</span>
-                <h3 class="feature-title" th:text="#{landing.feature_2_title}">📈 실시간 정밀 통계</h3>
+                <div class="feature-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                    <svg style="width: 32px; height: 32px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                        <polyline points="16 7 22 7 22 13"></polyline>
+                    </svg>
+                </div>
+                <h3 class="feature-title" th:text="#{landing.feature_2_title}">실시간 정밀 통계</h3>
                 <p class="feature-desc" th:text="#{landing.feature_2_desc}">어느 국가, 기기, OS, 사이트를 거쳐 접속했는지 클릭 로그를 완벽하게 모니터링합니다.</p>
             </div>
             <div class="feature-card">
-                <span class="feature-icon">🎯</span>
-                <h3 class="feature-title" th:text="#{landing.feature_3_title}">🎯 타겟팅 픽셀 삽입</h3>
+                <div class="feature-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+                    <svg style="width: 32px; height: 32px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="6"></circle>
+                        <circle cx="12" cy="12" r="2"></circle>
+                    </svg>
+                </div>
+                <h3 class="feature-title" th:text="#{landing.feature_3_title}">타겟팅 픽셀 삽입</h3>
                 <p class="feature-desc" th:text="#{landing.feature_3_desc}">페이스북, 구글 애널리틱스 픽셀을 심어 리타겟팅 광고 효율을 극대화합니다.</p>
             </div>
         </div>
@@ -632,7 +708,11 @@
             </div>
 
             <!-- 화살표 -->
-            <div class="arrow-container" style="font-size: 1.5rem; color: #94a3b8; font-weight: bold;">➔</div>
+            <div class="arrow-container" style="color: #94a3b8; display: flex; align-items: center; justify-content: center;">
+                <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                </svg>
+            </div>
 
             <!-- 2단계 -->
             <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; flex: 1; min-width: 200px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
@@ -642,7 +722,11 @@
             </div>
 
             <!-- 화살표 -->
-            <div class="arrow-container" style="font-size: 1.5rem; color: #94a3b8; font-weight: bold;">➔</div>
+            <div class="arrow-container" style="color: #94a3b8; display: flex; align-items: center; justify-content: center;">
+                <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                </svg>
+            </div>
 
             <!-- 3단계 -->
             <div style="background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 30px; flex: 1; min-width: 200px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.02);">
@@ -652,11 +736,19 @@
             </div>
 
             <!-- 화살표 -->
-            <div class="arrow-container" style="font-size: 1.5rem; color: #94a3b8; font-weight: bold;">➔</div>
+            <div class="arrow-container" style="color: #94a3b8; display: flex; align-items: center; justify-content: center;">
+                <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path>
+                </svg>
+            </div>
 
             <!-- 4단계 -->
             <div style="background: white; border: 1px solid #2563eb; border-radius: 16px; padding: 30px; flex: 1; min-width: 200px; text-align: center; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.05);">
-                <div style="width: 40px; height: 40px; border-radius: 50%; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; margin: 0 auto 15px auto;">✓</div>
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #10b981; color: white; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto;">
+                    <svg style="width: 20px; height: 20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
                 <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; color: #2563eb;">정밀 리타겟팅 광고 노출</h4>
                 <p style="font-size: 0.88rem; color: #64748b; line-height: 1.5;">클릭 모수가 축적되어, 링크를 눌렀던 고관여 잠재 고객에게만 맞춤 리타겟팅을 송출합니다.</p>
             </div>
@@ -671,7 +763,13 @@
         <div class="value-grid">
             <!-- 가치 1 -->
             <div class="value-card">
-                <div class="value-badge-icon">🎯</div>
+                <div class="value-badge-icon" style="background: rgba(37, 99, 235, 0.1); color: #2563eb;">
+                    <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="6"></circle>
+                        <circle cx="12" cy="12" r="2"></circle>
+                    </svg>
+                </div>
                 <h3 class="value-card-title" th:text="#{landing.val1_title}">리타겟팅 광고 효율 극대화</h3>
                 <p class="value-card-desc" th:text="#{landing.val1_desc}">
                     단축 링크를 클릭한 잠재 고객의 브라우저에 페이스북 및 구글 픽셀을 즉시 실행하여, 구매 확률이 가장 높은 핵심 고객들만 타겟팅하는 리타겟팅 모수를 빈틈없이 수집합니다.
@@ -680,7 +778,11 @@
 
             <!-- 가치 2 -->
             <div class="value-card">
-                <div class="value-badge-icon">⚡</div>
+                <div class="value-badge-icon" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                    <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                    </svg>
+                </div>
                 <h3 class="value-card-title" th:text="#{landing.val2_title}">이탈률 제로 초고속 리다이렉션</h3>
                 <p class="value-card-desc" th:text="#{landing.val2_desc}">
                     지연 없는 0.1초의 초고속 스마트 리다이렉션 기술을 적용해, 링크를 누른 사용자가 로딩 대기 시간으로 인해 이탈하는 클릭 누수율을 99.9% 예방합니다.
@@ -689,7 +791,11 @@
 
             <!-- 가치 3 -->
             <div class="value-card">
-                <div class="value-badge-icon">📊</div>
+                <div class="value-badge-icon" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+                    <svg style="width: 24px; height: 24px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 002 2h2a2 2 0 002-2z"></path>
+                    </svg>
+                </div>
                 <h3 class="value-card-title" th:text="#{landing.val3_title}">실시간 비즈니스 성장 데이터</h3>
                 <p class="value-card-desc" th:text="#{landing.val3_desc}">
                     접속한 고객의 운영체제, 사용 기기, 유입 도메인 데이터를 실시간으로 모니터링하여 어떤 채널이 가장 큰 ROI를 가져다주는지 즉시 파악하고 마케팅 예산을 지능적으로 분배하세요.
@@ -782,10 +888,14 @@
             navigator.clipboard.writeText(copyText.value)
                 .then(() => {
                     const copyBtn = document.getElementById('copyBtn');
-                    const originalText = copyBtn.innerText;
-                    copyBtn.innerText = /*[[#{landing.btn_copied}]]*/ '복사 완료!';
+                    const originalHtml = copyBtn.innerHTML;
+                    copyBtn.innerHTML = `<svg style="width: 18px; height: 18px; color: white; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg> <span>${/*[[#{landing.btn_copied}]]*/ '복사 완료!'}</span>`;
+                    copyBtn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                    copyBtn.style.boxShadow = '0 6px 20px rgba(16, 185, 129, 0.4)';
                     setTimeout(() => {
-                        copyBtn.innerText = originalText;
+                        copyBtn.innerHTML = originalHtml;
+                        copyBtn.style.background = '';
+                        copyBtn.style.boxShadow = '';
                     }, 2000);
                 })
                 .catch(err => {
@@ -853,7 +963,7 @@
                 clicks += Math.floor(Math.random() * 3) + 1; // 1~3씩 누적
                 document.getElementById('simClicks').innerText = clicks;
 
-                const devices = ['📱 Mobile (iOS)', '📱 Mobile (Android)', '🖥️ Desktop (Windows)', '🖥️ Desktop (macOS)'];
+                const devices = ['[Mobile - iOS]', '[Mobile - Android]', '[Desktop - Windows]', '[Desktop - macOS]'];
                 const dev = devices[Math.floor(Math.random() * devices.length)];
 
                 logCount++;
@@ -881,7 +991,14 @@
     <!-- 픽셀 삽입 락 모달 (체험 제한 알리미) -->
     <div id="pixelLockModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
         <div style="background: white; border-radius: 24px; padding: 40px; max-width: 520px; width: 90%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.3); text-align: center; animation: slideUp 0.3s forwards; border: 1px solid rgba(255,255,255,0.2);">
-            <div style="font-size: 3rem; margin-bottom: 15px; animation: bounce 2s infinite;">🚀</div>
+            <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; justify-content: center; width: 72px; height: 72px; background: rgba(37, 99, 235, 0.1); border-radius: 50%; color: #2563eb;">
+                    <svg style="width: 36px; height: 36px;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                </div>
+            </div>
             <h3 style="font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 12px;" th:text="#{landing.lock_modal_title}">마케팅 픽셀 무제한 삽입</h3>
             <p style="font-size: 0.95rem; color: #64748b; line-height: 1.6; margin-bottom: 24px;" th:text="#{landing.lock_modal_desc}">
                 마케팅 픽셀 삽입 및 정밀 트래킹 기능은 회원전용 서비스입니다. 무료 회원가입 시 아래의 모든 기능을 즉시 무료로 이용하실 수 있습니다!
@@ -889,16 +1006,22 @@
             
             <!-- 혜택 체크박스 리스트 (세일즈 홍보 강화) -->
             <div style="text-align: left; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; margin-bottom: 30px; display: flex; flex-direction: column; gap: 10px;">
-                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #334155; font-weight: 600;">
-                    <span style="color: #10b981; font-weight: bold;">✓</span>
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #334155; font-weight: 600;">
+                    <svg style="width: 16px; height: 16px; color: #10b981; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
                     <span th:text="#{landing.lock_modal_benefit_1}">단축 링크당 최대 2개 마케팅 픽셀 삽입 지원</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #334155; font-weight: 600;">
-                    <span style="color: #10b981; font-weight: bold;">✓</span>
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #334155; font-weight: 600;">
+                    <svg style="width: 16px; height: 16px; color: #10b981; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
                     <span th:text="#{landing.lock_modal_benefit_2}">링크 영구 소장 및 가입 즉시 3개 기본 링크 제공</span>
                 </div>
-                <div style="display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: #334155; font-weight: 600;">
-                    <span style="color: #10b981; font-weight: bold;">✓</span>
+                <div style="display: flex; align-items: center; gap: 10px; font-size: 0.9rem; color: #334155; font-weight: 600;">
+                    <svg style="width: 16px; height: 16px; color: #10b981; flex-shrink: 0;" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
                     <span th:text="#{landing.lock_modal_benefit_3}">방문자 실시간 기기, OS, 국가별 정밀 분석 대시보드</span>
                 </div>
             </div>

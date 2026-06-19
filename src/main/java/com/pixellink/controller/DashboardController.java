@@ -81,6 +81,63 @@ public class DashboardController {
         return "dashboard";
     }
 
+    @GetMapping("/dashboard/monetization")
+    public String showMonetization(
+            @RequestParam(value = "userId", defaultValue = "test-user") String userId,
+            Model model) {
+        
+        User user = userMapper.findById(userId);
+        if (user == null) {
+            user = userMapper.findById("test-user");
+            userId = "test-user";
+        }
+
+        Integer settlementBalance = settlementMapper.sumAmountByUserId(userId);
+        if (settlementBalance == null) {
+            settlementBalance = 0;
+        }
+
+        List<com.pixellink.model.Settlement> settlements = settlementMapper.findByUserId(userId);
+
+        List<User> mockUsers = Arrays.asList(
+            userMapper.findById("admin"),
+            userMapper.findById("test-user"),
+            userMapper.findById("free-user")
+        );
+
+        model.addAttribute("currentUser", user);
+        model.addAttribute("currentUserId", userId);
+        model.addAttribute("settlementBalance", settlementBalance);
+        model.addAttribute("settlements", settlements);
+        model.addAttribute("mockUsers", mockUsers);
+
+        return "monetization";
+    }
+
+    @GetMapping("/dashboard/developer")
+    public String showDeveloper(
+            @RequestParam(value = "userId", defaultValue = "test-user") String userId,
+            Model model) {
+        
+        User user = userMapper.findById(userId);
+        if (user == null) {
+            user = userMapper.findById("test-user");
+            userId = "test-user";
+        }
+
+        List<User> mockUsers = Arrays.asList(
+            userMapper.findById("admin"),
+            userMapper.findById("test-user"),
+            userMapper.findById("free-user")
+        );
+
+        model.addAttribute("currentUser", user);
+        model.addAttribute("currentUserId", userId);
+        model.addAttribute("mockUsers", mockUsers);
+
+        return "developer";
+    }
+
     private String getBaseUrl(HttpServletRequest request) {
         String scheme = request.getScheme(); // http or https
         String serverName = request.getServerName(); // localhost or domain

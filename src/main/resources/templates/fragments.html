@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+</head>
+<body>
+
+    <!-- 1. 공통 헤더 조각 -->
+    <header th:fragment="header(currentUser, mockUsers, currentUserId)">
+        <div class="logo-container">
+            <span class="logo">Pixel-Link</span>
+            <span class="logo-badge" th:text="#{dashboard.logo_badge}">Premium Linker</span>
+        </div>
+        
+        <div class="user-selector">
+            <!-- 언어 선택기 -->
+            <span th:text="#{dashboard.lang_select}">Language:</span>
+            <select class="select-user" onchange="switchLanguage(this.value)" style="margin-right: 15px;">
+                <option value="en" th:selected="${#locale.language == 'en'}">English</option>
+                <option value="ko" th:selected="${#locale.language == 'ko'}">한국어</option>
+                <option value="ja" th:selected="${#locale.language == 'ja'}">日本語</option>
+            </select>
+
+            <span th:text="#{dashboard.user_switch}">Switch Account:</span>
+            <select class="select-user" onchange="switchUser(this.value)">
+                <option th:each="user : ${mockUsers}" 
+                        th:value="${user.id}" 
+                        th:text="${user.id + ' (' + user.subscriptionTier + ')'}"
+                        th:selected="${user.id == currentUserId}">
+                </option>
+            </select>
+        </div>
+    </header>
+
+    <!-- 2. 공통 사이드바 조각 -->
+    <aside th:fragment="sidebar(activeMenu, currentUserId, currentUser)" class="sidebar">
+        <div class="sidebar-menu">
+            <a th:href="@{/dashboard(userId=${currentUserId})}" 
+               th:class="${activeMenu == 'dashboard'} ? 'menu-item active' : 'menu-item'">
+                <span class="menu-icon">🧭</span>
+                <span th:text="#{menu.dashboard}">대시보드</span>
+            </a>
+            <a th:href="@{/dashboard/monetization(userId=${currentUserId})}" 
+               th:class="${activeMenu == 'monetization'} ? 'menu-item active' : 'menu-item'">
+                <span class="menu-icon">💰</span>
+                <span th:text="#{menu.monetization}">수익 및 정산</span>
+            </a>
+            <a th:href="@{/dashboard/developer(userId=${currentUserId})}" 
+               th:class="${activeMenu == 'developer'} ? 'menu-item active' : 'menu-item'">
+                <span class="menu-icon">🔑</span>
+                <span th:text="#{menu.developer}">개발자 센터</span>
+            </a>
+        </div>
+        
+        <!-- 하단 로그인 회원 카드 -->
+        <div class="sidebar-user-card" th:if="${currentUser != null}">
+            <div class="user-avatar">👤</div>
+            <div class="user-info-box">
+                <div class="user-email" th:text="${currentUser.email}">user@pixel-link.com</div>
+                <div class="user-tier-badge" th:text="${currentUser.subscriptionTier}">FREE</div>
+            </div>
+        </div>
+    </aside>
+
+</body>
+</html>

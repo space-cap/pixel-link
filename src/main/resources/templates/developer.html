@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel-Link - 개발자 센터</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <style>
+        .code-block {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            overflow-x: auto;
+            position: relative;
+            border: 1px solid #1e293b;
+            margin-top: 10px;
+        }
+        .code-copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #94a3b8;
+            padding: 4px 10px;
+            font-size: 0.75rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+        .code-copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .api-badge {
+            background: #eff6ff;
+            color: var(--accent-primary);
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            border: 1px solid rgba(29,78,216,0.15);
+        }
+        .method-badge {
+            background: #10b981;
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 상단 헤더 조각 통합 -->
+    <div th:replace="~{fragments :: header(currentUser=${currentUser}, mockUsers=${mockUsers}, currentUserId=${currentUserId})}"></div>
+
+    <!-- 메인 대시보드 레이아웃 -->
+    <div class="dashboard-container">
+        <!-- 사이드바 조각 통합 -->
+        <div th:replace="~{fragments :: sidebar(activeMenu='developer', currentUserId=${currentUserId}, currentUser=${currentUser})}"></div>
+
+        <!-- 메인 콘텐츠 영역 -->
+        <div class="content-area">
+            <div class="content-wide">
+                
+                <h2 style="font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 5px;">🔑 개발자 센터 (Developer Center)</h2>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 25px;">외부 서버 및 마케팅 툴에서 대량의 단축 URL을 자동 생성할 수 있도록 인증 키를 발급받고 API 문서를 확인하세요.</p>
+
+                <!-- API Key 관리 카드 -->
+                <div class="card" style="padding: 30px; margin-bottom: 28px;">
+                    <h3 class="card-title" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border: none; padding: 0;">
+                        <span>🔑 개발용 API Key 인증 토큰</span>
+                        <button type="button" class="btn" style="padding: 8px 16px; font-size: 0.8rem; background: var(--accent-secondary); margin: 0; border-radius: 6px; width: auto;" onclick="openCreateApiKeyModal()">+ 신규 API Key 발급</button>
+                    </h3>
+                    
+                    <div class="empty-state" id="apiKeyEmptyState" style="display: none; padding: 30px 10px;">
+                        <div class="empty-state-icon" style="font-size: 2rem;">🔑</div>
+                        <p style="font-size: 0.9rem; color: var(--text-dark); margin-top: 10px;">발급된 API Key가 존재하지 않습니다. 우측 상단 버튼을 통해 새로운 키를 생성해 보세요.</p>
+                    </div>
+
+                    <div class="table-responsive" id="apiKeyTableContainer" style="display: none;">
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>인증 키 이름</th>
+                                    <th>API Key 식별 토큰</th>
+                                    <th style="text-align: center;">작업</th>
+                                </tr>
+                            </thead>
+                            <tbody id="apiKeyListTableBody">
+                                <!-- AJAX 동적 바인딩 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- API 연동 문서 및 가이드 카드 -->
+                <div class="card" style="padding: 32px;">
+                    <h3 class="card-title" style="margin-bottom: 20px; border-bottom: 1px solid var(--card-border); padding-bottom: 15px;">📚 단축 URL 생성 API 연동 가이드</h3>
+
+                    <!-- API 기본 주소 설명 -->
+                    <div style="margin-bottom: 25px;">
+                        <h4 style="font-weight: 700; font-size: 1rem; color: var(--text-main); margin-bottom: 8px;">
+                            <span class="method-badge">POST</span>
+                            <span style="font-family: monospace; font-weight: 700; color: #1e293b;">/api/v1/links</span>
+                        </h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+                            지정된 목적지 URL을 스마트 라우팅 및 수익형 옵션과 함께 초고속 단축 URL로 가공하여 반환합니다.<br>
+                            인증을 위해 HTTP Request Header에 <span class="api-badge">X-API-KEY</span> 명칭으로 발급받은 API 키를 실어 호출해야 합니다.
+                        </p>
+                    </div>
+
+                    <!-- 요청 헤더 설명 -->
+                    <div style="margin-bottom: 25px;">
+                        <h5 style="font-weight: 700; font-size: 0.9rem; color: var(--text-main); margin-bottom: 8px;">📋 Request Headers</h5>
+                        <table class="stats-table" style="font-size: 0.85rem;">
+                            <thead>
+                                <tr>
+                                    <th>헤더명</th>
+                                    <th>필수 여부</th>
+                                    <th>설명</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="font-family: monospace; font-weight: 700;">Content-Type</td>
+                                    <td style="color: var(--text-muted);">필수</td>
+                                    <td><span class="api-badge">application/json</span></td>
+                                </tr>
+                                <tr>
+                                    <td style="font-family: monospace; font-weight: 700;">X-API-KEY</td>
+                                    <td style="color: #ef4444; font-weight: 700;">필수</td>
+                                    <td>발급받은 활성 API Key (예: <span class="api-badge">pxl_live_abc123...</span>)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 퀵 스타트 코드 예제 -->
+                    <div>
+                        <h5 style="font-weight: 700; font-size: 0.9rem; color: var(--text-main); margin-bottom: 8px;">💻 Python 호출 예제</h5>
+                        <div class="code-block" id="pythonCodeBlock">
+                            <button type="button" class="code-copy-btn" onclick="copyCodeSnippet('pythonCodeBlock')">복사</button>
+                            <pre style="margin: 0;">import requests
+
+url = "http://localhost:8090/api/v1/links"
+headers = {
+    "X-API-KEY": "pxl_live_YOUR_API_KEY_HERE",
+    "Content-Type": "application/json"
+}
+payload = {
+    "defaultTargetUrl": "https://example.com/products/123",
+    "title": "Summer Sale Campaign",
+    "description": "Get 30% discount immediately!",
+    "isAdEnabled": True,
+    "adTimerSeconds": 5
+}
+
+response = requests.post(url, headers=headers, json=payload)
+print(response.json())</pre>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 토스트 컴포넌트 -->
+    <div class="toast" id="globalToast">
+        <span class="toast-icon"></span>
+        <span class="toast-message">Notification</span>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const currentUserId = /*[[${currentUserId}]]*/ 'test-user';
+
+        // API Key 목록 로드
+        function loadApiKeys() {
+            fetch(`/api/dashboard/keys?userId=${currentUserId}`)
+            .then(res => res.json())
+            .then(keys => {
+                const emptyState = document.getElementById('apiKeyEmptyState');
+                const tableContainer = document.getElementById('apiKeyTableContainer');
+                const tbody = document.getElementById('apiKeyListTableBody');
+                
+                tbody.innerHTML = '';
+                if (!keys || keys.length === 0) {
+                    emptyState.style.display = 'block';
+                    tableContainer.style.display = 'none';
+                    return;
+                }
+                
+                emptyState.style.display = 'none';
+                tableContainer.style.display = 'block';
+                
+                keys.forEach(key => {
+                    const tr = document.createElement('tr');
+                    tr.style.fontSize = '0.9rem';
+                    
+                    const keyString = key.apiKey;
+                    const maskedKey = keyString.substring(0, 13) + '...' + keyString.substring(keyString.length - 4);
+                    
+                    tr.innerHTML = `
+                        <td style="padding: 12px; font-weight: bold; color: #334155;">${key.name || 'API Key'}</td>
+                        <td style="padding: 12px; font-family: monospace; color: #475569;">
+                            <span title="${keyString}">${maskedKey}</span>
+                            <button type="button" class="action-btn" style="padding: 2px 8px; font-size: 0.75rem; margin-left: 8px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" onclick="copyToClipboard('${keyString}', this)">복사</button>
+                        </td>
+                        <td style="padding: 12px; text-align: center;">
+                            <button type="button" class="action-btn btn-delete" style="padding: 4px 8px; font-size: 0.8rem; border-radius: 4px;" onclick="revokeApiKey('${key.id}')">무효화</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(err => console.error('API Key 로드 오류:', err));
+        }
+
+        // API Key 발급 요청
+        function openCreateApiKeyModal() {
+            const name = prompt('발급받을 API Key의 이름을 입력해주세요:', '외부 연동 API Key');
+            if (name === null) return;
+            
+            const keyName = name.trim() || 'API Key';
+            
+            fetch('/api/dashboard/keys', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: currentUserId,
+                    name: keyName
+                })
+            })
+            .then(res => res.json())
+            .then(key => {
+                if (key && key.apiKey) {
+                    alert(`API Key가 성공적으로 발급되었습니다. 최초 1회만 제공되니 복사하여 안전한 곳에 보관해 주세요:\n\n${key.apiKey}`);
+                    loadApiKeys();
+                } else {
+                    showToast('API Key 생성에 실패했습니다.', 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showToast('API Key 생성 실패', 'error');
+            });
+        }
+
+        // API Key 파기 요청
+        function revokeApiKey(id) {
+            if (confirm('이 API Key를 파기하시겠습니까?\n파기 즉시 해당 키를 사용한 모든 외부 API 단축 링크 발급 요청이 영구 차단됩니다.')) {
+                fetch(`/api/dashboard/keys/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(res => {
+                    if (res.status === 204) {
+                        showToast('API Key가 파기되었습니다.', 'success');
+                        loadApiKeys();
+                    } else {
+                        showToast('API Key 파기 실패', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showToast('API Key 파기 실패', 'error');
+                });
+            }
+        }
+
+        // 클립보드 복사 피드백
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '✔';
+                button.style.backgroundColor = 'var(--color-success)';
+                button.style.color = 'white';
+                showToast('API Key가 클립보드에 복사되었습니다.', 'success');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.backgroundColor = '';
+                    button.style.color = '';
+                }, 1500);
+            }).catch(err => {
+                showToast('Copy failed.', 'error');
+            });
+        }
+
+        // 코드 스니펫 복사용
+        function copyCodeSnippet(blockId) {
+            const preText = document.querySelector(`#${blockId} pre`).innerText;
+            navigator.clipboard.writeText(preText).then(() => {
+                showToast('가이드 코드가 클립보드에 복사되었습니다.', 'success');
+            }).catch(() => {
+                showToast('복사 실패', 'error');
+            });
+        }
+
+        // 토스트 제어
+        function showToast(message, type) {
+            const toast = document.getElementById('globalToast');
+            toast.className = 'toast toast-' + type;
+            toast.querySelector('.toast-message').innerText = message;
+            toast.querySelector('.toast-icon').innerText = type === 'success' ? '✔' : '⚠';
+            toast.classList.add('active');
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        function switchLanguage(lang) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', lang);
+            window.location.href = url.toString();
+        }
+
+        function switchUser(userId) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('userId', userId);
+            window.location.href = url.toString();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadApiKeys();
+        });
+        /*]]>*/
+    </script>
+</body>
+</html>

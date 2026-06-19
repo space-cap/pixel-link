@@ -1,0 +1,51 @@
+package com.pixellink.controller;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+public class DashboardControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Test
+    void showDashboard_ReturnsDashboardView() throws Exception {
+        mockMvc.perform(get("/dashboard")
+                        .param("userId", "test-user"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("dashboard"))
+                .andExpect(model().attributeExists("currentUser"))
+                .andExpect(model().attributeExists("links"))
+                .andExpect(model().attributeExists("totalClicks"))
+                .andExpect(model().attributeExists("mockUsers"));
+    }
+
+    @Test
+    void showMonetization_ReturnsMonetizationView() throws Exception {
+        mockMvc.perform(get("/dashboard/monetization")
+                        .param("userId", "test-user"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("monetization"))
+                .andExpect(model().attributeExists("currentUser"))
+                .andExpect(model().attributeExists("settlementBalance"))
+                .andExpect(model().attributeExists("settlements"));
+    }
+
+    @Test
+    void showDeveloper_ReturnsDeveloperView() throws Exception {
+        mockMvc.perform(get("/dashboard/developer")
+                        .param("userId", "test-user"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("developer"))
+                .andExpect(model().attributeExists("currentUser"))
+                .andExpect(model().attributeExists("mockUsers"));
+    }
+}

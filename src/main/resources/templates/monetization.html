@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel-Link - 수익 및 정산 관리</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+</head>
+<body>
+
+    <!-- 상단 헤더 조각 통합 -->
+    <div th:replace="~{fragments :: header(currentUser=${currentUser}, mockUsers=${mockUsers}, currentUserId=${currentUserId})}"></div>
+
+    <!-- 메인 대시보드 레이아웃 -->
+    <div class="dashboard-container">
+        <!-- 사이드바 조각 통합 -->
+        <div th:replace="~{fragments :: sidebar(activeMenu='monetization', currentUserId=${currentUserId}, currentUser=${currentUser})}"></div>
+
+        <!-- 메인 콘텐츠 영역 -->
+        <div class="content-area">
+            <div class="content-wide">
+                
+                <h2 style="font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 5px;">💰 수익 및 정산금 관리</h2>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 20px;">단축 URL 마케팅을 통해 누적된 수익 현황을 확인하고 출금을 신청할 수 있습니다.</p>
+
+                <!-- 정산 요약 보드 -->
+                <div class="card" style="padding: 32px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid #334155; color: white;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                        <div>
+                            <div style="font-size: 0.9rem; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">출금 가능 적립 잔액</div>
+                            <div style="font-size: 2.8rem; font-weight: 800; color: #38bdf8; margin: 10px 0; font-family: 'Outfit', sans-serif;" id="settlementBalance" th:text="${#numbers.formatInteger(settlementBalance, 0, 'COMMA')} + ' 원'">0 원</div>
+                            <div style="font-size: 0.8rem; color: #64748b;">* 플랫폼 최소 출금액 기준: 10,000원 이상 신청 가능 (수수료 및 원천징수 공제 완료 금액)</div>
+                        </div>
+                        <button class="btn" onclick="requestPayout()" id="payoutBtn" 
+                                th:style="${settlementBalance < 10000} ? 'opacity: 0.4; cursor: not-allowed; background: #475569; margin: 0; box-shadow:none;' : 'background: #10b981; margin: 0;'"
+                                th:disabled="${settlementBalance < 10000}"
+                                style="padding: 16px 32px; font-size: 1rem; font-weight: bold; border-radius: var(--radius-md); width: auto;">출금 신청하기</button>
+                    </div>
+                </div>
+
+                <!-- 정산 히스토리 테이블 -->
+                <div class="card" style="padding: 30px;">
+                    <h3 class="card-title" style="margin-bottom: 15px; border: none; padding: 0;">📋 출금 및 적립 정산 내역</h3>
+                    
+                    <div class="empty-state" th:if="${settlements.isEmpty()}" style="padding: 40px 10px;">
+                        <div class="empty-state-icon" style="font-size: 2.5rem;">💸</div>
+                        <p style="font-size: 0.9rem; color: var(--text-dark);">아직 발생한 정산 적립 내역이나 출금 내역이 없습니다.</p>
+                    </div>
+
+                    <div class="table-responsive" th:if="${!settlements.isEmpty()}">
+                        <table class="stats-table">
+                            <thead>
+                                <tr>
+                                    <th>정산 ID</th>
+                                    <th>구분</th>
+                                    <th>금액 (원)</th>
+                                    <th>상태</th>
+                                    <th>처리 일시</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="s : ${settlements}">
+                                    <td style="font-family: monospace; font-size: 0.8rem;" th:text="${s.id}">id</td>
+                                    <td>
+                                        <span th:if="${s.amount > 0}" style="color: #10b981; font-weight: 700;">🟢 광고 수익 적립</span>
+                                        <span th:if="${s.amount < 0}" style="color: #ef4444; font-weight: 700;">🔴 수익금 환급 (출금)</span>
+                                    </td>
+                                    <td style="font-weight: 700;" th:text="${#numbers.formatInteger(s.amount, 0, 'COMMA')}">0</td>
+                                    <td>
+                                        <!-- Mock User 상태 상, status 필드가 String 형태이므로 이에 맞춰 분기 -->
+                                        <span th:if="${s.status == 'PENDING'}" style="background: #f59e0b; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">출금 대기</span>
+                                        <span th:if="${s.status == 'COMPLETED'}" style="background: #10b981; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">지급 완료</span>
+                                        <span th:if="${s.status == 'REJECTED'}" style="background: #ef4444; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">지급 거절</span>
+                                        <span th:if="${s.status == 'ACCUMULATED' || s.status == 'SUCCESS'}" style="background: #3b82f6; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">적립 성공</span>
+                                    </td>
+                                    <td th:text="${s.settledAt}">2026-06-19</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 토스트 컴포넌트 -->
+    <div class="toast" id="globalToast">
+        <span class="toast-icon"></span>
+        <span class="toast-message">Notification</span>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const currentUserId = /*[[${currentUserId}]]*/ 'test-user';
+
+        // 출금 신청 트리거
+        function requestPayout() {
+            if (confirm('현재 출금 가능한 모든 적립 금액을 출금 신청하시겠습니까?\n출금 신청 시 영업일 기준 3일 이내 지정된 정보로 정산 처리됩니다.')) {
+                fetch(`/api/links/withdraw?userId=${currentUserId}`, {
+                    method: 'POST'
+                })
+                .then(res => res.json())
+                .then(json => {
+                    if (json.success) {
+                        showToast('성공적으로 출금 신청이 등록되었습니다.', 'success');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        showToast(json.error.message, 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showToast('출금 요청 중 통신 오류가 발생했습니다.', 'error');
+                });
+            }
+        }
+
+        // 토스트 제어
+        function showToast(message, type) {
+            const toast = document.getElementById('globalToast');
+            toast.className = 'toast toast-' + type;
+            toast.querySelector('.toast-message').innerText = message;
+            toast.querySelector('.toast-icon').innerText = type === 'success' ? '✔' : '⚠';
+            toast.classList.add('active');
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // 공통 언어/유저 전환 함수
+        function switchLanguage(lang) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', lang);
+            window.location.href = url.toString();
+        }
+
+        function switchUser(userId) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('userId', userId);
+            window.location.href = url.toString();
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>

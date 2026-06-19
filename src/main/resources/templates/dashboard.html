@@ -9,39 +9,18 @@
 </head>
 <body>
 
-    <!-- 상단 헤더 -->
-    <header>
-        <div class="logo-container">
-            <span class="logo">Pixel-Link</span>
-            <span class="logo-badge" th:text="#{dashboard.logo_badge}">Premium Linker</span>
-        </div>
-        
-        <!-- 테스트용 멀티테넌트 구독 유저 전환기 & 다국어 전환기 -->
-        <div class="user-selector">
-            <!-- 언어 선택기 -->
-            <span th:text="#{dashboard.lang_select}">Language:</span>
-            <select class="select-user" onchange="switchLanguage(this.value)" style="margin-right: 15px;">
-                <option value="en" th:selected="${#locale.language == 'en'}">English</option>
-                <option value="ko" th:selected="${#locale.language == 'ko'}">한국어</option>
-                <option value="ja" th:selected="${#locale.language == 'ja'}">日本語</option>
-            </select>
-
-            <span th:text="#{dashboard.user_switch}">Switch Account:</span>
-            <select class="select-user" onchange="switchUser(this.value)">
-                <option th:each="user : ${mockUsers}" 
-                        th:value="${user.id}" 
-                        th:text="${user.id + ' (' + user.subscriptionTier + ')'}"
-                        th:selected="${user.id == currentUserId}">
-                </option>
-            </select>
-        </div>
-    </header>
+    <!-- 상단 헤더 조각 통합 -->
+    <div th:replace="~{fragments :: header(currentUser=${currentUser}, mockUsers=${mockUsers}, currentUserId=${currentUserId})}"></div>
 
     <!-- 대시보드 메인 본문 -->
-    <main>
-        
-        <!-- 좌측: 링크 생성 폼 (구독 요금제 별 제약 연동) -->
-        <section class="card">
+    <div class="dashboard-container">
+        <!-- 사이드바 조각 통합 -->
+        <div th:replace="~{fragments :: sidebar(activeMenu='dashboard', currentUserId=${currentUserId}, currentUser=${currentUser})}"></div>
+
+        <div class="content-area">
+            <div class="content-grid-2">
+                <!-- 좌측: 링크 생성 폼 (구독 요금제 별 제약 연동) -->
+                <section class="card" style="width: 100%;">
             <h2 class="card-title">
                 <span th:text="#{dashboard.create_title}">Create Short Link</span>
                 <span class="logo-badge" th:text="${currentUser.subscriptionTier}">FREE</span>
@@ -191,25 +170,6 @@
                 </div>
             </div>
 
-            <!-- [3단계 & 4단계] 수익 정산 현황판 -->
-            <div class="card" style="padding: 24px; margin-bottom: 24px; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid #334155; color: white;">
-                <h3 class="card-title" style="color: white; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border: none; padding: 0;">
-                    <span style="color: white;">💰 나의 마케팅 정산금 현황</span>
-                    <span class="logo-badge" style="background: #10b981; color: white; border: none;">ACTIVE</span>
-                </h3>
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-                    <div>
-                        <div style="font-size: 0.85rem; color: #94a3b8;">출금 가능 정산액 (누적)</div>
-                        <div style="font-size: 2.2rem; font-weight: 800; color: #38bdf8; margin: 5px 0;" id="settlementBalance" th:text="${#numbers.formatInteger(settlementBalance, 0, 'COMMA')} + ' 원'">0 원</div>
-                        <div style="font-size: 0.75rem; color: #64748b;">* 10,000원 이상 시 출금 신청 가능</div>
-                    </div>
-                    <button class="btn" onclick="requestPayout()" id="payoutBtn" 
-                            th:style="${settlementBalance < 10000} ? 'opacity: 0.5; cursor: not-allowed; background: #475569; margin: 0;' : 'background: #2563eb; margin: 0;'"
-                            th:disabled="${settlementBalance < 10000}"
-                            style="padding: 12px 24px; font-weight: bold; border-radius: 8px;">출금 신청하기</button>
-                </div>
-            </div>
-
             <!-- 링크 리스트 카드 섹션 -->
             <div class="card" style="padding: 24px;">
                 <h3 class="card-title" style="margin-bottom: 20px;" th:text="#{dashboard.table_title}">Short Link History</h3>
@@ -252,37 +212,11 @@
                     </div>
                 </div>
             </div>
-
-            <!-- API Key 관리 카드 섹션 -->
-            <div class="card" style="padding: 24px; margin-top: 24px;">
-                <h3 class="card-title" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border: none; padding: 0;">
-                    <span>🔑 API 연동 및 개발자 키 관리</span>
-                    <button type="button" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--accent-secondary); margin: 0; border-radius: 6px;" onclick="openCreateApiKeyModal()">+ API Key 발급</button>
-                </h3>
-                
-                <div class="empty-state" id="apiKeyEmptyState" style="display: none; padding: 30px 10px;">
-                    <div class="empty-state-icon" style="font-size: 2rem;">🔑</div>
-                    <p style="font-size: 0.9rem; color: var(--text-dark); margin-top: 10px;">발급된 API Key가 존재하지 않습니다. 우측 상단 버튼을 통해 새로운 키를 생성해 보세요.</p>
-                </div>
-
-                <div class="table-responsive" id="apiKeyTableContainer" style="display: none; overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-                        <thead>
-                            <tr style="border-bottom: 2px solid var(--card-border); text-align: left; font-size: 0.85rem; color: #64748b;">
-                                <th style="padding: 8px 12px;">Key 이름</th>
-                                <th style="padding: 8px 12px;">API Key 토큰</th>
-                                <th style="padding: 8px 12px; text-align: center;">동작</th>
-                            </tr>
-                        </thead>
-                        <tbody id="apiKeyListTableBody">
-                            <!-- 자바스크립트로 동적 로드 -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
         </section>
 
-    </main>
+            </div>
+        </div>
+    </div>
 
     <!-- 통계 디테일 모달창 Overlay -->
     <div class="modal-overlay" id="statsModal" onclick="closeStatsModal(event)">
@@ -624,126 +558,6 @@
                 input.placeholder = '예: Mobile, Desktop, Tablet';
             }
         }
-
-        // 12. 정산금 출금 신청
-        function requestPayout() {
-            if (confirm('모든 대기 정산금을 출금 신청하시겠습니까?')) {
-                fetch(`/api/settlements/withdraw?userId=${currentUserId}`, {
-                    method: 'POST'
-                })
-                .then(res => res.json())
-                .then(json => {
-                    if (json.success) {
-                        showToast('출금 신청이 완료되었습니다.', 'success');
-                        setTimeout(() => window.location.reload(), 1000);
-                    } else {
-                        showToast(json.error.message, 'error');
-                    }
-                })
-                .catch(err => {
-                    showToast('출금 요청 중 통신 오류가 발생했습니다.', 'error');
-                });
-            }
-        }
-
-        // 13. API Key 로드 및 렌더링
-        function loadApiKeys() {
-            fetch(`/api/dashboard/keys?userId=${currentUserId}`)
-            .then(res => res.json())
-            .then(keys => {
-                const emptyState = document.getElementById('apiKeyEmptyState');
-                const tableContainer = document.getElementById('apiKeyTableContainer');
-                const tbody = document.getElementById('apiKeyListTableBody');
-                
-                tbody.innerHTML = '';
-                if (!keys || keys.length === 0) {
-                    emptyState.style.display = 'block';
-                    tableContainer.style.display = 'none';
-                    return;
-                }
-                
-                emptyState.style.display = 'none';
-                tableContainer.style.display = 'block';
-                
-                keys.forEach(key => {
-                    const tr = document.createElement('tr');
-                    tr.style.borderBottom = '1px solid var(--card-border)';
-                    tr.style.fontSize = '0.9rem';
-                    
-                    const keyString = key.apiKey;
-                    const maskedKey = keyString.substring(0, 13) + '...' + keyString.substring(keyString.length - 4);
-                    
-                    tr.innerHTML = `
-                        <td style="padding: 12px; font-weight: bold; color: #334155;">${key.name || 'API Key'}</td>
-                        <td style="padding: 12px; font-family: monospace; color: #475569;">
-                            <span title="${keyString}">${maskedKey}</span>
-                            <button type="button" class="action-btn" style="padding: 2px 8px; font-size: 0.75rem; margin-left: 8px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" onclick="copyToClipboard('${keyString}', this)">복사</button>
-                        </td>
-                        <td style="padding: 12px; text-align: center;">
-                            <button type="button" class="action-btn btn-delete" style="padding: 4px 8px; font-size: 0.8rem; border-radius: 4px;" onclick="revokeApiKey('${key.id}')">무효화</button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            })
-            .catch(err => console.error('API Key 로드 오류:', err));
-        }
-
-        function openCreateApiKeyModal() {
-            const name = prompt('발급받을 API Key의 이름을 입력해주세요:', '외부 연동 API Key');
-            if (name === null) return;
-            
-            const keyName = name.trim() || 'API Key';
-            
-            fetch('/api/dashboard/keys', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    userId: currentUserId,
-                    name: keyName
-                })
-            })
-            .then(res => res.json())
-            .then(key => {
-                if (key && key.apiKey) {
-                    alert(`API Key가 성공적으로 발급되었습니다. 최초 1회만 제공되니 복사하여 안전한 곳에 보관해 주세요:\n\n${key.apiKey}`);
-                    loadApiKeys();
-                } else {
-                    showToast('API Key 생성에 실패했습니다.', 'error');
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                showToast('API Key 생성 실패', 'error');
-            });
-        }
-
-        function revokeApiKey(id) {
-            if (confirm('이 API Key를 파기하시겠습니까? 파기 즉시 해당 키를 사용한 모든 단축 URL 생성 API 요청이 차단됩니다.')) {
-                fetch(`/api/dashboard/keys/${id}`, {
-                    method: 'DELETE'
-                })
-                .then(res => {
-                    if (res.status === 204) {
-                        showToast('API Key가 파기되었습니다.', 'success');
-                        loadApiKeys();
-                    } else {
-                        showToast('API Key 파기 실패', 'error');
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    showToast('API Key 파기 실패', 'error');
-                });
-            }
-        }
-
-        // 페이지 로드 완료 시 API Key 목록 조회 트리거
-        document.addEventListener('DOMContentLoaded', () => {
-            loadApiKeys();
-        });
         /*]]>*/
 
     </script>

@@ -172,7 +172,7 @@
 
             <!-- 링크 리스트 카드 섹션 -->
             <div class="card" style="padding: 24px;">
-                <h3 class="card-title" style="margin-bottom: 20px;" th:text="#{dashboard.table_title}">Short Link History</h3>
+                <h3 class="card-title" style="margin-bottom: 20px;">⏱️ 최근 생성된 단축 링크 (최근 5개)</h3>
                 
                 <!-- 빈 목록 예외 대응 -->
                 <div class="empty-state" th:if="${links.isEmpty()}">
@@ -210,6 +210,11 @@
                             <button class="action-btn btn-delete" th:title="#{dashboard.action_delete}" th:onclick="deleteLink([[${link.id}]])">🗑️</button>
                         </div>
                     </div>
+                </div>
+
+                <!-- 전체 단축 링크 관리 바로가기 이동 버튼 -->
+                <div style="margin-top: 24px; text-align: center;" th:if="${!links.isEmpty()}">
+                    <a th:href="@{/dashboard/links(userId=${currentUserId})}" class="btn btn-secondary" style="width: auto; padding: 10px 24px; font-size: 0.85rem; border-radius: 6px; display: inline-flex;">🔗 전체 단축 링크 관리 바로가기</a>
                 </div>
             </div>
         </section>

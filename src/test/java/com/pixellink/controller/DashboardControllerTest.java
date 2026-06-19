@@ -48,4 +48,30 @@ public class DashboardControllerTest {
                 .andExpect(model().attributeExists("currentUser"))
                 .andExpect(model().attributeExists("mockUsers"));
     }
+
+    @Test
+    void showLinks_ReturnsLinksView() throws Exception {
+        mockMvc.perform(get("/dashboard/links")
+                        .param("userId", "test-user")
+                        .param("page", "1")
+                        .param("pageSize", "10"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("links"))
+                .andExpect(model().attributeExists("currentUser"))
+                .andExpect(model().attributeExists("links"))
+                .andExpect(model().attributeExists("currentPage"))
+                .andExpect(model().attributeExists("totalPages"))
+                .andExpect(model().attributeExists("searchKeyword"));
+    }
+
+    @Test
+    void showLinks_WithSearch_ReturnsLinksView() throws Exception {
+        mockMvc.perform(get("/dashboard/links")
+                        .param("userId", "test-user")
+                        .param("search", "promo")
+                        .param("page", "1"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("links"))
+                .andExpect(model().attribute("searchKeyword", "promo"));
+    }
 }

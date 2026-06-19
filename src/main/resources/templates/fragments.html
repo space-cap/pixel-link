@@ -39,6 +39,11 @@
                 <span class="menu-icon">🧭</span>
                 <span th:text="#{menu.dashboard}">대시보드</span>
             </a>
+            <a th:href="@{/dashboard/links(userId=${currentUserId})}" 
+               th:class="${activeMenu == 'links'} ? 'menu-item active' : 'menu-item'">
+                <span class="menu-icon">🔗</span>
+                <span th:text="#{menu.links}">링크 관리</span>
+            </a>
             <a th:href="@{/dashboard/monetization(userId=${currentUserId})}" 
                th:class="${activeMenu == 'monetization'} ? 'menu-item active' : 'menu-item'">
                 <span class="menu-icon">💰</span>

@@ -46,6 +46,18 @@ public class LinkService {
     private final SecureRandom random = new SecureRandom();
 
 
+    public List<LinkResponse> getLinksByUserIdPaged(String userId, String search, int page, int pageSize, String baseUrl) {
+        int offset = (page - 1) * pageSize;
+        List<Link> links = linkMapper.findByUserIdPaged(userId, search, pageSize, offset);
+        return links.stream()
+                .map(link -> LinkResponse.from(link, baseUrl))
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    public int getLinkCountByUserId(String userId, String search) {
+        return linkMapper.countByUserId(userId, search);
+    }
+
     @Transactional
     public LinkResponse createLink(LinkCreateRequest request, String userId, String baseUrl) {
         if (userId == null || userId.trim().isEmpty() || "anonymous".equalsIgnoreCase(userId)) {

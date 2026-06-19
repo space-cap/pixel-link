@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel-Link - 단축 링크 관리</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+</head>
+<body>
+
+    <!-- 상단 헤더 조각 통합 -->
+    <div th:replace="~{fragments :: header(currentUser=${currentUser}, mockUsers=${mockUsers}, currentUserId=${currentUserId})}"></div>
+
+    <!-- 메인 대시보드 레이아웃 -->
+    <div class="dashboard-container">
+        <!-- 사이드바 조각 통합 -->
+        <div th:replace="~{fragments :: sidebar(activeMenu='links', currentUserId=${currentUserId}, currentUser=${currentUser})}"></div>
+
+        <!-- 메인 콘텐츠 영역 -->
+        <div class="content-area">
+            <div class="content-wide">
+                
+                <h2 style="font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 5px;">🔗 단축 링크 목록 관리</h2>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px;">지금까지 발급된 모든 단축 링크를 탐색하고 클릭 수 통계를 상세 추적할 수 있습니다.</p>
+
+                <!-- 검색창 영역 -->
+                <div class="search-container">
+                    <div class="search-input-wrapper">
+                        <input type="text" id="searchInput" class="search-input" placeholder="단축 경로 슬러그, 목적지 URL, 혹은 공유 제목 검색..." th:value="${searchKeyword}" onkeydown="handleSearchEnter(event)">
+                        <button type="button" class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()" th:style="${#strings.isEmpty(searchKeyword)} ? 'display:none;' : 'display:flex;'">✕</button>
+                    </div>
+                    <button type="button" class="btn" style="width: auto; padding: 0 24px; font-size: 0.9rem; margin: 0; border-radius: var(--radius-md);" onclick="triggerSearch()">검색</button>
+                </div>
+
+                <!-- 링크 리스트 카드 섹션 -->
+                <div class="card" style="padding: 30px;">
+                    <h3 class="card-title" style="margin-bottom: 20px; border: none; padding: 0;">🔗 나의 단축 링크 목록</h3>
+                    
+                    <!-- 빈 목록 예외 대응 -->
+                    <div class="empty-state" th:if="${links.isEmpty()}" style="padding: 50px 10px;">
+                        <div class="empty-state-icon">🔎</div>
+                        <p th:text="${#strings.isEmpty(searchKeyword)} ? '생성된 단축 링크가 없습니다. 대시보드 홈에서 새 링크를 만들어 보세요.' : '검색 결과와 일치하는 단축 링크를 찾을 수 없습니다.'"></p>
+                    </div>
+
+                    <!-- 링크 목록 목록 루프 -->
+                    <div class="link-list" th:if="${!links.isEmpty()}">
+                        <div class="link-card" th:each="link : ${links}" th:id="'card-' + ${link.id}">
+                            <div class="link-info">
+                                <div class="link-header">
+                                    <a th:href="${link.shortenedUrl}" target="_blank" class="short-url-link" th:text="${link.shortenedUrl}">https://pixel-link.com/code</a>
+                                    <div class="link-badge-container">
+                                        <span class="badge badge-fb" th:if="${link.fbPixelId != null && !#strings.isEmpty(link.fbPixelId)}">FB</span>
+                                        <span class="badge badge-ga" th:if="${link.gaTrackingId != null && !#strings.isEmpty(link.gaTrackingId)}">GA</span>
+                                        <span class="badge badge-custom" th:if="${link.customScript != null && !#strings.isEmpty(link.customScript)}">Custom</span>
+                                        <span class="badge" style="background: #e11d48; color: white;" th:if="${link.adEnabled}">AD</span>
+                                        <span class="badge" style="background: #d97706; color: white;" th:if="${link.paywalled}" th:text="'PAY (' + ${link.price} + '원)'">PAY</span>
+                                    </div>
+                                </div>
+
+                                <div class="target-url" th:text="'Target: ' + ${link.defaultTargetUrl}">Target: https://example.com/target-url</div>
+                                <div class="created-date" th:text="#{dashboard.created_date} + ${#temporals.format(link.createdAt, 'yyyy-MM-dd HH:mm:ss')}">생성일: 2026-06-18</div>
+                            </div>
+
+                            <div class="clicks-display">
+                                <span class="clicks-num" th:text="${link.clicksCount}">0</span>
+                                <span class="clicks-lbl">Clicks</span>
+                            </div>
+
+                            <div class="link-actions">
+                                <button class="action-btn" th:title="#{dashboard.action_copy}" th:onclick="copyToClipboard([[${link.shortenedUrl}]], this)">📋</button>
+                                <button class="action-btn" th:title="#{dashboard.action_stats}" th:onclick="openStatsModal([[${link.id}]])">📊</button>
+                                <button class="action-btn btn-delete" th:title="#{dashboard.action_delete}" th:onclick="deleteLink([[${link.id}]])">🗑️</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 원형 디자인 페이지네이션 -->
+                    <div class="pagination-container" th:if="${totalPages > 1}">
+                        <!-- 이전 페이지 -->
+                        <a th:href="@{/dashboard/links(page=${currentPage - 1}, search=${searchKeyword}, userId=${currentUserId})}" 
+                           class="page-btn" th:classappend="${currentPage == 1} ? 'disabled' : ''"
+                           th:style="${currentPage == 1} ? 'pointer-events: none;' : ''">◀</a>
+                           
+                        <!-- 페이지 목록 루프 -->
+                        <a th:each="pageNum : ${#numbers.sequence(1, totalPages)}"
+                           th:href="@{/dashboard/links(page=${pageNum}, search=${searchKeyword}, userId=${currentUserId})}" 
+                           class="page-btn" th:classappend="${pageNum == currentPage} ? 'active' : ''"
+                           th:text="${pageNum}">1</a>
+                           
+                        <!-- 다음 페이지 -->
+                        <a th:href="@{/dashboard/links(page=${currentPage + 1}, search=${searchKeyword}, userId=${currentUserId})}" 
+                           class="page-btn" th:classappend="${currentPage == totalPages} ? 'disabled' : ''"
+                           th:style="${currentPage == totalPages} ? 'pointer-events: none;' : ''">▶</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 통계 디테일 모달창 Overlay -->
+    <div class="modal-overlay" id="statsModal" onclick="closeStatsModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="toggleModal(false)">&times;</button>
+            <h3 class="card-title" id="modalLinkTitle" th:text="#{modal.stats_title}">Detailed Link Analytics</h3>
+            
+            <div class="stats-container">
+                <!-- 유입 기기 분포 -->
+                <div class="stats-card-mini">
+                    <h4 th:text="#{modal.device}">Device Distribution</h4>
+                    <div class="stats-list" id="deviceStatsList">
+                        <!-- 동적 주입 -->
+                    </div>
+                </div>
+
+                <!-- 운영체제 분포 -->
+                <div class="stats-card-mini">
+                    <h4 th:text="#{modal.os}">OS Distribution</h4>
+                    <div class="stats-list" id="osStatsList">
+                        <!-- 동적 주입 -->
+                    </div>
+                </div>
+
+                <!-- 레퍼러 유입처 분포 -->
+                <div class="stats-card-mini">
+                    <h4 th:text="#{modal.referrer}">Traffic Referrer</h4>
+                    <div class="stats-list" id="referrerStatsList">
+                        <!-- 동적 주입 -->
+                    </div>
+                </div>
+
+                <!-- 최근 클릭 추이 -->
+                <div class="stats-card-mini">
+                    <h4 th:text="#{modal.daily}">Recent Daily Clicks</h4>
+                    <div class="stats-list" id="dailyStatsList">
+                        <!-- 동적 주입 -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 토스트 컴포넌트 -->
+    <div class="toast" id="globalToast">
+        <span class="toast-icon"></span>
+        <span class="toast-message">Notification</span>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const currentUserId = /*[[${currentUserId}]]*/ 'test-user';
+        
+        const translations = {
+            copySuccess: '단축 URL이 클립보드에 복사되었습니다.',
+            deleteSuccess: '링크가 성공적으로 삭제되었습니다.',
+            deleteConfirm: '정말로 이 단축 링크를 삭제하시겠습니까?\n삭제된 링크의 리다이렉트 및 접속 로그가 영구 소멸합니다.',
+            genericError: '서버 통신 중 오류가 발생했습니다.'
+        };
+
+        // 1. 키워드 검색 트리거
+        function triggerSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', '1'); // 검색 시 항상 1페이지로 강제 이동
+            if (query) {
+                url.searchParams.set('search', query);
+            } else {
+                url.searchParams.delete('search');
+            }
+            window.location.href = url.toString();
+        }
+
+        function handleSearchEnter(event) {
+            if (event.key === 'Enter') {
+                triggerSearch();
+            }
+        }
+
+        function clearSearch() {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('search');
+            url.searchParams.set('page', '1');
+            window.location.href = url.toString();
+        }
+
+        // 2. 단축 링크 삭제
+        function deleteLink(linkId) {
+            if (!confirm(translations.deleteConfirm)) {
+                return;
+            }
+
+            fetch(`/api/links/${linkId}?userId=${currentUserId}`, {
+                method: 'DELETE'
+            })
+            .then(res => res.json())
+            .then(json => {
+                if (json.success) {
+                    showToast(translations.deleteSuccess, 'success');
+                    const card = document.getElementById('card-' + linkId);
+                    if (card) {
+                        card.style.transition = 'all 0.4s ease';
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateX(50px)';
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 400);
+                    }
+                } else {
+                    showToast(json.error.message, 'error');
+                }
+            });
+        }
+
+        // 3. 복사 및 통계 제어
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.innerHTML;
+                button.innerHTML = '✔';
+                button.style.backgroundColor = 'var(--color-success)';
+                button.style.color = 'white';
+                showToast(translations.copySuccess, 'success');
+                
+                setTimeout(() => {
+                    button.innerHTML = originalText;
+                    button.style.backgroundColor = '';
+                    button.style.color = '';
+                }, 1500);
+            }).catch(err => {
+                showToast('Copy failed.', 'error');
+            });
+        }
+
+        function openStatsModal(linkId) {
+            fetch(`/api/links/${linkId}/stats?userId=${currentUserId}`)
+            .then(res => res.json())
+            .then(json => {
+                if (json.success) {
+                    const stats = json.data;
+                    renderStatsList('deviceStatsList', stats.devices);
+                    renderStatsList('osStatsList', stats.operatingSystems);
+                    renderStatsList('referrerStatsList', stats.referrers);
+                    
+                    const dailyContainer = document.getElementById('dailyStatsList');
+                    dailyContainer.innerHTML = '';
+                    if (stats.recentDailyClicks && stats.recentDailyClicks.length > 0) {
+                        stats.recentDailyClicks.forEach(item => {
+                            const row = document.createElement('div');
+                            row.className = 'stats-row';
+                            row.innerHTML = `<span class="stat-name">${item.date}</span><span class="stat-value">${item.clicks}</span>`;
+                            dailyContainer.appendChild(row);
+                        });
+                    } else {
+                        dailyContainer.innerHTML = `<div style="color:var(--text-dark); text-align:center;">No data</div>`;
+                    }
+                    toggleModal(true);
+                } else {
+                    showToast(json.error.message, 'error');
+                }
+            });
+        }
+
+        function renderStatsList(elementId, data) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+            const entries = Object.entries(data);
+            if (entries.length > 0) {
+                entries.sort((a,b) => b[1] - a[1]).forEach(([name, val]) => {
+                    const row = document.createElement('div');
+                    row.className = 'stats-row';
+                    row.innerHTML = `<span class="stat-name">${name}</span><span class="stat-value">${val}</span>`;
+                    container.appendChild(row);
+                });
+            } else {
+                container.innerHTML = `<div style="color:var(--text-dark); text-align:center;">No data</div>`;
+            }
+        }
+
+        function toggleModal(show) {
+            const modal = document.getElementById('statsModal');
+            if (show) {
+                modal.classList.add('active');
+            } else {
+                modal.classList.remove('active');
+            }
+        }
+
+        function closeStatsModal(event) {
+            if (event.target.id === 'statsModal') {
+                toggleModal(false);
+            }
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById('globalToast');
+            toast.className = 'toast toast-' + type;
+            toast.querySelector('.toast-message').innerText = message;
+            toast.querySelector('.toast-icon').innerText = type === 'success' ? '✔' : '⚠';
+            toast.classList.add('active');
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // 공통 다국어/유저 전환 함수
+        function switchLanguage(lang) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', lang);
+            window.location.href = url.toString();
+        }
+
+        function switchUser(userId) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('userId', userId);
+            window.location.href = url.toString();
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>

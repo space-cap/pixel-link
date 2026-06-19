@@ -16,6 +16,32 @@
     SELECT * FROM links WHERE user_id = #{userId} ORDER BY created_at DESC
   </select>
 
+  <select id="findByUserIdPaged" resultType="com.pixellink.model.Link">
+    SELECT * FROM links 
+    WHERE user_id = #{userId}
+    <if test="search != null and search != ''">
+      AND (
+        short_code LIKE '%' || #{search} || '%'
+        OR default_target_url LIKE '%' || #{search} || '%'
+        OR title LIKE '%' || #{search} || '%'
+      )
+    </if>
+    ORDER BY created_at DESC
+    LIMIT #{limit} OFFSET #{offset}
+  </select>
+
+  <select id="countByUserId" resultType="int">
+    SELECT COUNT(*) FROM links 
+    WHERE user_id = #{userId}
+    <if test="search != null and search != ''">
+      AND (
+        short_code LIKE '%' || #{search} || '%'
+        OR default_target_url LIKE '%' || #{search} || '%'
+        OR title LIKE '%' || #{search} || '%'
+      )
+    </if>
+  </select>
+
   <insert id="insert">
     INSERT INTO links (
       id, user_id, short_code, default_target_url, title, description, og_image, 

@@ -1,6 +1,10 @@
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
-    email TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE,
+    password TEXT,
+    name TEXT,
+    phone TEXT,
+    terms_agreed INTEGER DEFAULT 0,
     subscription_tier TEXT DEFAULT 'FREE',
     subscription_ends_at TEXT,
     role TEXT DEFAULT 'USER'

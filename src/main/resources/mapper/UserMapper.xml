@@ -13,8 +13,8 @@
   </select>
 
   <insert id="insert">
-    INSERT INTO users (id, email, subscription_tier, subscription_ends_at, role)
-    VALUES (#{id}, #{email}, #{subscriptionTier}, #{subscriptionEndsAt}, #{role})
+    INSERT INTO users (id, email, password, name, phone, terms_agreed, subscription_tier, subscription_ends_at, role)
+    VALUES (#{id}, #{email}, #{password}, #{name}, #{phone}, #{termsAgreed}, #{subscriptionTier}, #{subscriptionEndsAt}, #{role})
   </insert>
 
   <update id="updateRole">

@@ -16,7 +16,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 
@@ -35,6 +38,9 @@ public class DashboardController {
     @Autowired
     private HttpSession httpSession;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Value("${spring.profiles.active:local}")
     private String activeProfile;
 
@@ -47,6 +53,55 @@ public class DashboardController {
     public String showLogin(Model model) {
         model.addAttribute("activeProfile", activeProfile);
         return "login";
+    }
+
+    @GetMapping("/app/signup")
+    public String showSignup() {
+        return "signup";
+    }
+
+    @PostMapping("/app/signup/process")
+    public String processSignup(
+            @RequestParam("username") String username,
+            @RequestParam("password") String password,
+            @RequestParam("name") String name,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "termsAgreed", defaultValue = "false") boolean termsAgreed,
+            RedirectAttributes redirectAttributes) {
+
+        if (username == null || username.trim().isEmpty() ||
+            password == null || password.trim().isEmpty() ||
+            name == null || name.trim().isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "필수 입력 항목(이름, 아이디, 비밀번호)을 채워주세요.");
+            return "redirect:/app/signup";
+        }
+
+        if (!termsAgreed) {
+            redirectAttributes.addFlashAttribute("errorMessage", "이용약관 및 개인정보 처리방침에 동의해야 합니다.");
+            return "redirect:/app/signup";
+        }
+
+        User existing = userMapper.findById(username);
+        if (existing != null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "이미 사용 중인 아이디입니다.");
+            return "redirect:/app/signup";
+        }
+
+        User user = new User();
+        user.setId(username);
+        user.setName(name);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setEmail(email != null && !email.trim().isEmpty() ? email : null);
+        user.setPhone(phone != null && !phone.trim().isEmpty() ? phone : null);
+        user.setTermsAgreed(true);
+        user.setSubscriptionTier("FREE");
+        user.setRole("USER");
+
+        userMapper.insert(user);
+
+        redirectAttributes.addFlashAttribute("successMessage", "기업 회원가입이 완료되었습니다. 로그인해주세요.");
+        return "redirect:/app/login";
     }
 
 

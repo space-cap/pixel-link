@@ -60,7 +60,7 @@ public class WebSecurityConfig {
                     "/api/links/*/payments/confirm"
                 ).permitAll()
                 // 로그인 페이지는 누구나 접근 가능 (보호막에 걸리기 전에 통과)
-                .requestMatchers("/app/login").permitAll()
+                .requestMatchers("/app/login", "/app/login/mock").permitAll()
                 // 대시보드는 무조건 보호
                 .requestMatchers("/app", "/app/**").authenticated()
                 // 단축 주소 리다이렉트 패턴 허용 (알파뉴메릭 1자 이상)

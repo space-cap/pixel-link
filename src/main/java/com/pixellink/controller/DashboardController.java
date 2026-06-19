@@ -100,7 +100,7 @@ public class DashboardController {
 
         userMapper.insert(user);
 
-        redirectAttributes.addFlashAttribute("successMessage", "기업 회원가입이 완료되었습니다. 로그인해주세요.");
+        redirectAttributes.addFlashAttribute("successMessage", "회원가입이 완료되었습니다. 로그인해주세요.");
         return "redirect:/app/login";
     }
 

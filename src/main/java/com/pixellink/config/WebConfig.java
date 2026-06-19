@@ -1,5 +1,6 @@
 package com.pixellink.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.LocaleResolver;
@@ -11,7 +12,10 @@ import org.springframework.web.servlet.i18n.LocaleChangeInterceptor;
 import java.util.Locale;
 
 @Configuration
+@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
+
+    private final ApiKeyAuthInterceptor apiKeyAuthInterceptor;
 
     @Bean
     public LocaleResolver localeResolver() {
@@ -31,5 +35,8 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(localeChangeInterceptor());
+        registry.addInterceptor(apiKeyAuthInterceptor)
+                .addPathPatterns("/api/v1/links/**");
     }
 }
+

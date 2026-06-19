@@ -90,3 +90,15 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO system_settings (setting_key, setting_value, description)
 VALUES ('anon_link_expiry_days', '30', '비회원 단축 링크 만료 기간 (일)')
 ON CONFLICT (setting_key) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS api_keys (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) NOT NULL REFERENCES users(id),
+    api_key VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(100),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_api_keys_token ON api_keys(api_key);
+

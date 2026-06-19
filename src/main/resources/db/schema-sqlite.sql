@@ -90,3 +90,16 @@ VALUES ('anonymous', 'anonymous@pixel-link.com', 'FREE', NULL);
 -- 초기 설정값 등록
 INSERT OR IGNORE INTO system_settings (setting_key, setting_value, description)
 VALUES ('anon_link_expiry_days', '30', '비회원 단축 링크 만료 기간 (일)');
+
+CREATE TABLE IF NOT EXISTS api_keys (
+    id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    api_key TEXT UNIQUE NOT NULL,
+    name TEXT,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY(user_id) REFERENCES users(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_api_keys_token ON api_keys(api_key);
+

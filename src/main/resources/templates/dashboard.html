@@ -252,6 +252,34 @@
                     </div>
                 </div>
             </div>
+
+            <!-- API Key 관리 카드 섹션 -->
+            <div class="card" style="padding: 24px; margin-top: 24px;">
+                <h3 class="card-title" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; border: none; padding: 0;">
+                    <span>🔑 API 연동 및 개발자 키 관리</span>
+                    <button type="button" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--accent-secondary); margin: 0; border-radius: 6px;" onclick="openCreateApiKeyModal()">+ API Key 발급</button>
+                </h3>
+                
+                <div class="empty-state" id="apiKeyEmptyState" style="display: none; padding: 30px 10px;">
+                    <div class="empty-state-icon" style="font-size: 2rem;">🔑</div>
+                    <p style="font-size: 0.9rem; color: var(--text-dark); margin-top: 10px;">발급된 API Key가 존재하지 않습니다. 우측 상단 버튼을 통해 새로운 키를 생성해 보세요.</p>
+                </div>
+
+                <div class="table-responsive" id="apiKeyTableContainer" style="display: none; overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--card-border); text-align: left; font-size: 0.85rem; color: #64748b;">
+                                <th style="padding: 8px 12px;">Key 이름</th>
+                                <th style="padding: 8px 12px;">API Key 토큰</th>
+                                <th style="padding: 8px 12px; text-align: center;">동작</th>
+                            </tr>
+                        </thead>
+                        <tbody id="apiKeyListTableBody">
+                            <!-- 자바스크립트로 동적 로드 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </section>
 
     </main>
@@ -617,6 +645,105 @@
                 });
             }
         }
+
+        // 13. API Key 로드 및 렌더링
+        function loadApiKeys() {
+            fetch(`/api/dashboard/keys?userId=${currentUserId}`)
+            .then(res => res.json())
+            .then(keys => {
+                const emptyState = document.getElementById('apiKeyEmptyState');
+                const tableContainer = document.getElementById('apiKeyTableContainer');
+                const tbody = document.getElementById('apiKeyListTableBody');
+                
+                tbody.innerHTML = '';
+                if (!keys || keys.length === 0) {
+                    emptyState.style.display = 'block';
+                    tableContainer.style.display = 'none';
+                    return;
+                }
+                
+                emptyState.style.display = 'none';
+                tableContainer.style.display = 'block';
+                
+                keys.forEach(key => {
+                    const tr = document.createElement('tr');
+                    tr.style.borderBottom = '1px solid var(--card-border)';
+                    tr.style.fontSize = '0.9rem';
+                    
+                    const keyString = key.apiKey;
+                    const maskedKey = keyString.substring(0, 13) + '...' + keyString.substring(keyString.length - 4);
+                    
+                    tr.innerHTML = `
+                        <td style="padding: 12px; font-weight: bold; color: #334155;">${key.name || 'API Key'}</td>
+                        <td style="padding: 12px; font-family: monospace; color: #475569;">
+                            <span title="${keyString}">${maskedKey}</span>
+                            <button type="button" class="action-btn" style="padding: 2px 8px; font-size: 0.75rem; margin-left: 8px; border-radius: 4px; display: inline-flex; align-items: center; justify-content: center;" onclick="copyToClipboard('${keyString}', this)">복사</button>
+                        </td>
+                        <td style="padding: 12px; text-align: center;">
+                            <button type="button" class="action-btn btn-delete" style="padding: 4px 8px; font-size: 0.8rem; border-radius: 4px;" onclick="revokeApiKey('${key.id}')">무효화</button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(err => console.error('API Key 로드 오류:', err));
+        }
+
+        function openCreateApiKeyModal() {
+            const name = prompt('발급받을 API Key의 이름을 입력해주세요:', '외부 연동 API Key');
+            if (name === null) return;
+            
+            const keyName = name.trim() || 'API Key';
+            
+            fetch('/api/dashboard/keys', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    userId: currentUserId,
+                    name: keyName
+                })
+            })
+            .then(res => res.json())
+            .then(key => {
+                if (key && key.apiKey) {
+                    alert(`API Key가 성공적으로 발급되었습니다. 최초 1회만 제공되니 복사하여 안전한 곳에 보관해 주세요:\n\n${key.apiKey}`);
+                    loadApiKeys();
+                } else {
+                    showToast('API Key 생성에 실패했습니다.', 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showToast('API Key 생성 실패', 'error');
+            });
+        }
+
+        function revokeApiKey(id) {
+            if (confirm('이 API Key를 파기하시겠습니까? 파기 즉시 해당 키를 사용한 모든 단축 URL 생성 API 요청이 차단됩니다.')) {
+                fetch(`/api/dashboard/keys/${id}`, {
+                    method: 'DELETE'
+                })
+                .then(res => {
+                    if (res.status === 204) {
+                        showToast('API Key가 파기되었습니다.', 'success');
+                        loadApiKeys();
+                    } else {
+                        showToast('API Key 파기 실패', 'error');
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showToast('API Key 파기 실패', 'error');
+                });
+            }
+        }
+
+        // 페이지 로드 완료 시 API Key 목록 조회 트리거
+        document.addEventListener('DOMContentLoaded', () => {
+            loadApiKeys();
+        });
         /*]]>*/
 
     </script>

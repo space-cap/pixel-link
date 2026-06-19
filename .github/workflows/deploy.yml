@@ -29,7 +29,7 @@ jobs:
 
     - name: Build with Gradle
       # 무결성 검증을 위해 단위/통합 테스트를 통과한 결과물만 빌드하도록 빌드 시 자동 테스트를 포함시킵니다.
-      run: ./gradlew clean bootJar
+      run: ./gradlew clean bootJar -Dorg.gradle.java.home=$JAVA_HOME
 
     # SCP를 통해 오라클 클라우드 우분투 서버로 JAR 파일 전송
     - name: Transfer JAR file via SCP

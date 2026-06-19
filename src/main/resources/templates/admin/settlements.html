@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel-Link - 정산 및 출금 승인</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <style>
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            color: var(--text-light);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .admin-table th, .admin-table td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .admin-table th {
+            background: rgba(255, 255, 255, 0.06);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+        .admin-table tr:last-child td {
+            border-bottom: none;
+        }
+        .admin-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px 20px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .tab-btn.active {
+            color: #f59e0b;
+            border-bottom-color: #f59e0b;
+        }
+        .action-btn-green {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .action-btn-green:hover {
+            background: #059669;
+        }
+        .action-btn-red {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .action-btn-red:hover {
+            background: #dc2626;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .status-pending {
+            background: #f59e0b;
+            color: #ffffff;
+        }
+        .status-completed {
+            background: #10b981;
+            color: #ffffff;
+        }
+        .status-rejected {
+            background: #ef4444;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 상단 헤더 조각 통합 -->
+    <div th:replace="~{fragments :: header(currentUser=${user}, mockUsers=${@userMapper.findAll()}, currentUserId=${user.id})}"></div>
+
+    <!-- 메인 대시보드 레이아웃 -->
+    <div class="dashboard-container">
+        <!-- 사이드바 조각 통합 -->
+        <div th:replace="~{fragments :: sidebar(activeMenu='admin-settlements', currentUserId=${user.id}, currentUser=${user})}"></div>
+
+        <!-- 메인 콘텐츠 영역 -->
+        <div class="content-area">
+            <div class="content-wide">
+                
+                <h2 style="font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 5px; color: #f59e0b;">정산/출금 승인 관리</h2>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px;">유저들의 수익금 환급(출금) 신청을 심사하고 승인 또는 반려할 수 있습니다.</p>
+
+                <!-- 탭 메뉴 -->
+                <div style="display: flex; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 20px;">
+                    <button class="tab-btn active" id="tabPayoutsBtn" onclick="switchTab('payouts')">출금 신청 내역</button>
+                    <button class="tab-btn" id="tabAllBtn" onclick="switchTab('all')">전체 정산 적립 로그</button>
+                </div>
+
+                <!-- 1. 출금 신청 내역 테이블 -->
+                <div class="card" id="payoutsSection" style="padding: 30px;">
+                    <h3 class="card-title" style="margin-bottom: 20px; border: none; padding: 0;">📋 출금 신청 심사 대상</h3>
+
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>신청자 ID</th>
+                                <th>신청 금액 (원)</th>
+                                <th>송금 계좌 정보</th>
+                                <th>신청 일시</th>
+                                <th>상태</th>
+                                <th>출금 처리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- s.amount < 0 조건으로 출금 신청 내역만 필터링 출력 -->
+                            <tr th:each="s : ${settlements}" th:if="${s.amount < 0}">
+                                <td th:text="${s.userId}" style="font-family: monospace; font-size: 0.85rem; color: var(--text-muted);">google_123456</td>
+                                <!-- 음수 금액을 양수로 표시하기 위해 절대값 또는 - 기호 제거 적용 -->
+                                <td th:text="${#numbers.formatInteger(-s.amount, 0, 'COMMA')} + ' 원'" style="font-weight: 700; color: #ef4444;">10,000 원</td>
+                                <td>
+                                    <div style="font-size: 0.85rem;">
+                                        <span style="font-weight: bold; color: var(--text-light);" th:text="${s.bankName}">신한은행</span> | 
+                                        <span th:text="${s.accountNumber}">110-123-456789</span>
+                                    </div>
+                                    <div style="font-size: 0.75rem; color: var(--text-muted);" th:text="'예금주: ' + ${s.accountHolder}">예금주: 홍길동</div>
+                                </td>
+                                <td th:text="${s.settledAt}">2026-06-19 19:15:00</td>
+                                <td>
+                                    <span th:if="${s.status == 'PENDING'}" class="status-badge status-pending">대기중</span>
+                                    <span th:if="${s.status == 'COMPLETED'}" class="status-badge status-completed">지급완료</span>
+                                    <span th:if="${s.status == 'REJECTED'}" class="status-badge status-rejected">반려됨</span>
+                                </td>
+                                <td>
+                                    <div th:if="${s.status == 'PENDING'}" style="display: flex; gap: 8px;">
+                                        <button class="action-btn-green" th:onclick="processSettlement([[${s.id}]], 'approve')">송금완료</button>
+                                        <button class="action-btn-red" th:onclick="processSettlement([[${s.id}]], 'reject')">반려</button>
+                                    </div>
+                                    <span th:if="${s.status != 'PENDING'}" style="font-size: 0.8rem; color: var(--text-muted);">-</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 2. 전체 정산 적립 로그 테이블 -->
+                <div class="card" id="allSection" style="padding: 30px; display: none;">
+                    <h3 class="card-title" style="margin-bottom: 20px; border: none; padding: 0;">📜 전체 정산 로그</h3>
+
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>정산 ID</th>
+                                <th>대상자 ID</th>
+                                <th>구분</th>
+                                <th>금액 (원)</th>
+                                <th>상태</th>
+                                <th>일시</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="s : ${settlements}">
+                                <td th:text="${s.id}" style="font-family: monospace; font-size: 0.8rem; color: var(--text-muted);">id</td>
+                                <td th:text="${s.userId}" style="font-family: monospace; font-size: 0.85rem;">google_123456</td>
+                                <td>
+                                    <span th:if="${s.amount > 0}" style="color: #10b981; font-weight: 700;">🟢 광고 수익 적립</span>
+                                    <span th:if="${s.amount < 0}" style="color: #ef4444; font-weight: 700;">🔴 수익금 환급 (출금)</span>
+                                </td>
+                                <td th:text="${#numbers.formatInteger(s.amount, 0, 'COMMA')}" style="font-weight: 700;">0</td>
+                                <td>
+                                    <span th:if="${s.status == 'PENDING'}" class="status-badge status-pending" th:text="${s.amount < 0 ? '출금대기' : '적립대기'}">대기</span>
+                                    <span th:if="${s.status == 'COMPLETED'}" class="status-badge status-completed" th:text="${s.amount < 0 ? '지급완료' : '지급완료'}">완료</span>
+                                    <span th:if="${s.status == 'REJECTED'}" class="status-badge status-rejected">반려됨</span>
+                                </td>
+                                <td th:text="${s.settledAt}">2026-06-19</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 다국어 변경 및 계정 전환 스크립트 대응 -->
+    <script>
+        function switchLanguage(lang) {
+            window.location.href = window.location.pathname + "?lang=" + lang;
+        }
+        function switchUser(userId) {
+            window.location.href = window.location.pathname + "?userId=" + userId;
+        }
+
+        // 탭 전환 기능
+        function switchTab(tab) {
+            const tabPayoutsBtn = document.getElementById('tabPayoutsBtn');
+            const tabAllBtn = document.getElementById('tabAllBtn');
+            const payoutsSection = document.getElementById('payoutsSection');
+            const allSection = document.getElementById('allSection');
+
+            if (tab === 'payouts') {
+                tabPayoutsBtn.classList.add('active');
+                tabAllBtn.classList.remove('active');
+                payoutsSection.style.display = 'block';
+                allSection.style.display = 'none';
+            } else {
+                tabPayoutsBtn.classList.remove('active');
+                tabAllBtn.classList.add('active');
+                payoutsSection.style.display = 'none';
+                allSection.style.display = 'block';
+            }
+        }
+
+        // 승인 및 반려 비동기 API 처리
+        function processSettlement(settlementId, action) {
+            const confirmMsg = action === 'approve' 
+                ? '해당 출금 계좌로 수동 이체를 완료하셨습니까?\n확인 시 출금 상태가 [지급 완료]로 변경됩니다.' 
+                : '이 출금 신청을 반려하시겠습니까?\n반려 시 출금 신청 상태가 [반려됨]으로 변경되며, 신청자의 출금 가능 잔액이 즉시 복원됩니다.';
+            
+            if (confirm(confirmMsg)) {
+                fetch(`/app/admin/settlements/${settlementId}/${action}`, {
+                    method: 'POST'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert(action === 'approve' ? '출금이 정상적으로 승인 처리되었습니다.' : '출금 신청이 반려 처리되었습니다.');
+                        window.location.reload();
+                    } else {
+                        return response.text().then(text => { throw new Error(text); });
+                    }
+                })
+                .catch(error => {
+                    alert('정산 처리 중 오류가 발생했습니다: ' + error.message);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

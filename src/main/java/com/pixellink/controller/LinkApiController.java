@@ -175,13 +175,16 @@ public class LinkApiController {
 
     @PostMapping("/withdraw")
     public ResponseEntity<Map<String, Object>> withdrawSettlements(
+            @RequestParam("bankName") String bankName,
+            @RequestParam("accountNumber") String accountNumber,
+            @RequestParam("accountHolder") String accountHolder,
             @AuthenticationPrincipal SessionUser sessionUser) {
         
         if (sessionUser == null) {
             throw new SecurityException("로그인이 필요한 서비스입니다.");
         }
         String userId = sessionUser.getId();
-        linkService.withdrawSettlements(userId);
+        linkService.withdrawSettlements(userId, bankName, accountNumber, accountHolder);
 
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);

@@ -103,6 +103,7 @@ public class OAuthAttributes {
         user.setEmail(email != null ? email : idValue + "@pixellink.mock");
         user.setSubscriptionTier("FREE");
         user.setSubscriptionEndsAt(null);
+        user.setRole("USER");
         return user;
     }
 }

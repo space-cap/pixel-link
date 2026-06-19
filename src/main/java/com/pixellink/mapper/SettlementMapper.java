@@ -8,6 +8,7 @@ import java.util.List;
 @Mapper
 public interface SettlementMapper {
     List<Settlement> findByUserId(String userId);
+    List<Settlement> findAll();
     void insert(Settlement settlement);
     void updateStatus(@Param("id") String id, @Param("status") String status);
     void updateStatusByUserId(@Param("userId") String userId, @Param("status") String status);

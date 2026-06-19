@@ -5,15 +5,21 @@
 <mapper namespace="com.pixellink.mapper.SettlementMapper">
 
     <select id="findByUserId" resultType="com.pixellink.model.Settlement">
-        SELECT id, user_id, amount, status, settled_at
+        SELECT id, user_id, amount, status, settled_at, bank_name, account_number, account_holder
         FROM settlements
         WHERE user_id = #{userId}
         ORDER BY settled_at DESC
     </select>
 
+    <select id="findAll" resultType="com.pixellink.model.Settlement">
+        SELECT id, user_id, amount, status, settled_at, bank_name, account_number, account_holder
+        FROM settlements
+        ORDER BY settled_at DESC
+    </select>
+
     <insert id="insert">
-        INSERT INTO settlements (id, user_id, amount, status)
-        VALUES (#{id}, #{userId}, #{amount}, #{status})
+        INSERT INTO settlements (id, user_id, amount, status, bank_name, account_number, account_holder)
+        VALUES (#{id}, #{userId}, #{amount}, #{status}, #{bankName}, #{accountNumber}, #{accountHolder})
     </insert>
 
     <update id="updateStatus">
@@ -32,7 +38,7 @@
     <select id="sumAmountByUserId" resultType="java.lang.Integer">
         SELECT COALESCE(SUM(amount), 0)
         FROM settlements
-        WHERE user_id = #{userId}
+        WHERE user_id = #{userId} AND status != 'REJECTED'
     </select>
 
 </mapper>

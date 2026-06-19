@@ -57,7 +57,10 @@ CREATE TABLE IF NOT EXISTS settlements (
     user_id VARCHAR(50) NOT NULL REFERENCES users(id),
     amount INTEGER NOT NULL,
     status VARCHAR(50) NOT NULL,
-    settled_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    settled_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    bank_name VARCHAR(100),
+    account_number VARCHAR(100),
+    account_holder VARCHAR(100)
 );
 
 CREATE TABLE IF NOT EXISTS payments (

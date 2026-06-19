@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel-Link - 관리자 콘솔</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <style>
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            color: var(--text-light);
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .admin-table th, .admin-table td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .admin-table th {
+            background: rgba(255, 255, 255, 0.06);
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+        .admin-table tr:last-child td {
+            border-bottom: none;
+        }
+        .admin-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .role-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .role-admin {
+            background: #d97706;
+            color: #ffffff;
+        }
+        .role-user {
+            background: #3b82f6;
+            color: #ffffff;
+        }
+        .tier-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        .tier-premium {
+            background: #8b5cf6;
+            color: #ffffff;
+        }
+        .tier-free {
+            background: #6b7280;
+            color: #ffffff;
+        }
+        .tier-starter {
+            background: #10b981;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 상단 헤더 조각 통합 (목록에 모든 가입 유저 바인딩) -->
+    <div th:replace="~{fragments :: header(currentUser=${user}, mockUsers=${@userMapper.findAll()}, currentUserId=${user.id})}"></div>
+
+    <!-- 메인 대시보드 레이아웃 -->
+    <div class="dashboard-container">
+        <!-- 사이드바 조각 통합 -->
+        <div th:replace="~{fragments :: sidebar(activeMenu='admin-users', currentUserId=${user.id}, currentUser=${user})}"></div>
+
+        <!-- 메인 콘텐츠 영역 -->
+        <div class="content-area">
+            <div class="content-wide">
+                
+                <h2 style="font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 5px; color: #f59e0b;">관리자 시스템 콘솔</h2>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 24px;">Pixel-Link 서비스에 가입한 모든 전체 회원 현황을 한눈에 조회하고 관리할 수 있습니다.</p>
+
+                <!-- 회원 현황 카드 섹션 -->
+                <div class="card" style="padding: 30px;">
+                    <h3 class="card-title" style="margin-bottom: 20px; border: none; padding: 0; display: flex; align-items: center; gap: 8px;">
+                        <span>가입 회원 목록</span>
+                        <span class="user-tier-badge" th:text="${users.size()} + ' 명'" style="background: rgba(255,255,255,0.1); margin-left: 5px; padding: 2px 8px; font-size: 0.8rem;">0명</span>
+                    </h3>
+
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>유저 식별 ID</th>
+                                <th>이메일 주소</th>
+                                <th>구독 등급 (Tier)</th>
+                                <th>구독 만료 기한</th>
+                                <th>접근 권한 (Role)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="u : ${users}">
+                                <td th:text="${u.id}" style="font-family: monospace; font-size: 0.85rem; color: var(--text-muted);">google_123456</td>
+                                <td th:text="${u.email}">user@example.com</td>
+                                <td>
+                                    <span th:text="${u.subscriptionTier}" th:class="'tier-badge ' + (${u.subscriptionTier == 'PREMIUM' ? 'tier-premium' : (u.subscriptionTier == 'STARTER' ? 'tier-starter' : 'tier-free')})">FREE</span>
+                                </td>
+                                <td th:text="${u.subscriptionEndsAt != null ? u.subscriptionEndsAt : '-'}">-</td>
+                                <td>
+                                    <select class="select-user" 
+                                            style="margin: 0; padding: 4px 8px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.05); color: var(--text-light); border: 1px solid rgba(255,255,255,0.1); font-size: 0.8rem; font-weight: 600;"
+                                            th:disabled="${u.id == user.id}"
+                                            th:onchange="updateUserRole([[${u.id}]], this.value)">
+                                        <option value="USER" th:selected="${u.role == 'USER'}">USER</option>
+                                        <option value="ADMIN" th:selected="${u.role == 'ADMIN'}">ADMIN</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 다국어 변경 및 계정 전환 스크립트 대응 -->
+    <script>
+        function switchLanguage(lang) {
+            window.location.href = window.location.pathname + "?lang=" + lang;
+        }
+        function switchUser(userId) {
+            window.location.href = window.location.pathname + "?userId=" + userId;
+        }
+        function updateUserRole(userId, newRole) {
+            const formData = new FormData();
+            formData.append('id', userId);
+            formData.append('role', newRole);
+
+            fetch('/app/admin/users/update-role', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    console.log('Role updated successfully');
+                } else {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+            })
+            .catch(error => {
+                alert('권한 변경 중 오류가 발생했습니다: ' + error.message);
+                window.location.reload();
+            });
+        }
+    </script>
+</body>
+</html>

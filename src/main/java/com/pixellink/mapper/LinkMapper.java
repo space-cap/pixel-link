@@ -9,6 +9,7 @@ import java.util.List;
 public interface LinkMapper {
     Link findById(@Param("id") String id);
     Link findByShortCode(@Param("shortCode") String shortCode);
+    List<Link> findAll();
     List<Link> findByUserId(@Param("userId") String userId);
     List<Link> findByUserIdPaged(@Param("userId") String userId, @Param("search") String search, @Param("limit") int limit, @Param("offset") int offset);
     int countByUserId(@Param("userId") String userId, @Param("search") String search);

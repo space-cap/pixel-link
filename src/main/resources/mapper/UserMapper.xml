@@ -8,9 +8,19 @@
     SELECT * FROM users WHERE id = #{id}
   </select>
 
+  <select id="findAll" resultType="com.pixellink.model.User">
+    SELECT * FROM users
+  </select>
+
   <insert id="insert">
-    INSERT INTO users (id, email, subscription_tier, subscription_ends_at)
-    VALUES (#{id}, #{email}, #{subscriptionTier}, #{subscriptionEndsAt})
+    INSERT INTO users (id, email, subscription_tier, subscription_ends_at, role)
+    VALUES (#{id}, #{email}, #{subscriptionTier}, #{subscriptionEndsAt}, #{role})
   </insert>
+
+  <update id="updateRole">
+    UPDATE users
+    SET role = #{role}
+    WHERE id = #{id}
+  </update>
 
 </mapper>

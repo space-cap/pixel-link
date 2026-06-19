@@ -33,7 +33,8 @@
 
     <!-- 2. 공통 사이드바 조각 -->
     <aside th:fragment="sidebar(activeMenu, currentUserId, currentUser)" class="sidebar">
-        <div class="sidebar-menu">
+        <!-- 2-1. 일반 사용자 메뉴 리스트 (어드민 모드가 아닐 때) -->
+        <div class="sidebar-menu" th:if="${!#strings.startsWith(activeMenu, 'admin')}">
             <a th:href="@{/app/dashboard(userId=${currentUserId})}" 
                th:class="${activeMenu == 'dashboard'} ? 'menu-item active' : 'menu-item'">
                 <span class="menu-icon">
@@ -69,11 +70,58 @@
                 </span>
                 <span th:text="#{menu.developer}">개발자 센터</span>
             </a>
+            <a th:href="@{/app/admin/dashboard(userId=${currentUserId})}" 
+               th:if="${currentUser != null && currentUser.role == 'ADMIN'}"
+               th:class="${activeMenu == 'admin'} ? 'menu-item active' : 'menu-item'">
+                <span class="menu-icon" style="color: #f59e0b;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </span>
+                <span style="color: #f59e0b;" th:text="#{menu.admin}">관리자 콘솔</span>
+            </a>
         </div>
-        
-        <!-- 하단 로그인 회원 카드 -->
+
+        <!-- 2-2. 관리자 전용 메뉴 리스트 (어드민 모드일 때) -->
+        <div class="sidebar-menu" th:if="${#strings.startsWith(activeMenu, 'admin')}">
+            <a th:href="@{/app/admin/dashboard(userId=${currentUserId})}" 
+               th:class="${activeMenu == 'admin-dashboard'} ? 'menu-item active' : 'menu-item'">
+                <span class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+                </span>
+                <span th:text="#{menu.admin_home}">어드민 홈</span>
+            </a>
+            <a th:href="@{/app/admin/users(userId=${currentUserId})}" 
+               th:class="${activeMenu == 'admin-users'} ? 'menu-item active' : 'menu-item'">
+                <span class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </span>
+                <span th:text="#{menu.admin_users}">회원 관리</span>
+            </a>
+            <a th:href="@{/app/admin/settlements(userId=${currentUserId})}" 
+               th:class="${activeMenu == 'admin-settlements'} ? 'menu-item active' : 'menu-item'">
+                <span class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </span>
+                <span th:text="#{menu.admin_settlements}">정산/출금 승인</span>
+            </a>
+            <a href="#" class="menu-item" style="opacity: 0.5; pointer-events: none;">
+                <span class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </span>
+                <span th:text="#{menu.admin_settings}">시스템 설정</span>
+            </a>
+            <a th:href="@{/app/dashboard(userId=${currentUserId})}" class="menu-item" style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 15px;">
+                <span class="menu-icon" style="color: #3b82f6;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </span>
+                <span style="color: #3b82f6;" th:text="#{menu.admin_exit}">서비스로 돌아가기</span>
+            </a>
+        </div>
+
+        <!-- 하단 로그인 회원 카드 (이모지 제거, 모노톤 SVG 아바타 대체) -->
         <div class="sidebar-user-card" th:if="${currentUser != null}">
-            <div class="user-avatar">👤</div>
+            <div class="user-avatar" style="display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.1); border-radius: 50%; width: 28px; height: 28px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
             <div class="user-info-box" style="flex: 1; min-width: 0;">
                 <div class="user-email" th:text="${currentUser.email}" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">user@pixel-link.com</div>
                 <div class="user-tier-badge" th:text="${currentUser.subscriptionTier}">FREE</div>

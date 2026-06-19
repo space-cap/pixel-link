@@ -23,4 +23,10 @@
         ORDER BY created_at DESC
     </select>
 
+    <select id="findAll" resultType="com.pixellink.model.Payment">
+        SELECT id, link_id, ip_hash, amount, created_at
+        FROM payments
+        ORDER BY created_at DESC
+    </select>
+
 </mapper>

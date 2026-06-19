@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel-Link - 관리자 대시보드</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <style>
+        .admin-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+        .admin-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 180px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+        .admin-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .admin-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(245, 158, 11, 0.3);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(245, 158, 11, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .admin-card:hover::before {
+            opacity: 1;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            z-index: 1;
+        }
+        .card-title-text {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: -0.01em;
+        }
+        .card-icon {
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            transition: all 0.3s ease;
+        }
+        .admin-card:hover .card-icon {
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+        }
+        .card-value {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text-light);
+            line-height: 1;
+            z-index: 1;
+        }
+        .card-subtext {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 8px;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 상단 헤더 조각 통합 -->
+    <div th:replace="~{fragments :: header(currentUser=${user}, mockUsers=${@userMapper.findAll()}, currentUserId=${user.id})}"></div>
+
+    <!-- 메인 대시보드 레이아웃 -->
+    <div class="dashboard-container">
+        <!-- 사이드바 조각 통합 -->
+        <div th:replace="~{fragments :: sidebar(activeMenu='admin-dashboard', currentUserId=${user.id}, currentUser=${user})}"></div>
+
+        <!-- 메인 콘텐츠 영역 -->
+        <div class="content-area">
+            <div class="content-wide">
+                
+                <h2 style="font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 5px; color: #f59e0b;">System Console</h2>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 30px;">Pixel-Link 서비스 운영 현황 지표입니다.</p>
+
+                <!-- 4대 요약 지표 카드 그리드 -->
+                <div class="admin-grid">
+                    
+                    <!-- 1. 전체 가입 회원 수 -->
+                    <div class="admin-card" th:data-url="@{/app/admin/users(userId=${user.id})}" onclick="location.href=this.getAttribute('data-url')">
+                        <div class="card-header">
+                            <span class="card-title-text" th:text="#{menu.admin_users}">회원 관리</span>
+                            <div class="card-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="card-value" th:text="${totalUsersCount} + '명'">0명</div>
+                            <div class="card-subtext">
+                                <span th:text="'Premium ' + ${premiumUsersCount} + ' / Free ' + ${freeUsersCount}">Premium 0 / Free 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2. 전체 생성 링크 수 & 클릭 합계 -->
+                    <div class="admin-card" style="cursor: default;">
+                        <div class="card-header">
+                            <span class="card-title-text">단축 링크 현황</span>
+                            <div class="card-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="card-value" th:text="${totalLinksCount} + '개'">0개</div>
+                            <div class="card-subtext">
+                                <span th:text="'누적 ' + ${totalClicksSum} + ' 클릭'">누적 0 클릭</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. 정산 신청 대기 건수 -->
+                    <div class="admin-card" th:data-url="@{/app/admin/settlements(userId=${user.id})}" onclick="location.href=this.getAttribute('data-url')">
+                        <div class="card-header">
+                            <span class="card-title-text" th:text="#{menu.admin_settlements}">정산/출금 승인</span>
+                            <div class="card-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="card-value" th:text="${pendingSettlementsCount} + '건'">0건</div>
+                            <div class="card-subtext">
+                                <span th:text="'총 ' + ${pendingSettlementsAmount} + '원 PENDING'">총 0원 PENDING</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. 누적 결제 매출 -->
+                    <div class="admin-card" style="cursor: default;">
+                        <div class="card-header">
+                            <span class="card-title-text">누적 매출액</span>
+                            <div class="card-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="card-value" th:text="${totalPaymentsAmount} + '원'">0원</div>
+                            <div class="card-subtext">
+                                <span>실시간 누적 결제 완료 기준</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 다국어 변경 및 계정 전환 스크립트 대응 -->
+    <script>
+        function switchLanguage(lang) {
+            window.location.href = window.location.pathname + "?lang=" + lang;
+        }
+        function switchUser(userId) {
+            window.location.href = window.location.pathname + "?userId=" + userId;
+        }
+    </script>
+</body>
+</html>

@@ -66,6 +66,7 @@ public class DashboardController {
             user.setId(userId);
             user.setEmail(mockEmail);
             user.setSubscriptionTier("FREE");
+            user.setRole("USER");
             userMapper.insert(user);
         }
 

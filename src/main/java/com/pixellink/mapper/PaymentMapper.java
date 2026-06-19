@@ -9,5 +9,6 @@ import java.util.List;
 public interface PaymentMapper {
     Payment findByLinkIdAndIpHash(@Param("linkId") String linkId, @Param("ipHash") String ipHash);
     void insert(Payment payment);
+    List<Payment> findAll();
     List<Payment> findByLinkId(String linkId);
 }

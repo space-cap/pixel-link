@@ -61,6 +61,8 @@ public class WebSecurityConfig {
                 ).permitAll()
                 // 로그인 페이지는 누구나 접근 가능 (보호막에 걸리기 전에 통과)
                 .requestMatchers("/app/login", "/app/login/mock").permitAll()
+                // 관리자 경로는 ADMIN 권한 필요
+                .requestMatchers("/app/admin/**").hasRole("ADMIN")
                 // 대시보드는 무조건 보호
                 .requestMatchers("/app", "/app/**").authenticated()
                 // 단축 주소 리다이렉트 패턴 허용 (알파뉴메릭 1자 이상)
@@ -103,16 +105,19 @@ public class WebSecurityConfig {
                     httpSession.setAttribute("user", sessionUser);
 
                     // Security Context 인증 강제 주입
-                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
+                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole());
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             sessionUser, null, Collections.singletonList(authority));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
+                } else {
+                    httpSession.removeAttribute("user");
+                    SecurityContextHolder.clearContext();
                 }
             } else {
                 // 파라미터가 없더라도 세션에 "user"가 존재한다면 시큐리티 컨텍스트에 바인딩 유지
                 SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
                 if (sessionUser != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
+                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + sessionUser.getRole());
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             sessionUser, null, Collections.singletonList(authority));
                     SecurityContextHolder.getContext().setAuthentication(authentication);

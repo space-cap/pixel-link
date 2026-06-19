@@ -311,19 +311,22 @@ public class LinkService {
     }
 
     @Transactional
-    public void withdrawSettlements(String userId) {
+    public void withdrawSettlements(String userId, String bankName, String accountNumber, String accountHolder) {
         Integer balance = settlementMapper.sumAmountByUserId(userId);
         if (balance == null || balance < 10000) {
             throw new IllegalStateException("출금 신청 가능한 정산금이 부족합니다. (최소 10,000원)");
         }
         settlementMapper.updateStatusByUserId(userId, "COMPLETED");
 
-        // 잔액 차감을 위한 역정산 거래 기입
+        // 잔액 차감을 위한 역정산 거래 기입 (관리자 승인 대기 상태 PENDING)
         com.pixellink.model.Settlement balanceReset = new com.pixellink.model.Settlement();
         balanceReset.setId(UUID.randomUUID().toString());
         balanceReset.setUserId(userId);
         balanceReset.setAmount(-balance);
-        balanceReset.setStatus("COMPLETED");
+        balanceReset.setStatus("PENDING");
+        balanceReset.setBankName(bankName);
+        balanceReset.setAccountNumber(accountNumber);
+        balanceReset.setAccountHolder(accountHolder);
         settlementMapper.insert(balanceReset);
     }
 

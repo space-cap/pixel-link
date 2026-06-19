@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     subscription_tier TEXT DEFAULT 'FREE',
-    subscription_ends_at TEXT
+    subscription_ends_at TEXT,
+    role TEXT DEFAULT 'USER'
 );
 
 CREATE TABLE IF NOT EXISTS links (
@@ -61,6 +62,9 @@ CREATE TABLE IF NOT EXISTS settlements (
     amount INTEGER NOT NULL,
     status TEXT NOT NULL,
     settled_at TEXT DEFAULT (datetime('now', 'localtime')),
+    bank_name TEXT,
+    account_number TEXT,
+    account_holder TEXT,
     FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
@@ -75,17 +79,17 @@ CREATE TABLE IF NOT EXISTS payments (
 
 
 -- 초기 마스터 회원 등록 (1단계 SaaS 구독 기능 테스트를 위한 기본 계정)
-INSERT OR IGNORE INTO users (id, email, subscription_tier, subscription_ends_at)
-VALUES ('admin', 'admin@pixel-link.com', 'PREMIUM', '2030-12-31T23:59:59');
+INSERT OR IGNORE INTO users (id, email, subscription_tier, subscription_ends_at, role)
+VALUES ('admin', 'admin@pixel-link.com', 'PREMIUM', '2030-12-31T23:59:59', 'ADMIN');
 
-INSERT OR IGNORE INTO users (id, email, subscription_tier, subscription_ends_at)
-VALUES ('test-user', 'user@pixel-link.com', 'STARTER', '2030-12-31T23:59:59');
+INSERT OR IGNORE INTO users (id, email, subscription_tier, subscription_ends_at, role)
+VALUES ('test-user', 'user@pixel-link.com', 'STARTER', '2030-12-31T23:59:59', 'USER');
 
-INSERT OR IGNORE INTO users (id, email, subscription_tier, subscription_ends_at)
-VALUES ('free-user', 'free@pixel-link.com', 'FREE', NULL);
+INSERT OR IGNORE INTO users (id, email, subscription_tier, subscription_ends_at, role)
+VALUES ('free-user', 'free@pixel-link.com', 'FREE', NULL, 'USER');
 
-INSERT OR IGNORE INTO users (id, email, subscription_tier, subscription_ends_at)
-VALUES ('anonymous', 'anonymous@pixel-link.com', 'FREE', NULL);
+INSERT OR IGNORE INTO users (id, email, subscription_tier, subscription_ends_at, role)
+VALUES ('anonymous', 'anonymous@pixel-link.com', 'FREE', NULL, 'USER');
 
 -- 초기 설정값 등록
 INSERT OR IGNORE INTO system_settings (setting_key, setting_value, description)

@@ -84,6 +84,43 @@
         </div>
     </div>
 
+    <!-- 출금 신청 모달 (Payout Request Modal) -->
+    <div class="modal-overlay" id="payoutModal" onclick="closePayoutModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 480px; background: #0f172a; border: 1px solid rgba(255,255,255,0.08); color: var(--text-light);">
+            <button class="close-btn" onclick="togglePayoutModal(false)" style="position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 1.5rem; color: var(--text-muted); cursor: pointer;">&times;</button>
+            <h3 class="card-title" style="margin-bottom: 20px; border: none; padding: 0; color: #10b981; font-family: 'Outfit', sans-serif;">출금 계좌 정보 입력</h3>
+            
+            <form id="payoutForm" onsubmit="submitPayout(event)">
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="bankName" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">은행명</label>
+                    <select id="bankName" required style="width: 100%; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--text-light); font-size: 0.9rem;">
+                        <option value="" disabled selected>은행을 선택하세요</option>
+                        <option value="국민은행">KB국민은행</option>
+                        <option value="신한은행">신한은행</option>
+                        <option value="우리은행">우리은행</option>
+                        <option value="하나은행">하나은행</option>
+                        <option value="농협은행">NH농협은행</option>
+                        <option value="기업은행">IBK기업은행</option>
+                        <option value="카카오뱅크">카카오뱅크</option>
+                        <option value="토스뱅크">토스뱅크</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="accountNumber" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">계좌번호 (- 제외)</label>
+                    <input type="text" id="accountNumber" placeholder="1234567890" required pattern="[0-9]+" style="width: 100%; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--text-light); font-size: 0.9rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 24px;">
+                    <label for="accountHolder" style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 6px;">예금주명</label>
+                    <input type="text" id="accountHolder" placeholder="홍길동" required style="width: 100%; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--text-light); font-size: 0.9rem;">
+                </div>
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button type="button" class="btn" onclick="togglePayoutModal(false)" style="margin: 0; padding: 10px 20px; font-size: 0.9rem; font-weight: bold; width: auto; background: #475569;">취소</button>
+                    <button type="submit" class="btn" style="margin: 0; padding: 10px 20px; font-size: 0.9rem; font-weight: bold; width: auto; background: #10b981;">신청 완료</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- 토스트 컴포넌트 -->
     <div class="toast" id="globalToast">
         <span class="toast-icon"></span>
@@ -94,28 +131,65 @@
         /*<![CDATA[*/
         const currentUserId = /*[[${currentUserId}]]*/ 'test-user';
 
-        // 출금 신청 트리거
+        // 출금 신청 모달 제어
         function requestPayout() {
-            if (confirm('현재 출금 가능한 모든 적립 금액을 출금 신청하시겠습니까?\n출금 신청 시 영업일 기준 3일 이내 지정된 정보로 정산 처리됩니다.')) {
-                fetch(`/api/links/withdraw?userId=${currentUserId}`, {
-                    method: 'POST'
-                })
-                .then(res => res.json())
-                .then(json => {
-                    if (json.success) {
-                        showToast('성공적으로 출금 신청이 등록되었습니다.', 'success');
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1000);
-                    } else {
-                        showToast(json.error.message, 'error');
-                    }
-                })
-                .catch(err => {
-                    console.error(err);
-                    showToast('출금 요청 중 통신 오류가 발생했습니다.', 'error');
-                });
+            togglePayoutModal(true);
+        }
+
+        function togglePayoutModal(show) {
+            const modal = document.getElementById('payoutModal');
+            if (show) {
+                modal.classList.add('active');
+            } else {
+                modal.classList.remove('active');
+                document.getElementById('payoutForm').reset();
             }
+        }
+
+        function closePayoutModal(event) {
+            if (event.target.id === 'payoutModal') {
+                togglePayoutModal(false);
+            }
+        }
+
+        // 출금 신청 비동기 전송
+        function submitPayout(event) {
+            event.preventDefault();
+            
+            const bankName = document.getElementById('bankName').value;
+            const accountNumber = document.getElementById('accountNumber').value;
+            const accountHolder = document.getElementById('accountHolder').value;
+
+            if (!bankName || !accountNumber || !accountHolder) {
+                showToast('모든 정보를 정확히 입력해주세요.', 'error');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('bankName', bankName);
+            formData.append('accountNumber', accountNumber);
+            formData.append('accountHolder', accountHolder);
+
+            fetch(`/api/links/withdraw?userId=${currentUserId}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(res => res.json())
+            .then(json => {
+                if (json.success) {
+                    showToast('성공적으로 출금 신청이 등록되었습니다.', 'success');
+                    togglePayoutModal(false);
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    showToast(json.error.message, 'error');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                showToast('출금 요청 중 통신 오류가 발생했습니다.', 'error');
+            });
         }
 
         // 토스트 제어

@@ -451,6 +451,45 @@
             align-items: center;
             gap: 12px;
         }
+
+        .btn-login-header {
+            text-decoration: none;
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.2s;
+        }
+
+        .btn-login-header:hover {
+            color: #0f172a;
+            background-color: #f1f5f9;
+        }
+
+        .btn-signup-header {
+            text-decoration: none;
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: #2563eb;
+            color: white !important;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+
+        .btn-signup-header:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn-signup-header:active {
+            transform: translateY(0);
+        }
     </style>
 </head>
 <body>
@@ -471,7 +510,16 @@
                 <option value="ja" th:selected="${#locale.language == 'ja'}">日本語</option>
             </select>
 
-            <a th:href="@{/app/dashboard}" class="btn-primary" style="text-decoration: none; display: inline-block; padding: 8px 16px; border-radius: 8px; font-size: 0.9rem;" th:text="#{dashboard.title}">대시보드 보기</a>
+            <!-- 비로그인 상태: 로그인, 회원가입 -->
+            <th:block th:if="${session.user == null}">
+                <a th:href="@{/app/login}" class="btn-login-header" th:text="#{landing.btn_login}">로그인</a>
+                <a th:href="@{/app/signup}" class="btn-signup-header" th:text="#{landing.btn_signup}">회원가입</a>
+            </th:block>
+            <!-- 로그인 상태: 대시보드 보기, 로그아웃 -->
+            <th:block th:if="${session.user != null}">
+                <a th:href="@{/app/dashboard}" class="btn-signup-header" th:text="#{dashboard.title}">대시보드 보기</a>
+                <a th:href="@{/logout}" class="btn-login-header" th:text="#{landing.btn_logout}">로그아웃</a>
+            </th:block>
         </div>
     </header>
 

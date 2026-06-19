@@ -33,6 +33,11 @@ public class DashboardController {
         return "landing";
     }
 
+    @GetMapping("/login")
+    public String showLogin() {
+        return "login";
+    }
+
     @GetMapping("/app/dashboard")
     public String showDashboard(
             @AuthenticationPrincipal SessionUser sessionUser,

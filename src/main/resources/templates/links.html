@@ -77,18 +77,18 @@
                     <!-- 원형 디자인 페이지네이션 -->
                     <div class="pagination-container" th:if="${totalPages > 1}">
                         <!-- 이전 페이지 -->
-                        <a th:href="@{/dashboard/links(page=${currentPage - 1}, search=${searchKeyword}, userId=${currentUserId})}" 
+                        <a th:href="@{/app/links(page=${currentPage - 1}, search=${searchKeyword}, userId=${currentUserId})}" 
                            class="page-btn" th:classappend="${currentPage == 1} ? 'disabled' : ''"
                            th:style="${currentPage == 1} ? 'pointer-events: none;' : ''">◀</a>
                            
                         <!-- 페이지 목록 루프 -->
                         <a th:each="pageNum : ${#numbers.sequence(1, totalPages)}"
-                           th:href="@{/dashboard/links(page=${pageNum}, search=${searchKeyword}, userId=${currentUserId})}" 
+                           th:href="@{/app/links(page=${pageNum}, search=${searchKeyword}, userId=${currentUserId})}" 
                            class="page-btn" th:classappend="${pageNum == currentPage} ? 'active' : ''"
                            th:text="${pageNum}">1</a>
                            
                         <!-- 다음 페이지 -->
-                        <a th:href="@{/dashboard/links(page=${currentPage + 1}, search=${searchKeyword}, userId=${currentUserId})}" 
+                        <a th:href="@{/app/links(page=${currentPage + 1}, search=${searchKeyword}, userId=${currentUserId})}" 
                            class="page-btn" th:classappend="${currentPage == totalPages} ? 'disabled' : ''"
                            th:style="${currentPage == totalPages} ? 'pointer-events: none;' : ''">▶</a>
                     </div>

@@ -166,7 +166,7 @@
 
                         <!-- 전송 및 취소 버튼 -->
                         <div style="display: flex; gap: 16px;">
-                            <a th:href="@{/dashboard(userId=${currentUserId})}" class="btn btn-secondary" style="flex: 1; padding: 14px;">취소</a>
+                            <a th:href="@{/app/dashboard(userId=${currentUserId})}" class="btn btn-secondary" style="flex: 1; padding: 14px;">취소</a>
                             <button class="btn" type="submit" style="flex: 2;">고급 단축 링크 생성하기</button>
                         </div>
                     </form>
@@ -385,7 +385,7 @@
         function closeSuccessModal() {
             const modal = document.getElementById('successModal');
             modal.classList.remove('active');
-            window.location.href = '/dashboard/links?userId=' + currentUserId;
+            window.location.href = '/app/links?userId=' + currentUserId;
         }
 
         // 성공 모달 내 URL 복사

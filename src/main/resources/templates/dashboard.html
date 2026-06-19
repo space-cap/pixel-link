@@ -35,7 +35,7 @@
 
                         <button class="btn" type="submit" th:text="#{dashboard.submit_btn}">Create Link</button>
                         <div style="margin-top: 16px; text-align: center;">
-                            <a th:href="@{/dashboard/create(userId=${currentUserId})}" style="font-size: 0.85rem; color: var(--accent-secondary); font-weight: 600; text-decoration: underline;">➕ 고급 설정(맞춤 경로, 스마트 라우팅 등) 추가하여 생성하기</a>
+                            <a th:href="@{/app/create(userId=${currentUserId})}" style="font-size: 0.85rem; color: var(--accent-secondary); font-weight: 600; text-decoration: underline;">➕ 고급 설정(맞춤 경로, 스마트 라우팅 등) 추가하여 생성하기</a>
                         </div>
                     </form>
                 </section>
@@ -115,7 +115,7 @@
 
                     <!-- 전체 단축 링크 관리 바로가기 이동 버튼 -->
                     <div style="margin-top: 24px; text-align: center;" th:if="${!links.isEmpty()}">
-                        <a th:href="@{/dashboard/links(userId=${currentUserId})}" class="btn btn-secondary" style="width: auto; padding: 10px 24px; font-size: 0.85rem; border-radius: 6px; display: inline-flex;">🔗 전체 단축 링크 관리 바로가기</a>
+                        <a th:href="@{/app/links(userId=${currentUserId})}" class="btn btn-secondary" style="width: auto; padding: 10px 24px; font-size: 0.85rem; border-radius: 6px; display: inline-flex;">🔗 전체 단축 링크 관리 바로가기</a>
                     </div>
                 </div>
 

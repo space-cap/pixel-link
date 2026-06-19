@@ -34,35 +34,35 @@
     <!-- 2. 공통 사이드바 조각 -->
     <aside th:fragment="sidebar(activeMenu, currentUserId, currentUser)" class="sidebar">
         <div class="sidebar-menu">
-            <a th:href="@{/dashboard(userId=${currentUserId})}" 
+            <a th:href="@{/app/dashboard(userId=${currentUserId})}" 
                th:class="${activeMenu == 'dashboard'} ? 'menu-item active' : 'menu-item'">
                 <span class="menu-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 </span>
                 <span th:text="#{menu.dashboard}">대시보드</span>
             </a>
-            <a th:href="@{/dashboard/create(userId=${currentUserId})}" 
+            <a th:href="@{/app/create(userId=${currentUserId})}" 
                th:class="${activeMenu == 'create'} ? 'menu-item active' : 'menu-item'">
                 <span class="menu-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
                 </span>
                 <span th:text="#{menu.advanced_create}">고급 링크 생성</span>
             </a>
-            <a th:href="@{/dashboard/links(userId=${currentUserId})}" 
+            <a th:href="@{/app/links(userId=${currentUserId})}" 
                th:class="${activeMenu == 'links'} ? 'menu-item active' : 'menu-item'">
                 <span class="menu-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                 </span>
                 <span th:text="#{menu.links}">링크 관리</span>
             </a>
-            <a th:href="@{/dashboard/monetization(userId=${currentUserId})}" 
+            <a th:href="@{/app/monetization(userId=${currentUserId})}" 
                th:class="${activeMenu == 'monetization'} ? 'menu-item active' : 'menu-item'">
                 <span class="menu-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                 </span>
                 <span th:text="#{menu.monetization}">수익 및 정산</span>
             </a>
-            <a th:href="@{/dashboard/developer(userId=${currentUserId})}" 
+            <a th:href="@{/app/developer(userId=${currentUserId})}" 
                th:class="${activeMenu == 'developer'} ? 'menu-item active' : 'menu-item'">
                 <span class="menu-icon">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 2-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 1.5 1.5M15.5 7.5 14 6"/></svg>

@@ -57,10 +57,12 @@ public class WebSecurityConfig {
                     "/monetization/**", 
                     "/api/links", 
                     "/api/links/*/ad-click", 
-                    "/api/links/*/payments/confirm"
+                    "/api/links/*/payments/confirm",
+                    "/dashboard",
+                    "/dashboard/**"
                 ).permitAll()
                 // 대시보드는 무조건 보호
-                .requestMatchers("/dashboard", "/dashboard/**").authenticated()
+                .requestMatchers("/app", "/app/**").authenticated()
                 // 단축 주소 리다이렉트 패턴 허용 (알파뉴메릭 1자 이상)
                 .requestMatchers("/{shortCode:[a-zA-Z0-9]+}").permitAll()
                 // 나머지 요청들은 permitAll 또는 컨트롤러에서 추가 검증 수행
@@ -68,7 +70,7 @@ public class WebSecurityConfig {
             )
             .oauth2Login(oauth2 -> oauth2
                 .loginPage("/login")
-                .defaultSuccessUrl("/dashboard", true)
+                .defaultSuccessUrl("/app/dashboard", true)
                 .userInfoEndpoint(userInfo -> userInfo
                     .userService(customOAuth2UserService)
                 )

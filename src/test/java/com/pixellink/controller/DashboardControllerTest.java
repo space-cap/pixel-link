@@ -18,7 +18,7 @@ public class DashboardControllerTest {
 
     @Test
     void showDashboard_ReturnsDashboardView() throws Exception {
-        mockMvc.perform(get("/dashboard")
+        mockMvc.perform(get("/app/dashboard")
                         .param("userId", "test-user"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("dashboard"))
@@ -30,7 +30,7 @@ public class DashboardControllerTest {
 
     @Test
     void showMonetization_ReturnsMonetizationView() throws Exception {
-        mockMvc.perform(get("/dashboard/monetization")
+        mockMvc.perform(get("/app/monetization")
                         .param("userId", "test-user"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("monetization"))
@@ -41,7 +41,7 @@ public class DashboardControllerTest {
 
     @Test
     void showDeveloper_ReturnsDeveloperView() throws Exception {
-        mockMvc.perform(get("/dashboard/developer")
+        mockMvc.perform(get("/app/developer")
                         .param("userId", "test-user"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("developer"))
@@ -51,7 +51,7 @@ public class DashboardControllerTest {
 
     @Test
     void showLinks_ReturnsLinksView() throws Exception {
-        mockMvc.perform(get("/dashboard/links")
+        mockMvc.perform(get("/app/links")
                         .param("userId", "test-user")
                         .param("page", "1")
                         .param("pageSize", "10"))
@@ -66,7 +66,7 @@ public class DashboardControllerTest {
 
     @Test
     void showLinks_WithSearch_ReturnsLinksView() throws Exception {
-        mockMvc.perform(get("/dashboard/links")
+        mockMvc.perform(get("/app/links")
                         .param("userId", "test-user")
                         .param("search", "promo")
                         .param("page", "1"))
@@ -77,7 +77,7 @@ public class DashboardControllerTest {
 
     @Test
     void showAdvancedCreate_ReturnsCreateView() throws Exception {
-        mockMvc.perform(get("/dashboard/create")
+        mockMvc.perform(get("/app/create")
                         .param("userId", "test-user"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("create"))

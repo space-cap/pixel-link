@@ -33,7 +33,7 @@ public class DashboardController {
         return "landing";
     }
 
-    @GetMapping("/dashboard")
+    @GetMapping("/app/dashboard")
     public String showDashboard(
             @AuthenticationPrincipal SessionUser sessionUser,
             HttpServletRequest request,
@@ -84,7 +84,7 @@ public class DashboardController {
         return "dashboard";
     }
 
-    @GetMapping("/dashboard/create")
+    @GetMapping("/app/create")
     public String showAdvancedCreate(
             @AuthenticationPrincipal SessionUser sessionUser,
             Model model) {
@@ -109,7 +109,7 @@ public class DashboardController {
         return "create";
     }
 
-    @GetMapping("/dashboard/links")
+    @GetMapping("/app/links")
     public String showLinks(
             @AuthenticationPrincipal SessionUser sessionUser,
             @RequestParam(value = "search", required = false) String search,
@@ -152,7 +152,7 @@ public class DashboardController {
         return "links";
     }
 
-    @GetMapping("/dashboard/monetization")
+    @GetMapping("/app/monetization")
     public String showMonetization(
             @AuthenticationPrincipal SessionUser sessionUser,
             Model model) {
@@ -186,7 +186,7 @@ public class DashboardController {
         return "monetization";
     }
 
-    @GetMapping("/dashboard/developer")
+    @GetMapping("/app/developer")
     public String showDeveloper(
             @AuthenticationPrincipal SessionUser sessionUser,
             Model model) {
@@ -209,6 +209,16 @@ public class DashboardController {
         model.addAttribute("mockUsers", mockUsers);
 
         return "developer";
+    }
+
+    @GetMapping({"/dashboard", "/dashboard/**"})
+    public String redirectOldDashboard(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        String newUri = uri.replace("/dashboard", "/app");
+        if ("/app".equals(newUri) || "/app/".equals(newUri)) {
+            newUri = "/app/dashboard";
+        }
+        return "redirect:" + newUri;
     }
 
     private String getBaseUrl(HttpServletRequest request) {

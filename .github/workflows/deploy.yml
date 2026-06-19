@@ -35,9 +35,9 @@ jobs:
     - name: Transfer JAR file via SCP
       uses: appleboy/scp-action@v0.1.7
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSH_KEY }}
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         source: "build/libs/pixel-link-0.0.1-SNAPSHOT.jar"
         target: "/home/ubuntu/deploy-temp/"
@@ -51,9 +51,9 @@ jobs:
     - name: Execute remote ssh commands to deploy
       uses: appleboy/ssh-action@v1.0.3
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSH_KEY }}
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
         script: |
           # 1. 임시 디렉토리에서 메인 구동 위치로 배포본 이동 및 명칭 단일화

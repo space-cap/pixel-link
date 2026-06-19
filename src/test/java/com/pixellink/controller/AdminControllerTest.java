@@ -1,8 +1,10 @@
 package com.pixellink.controller;
 
+import com.pixellink.dto.SessionUser;
 import com.pixellink.mapper.UserMapper;
 import com.pixellink.mapper.SettlementMapper;
 import com.pixellink.model.Settlement;
+import com.pixellink.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,7 @@ import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -30,6 +33,20 @@ public class AdminControllerTest {
     @Autowired
     private SettlementMapper settlementMapper;
 
+    private MockHttpSession getAdminSession() {
+        User admin = userMapper.findById("admin");
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("user", new SessionUser(admin));
+        return session;
+    }
+
+    private MockHttpSession getUserSession() {
+        User user = userMapper.findById("test-user");
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("user", new SessionUser(user));
+        return session;
+    }
+
     @BeforeEach
     void setUp() {
         userMapper.updateRole("admin", "ADMIN");
@@ -41,8 +58,8 @@ public class AdminControllerTest {
     @Test
     void viewUsers_AsAdmin_ReturnsUsersView() throws Exception {
         mockMvc.perform(get("/app/admin/users")
-                        .session(new MockHttpSession())
-                        .param("userId", "admin"))
+                        .session(getAdminSession())
+                        .with(user("admin").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/users"))
                 .andExpect(model().attributeExists("users"))
@@ -52,16 +69,16 @@ public class AdminControllerTest {
     @Test
     void viewUsers_AsRegularUser_ReturnsForbidden() throws Exception {
         mockMvc.perform(get("/app/admin/users")
-                        .session(new MockHttpSession())
-                        .param("userId", "test-user"))
+                        .session(getUserSession())
+                        .with(user("test-user").roles("USER")))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void viewDashboard_AsAdmin_ReturnsDashboardView() throws Exception {
         mockMvc.perform(get("/app/admin/dashboard")
-                        .session(new MockHttpSession())
-                        .param("userId", "admin"))
+                        .session(getAdminSession())
+                        .with(user("admin").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/dashboard"))
                 .andExpect(model().attributeExists("user"))
@@ -78,16 +95,16 @@ public class AdminControllerTest {
     @Test
     void viewDashboard_AsRegularUser_ReturnsForbidden() throws Exception {
         mockMvc.perform(get("/app/admin/dashboard")
-                        .session(new MockHttpSession())
-                        .param("userId", "test-user"))
+                        .session(getUserSession())
+                        .with(user("test-user").roles("USER")))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void updateRole_AsAdmin_Success() throws Exception {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/app/admin/users/update-role")
-                        .session(new MockHttpSession())
-                        .param("userId", "admin")
+                        .session(getAdminSession())
+                        .with(user("admin").roles("ADMIN"))
                         .param("id", "test-user")
                         .param("role", "ADMIN"))
                 .andExpect(status().isOk())
@@ -97,8 +114,8 @@ public class AdminControllerTest {
     @Test
     void updateRole_AsRegularUser_Forbidden() throws Exception {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/app/admin/users/update-role")
-                        .session(new MockHttpSession())
-                        .param("userId", "test-user")
+                        .session(getUserSession())
+                        .with(user("test-user").roles("USER"))
                         .param("id", "free-user")
                         .param("role", "ADMIN"))
                 .andExpect(status().isForbidden());
@@ -107,8 +124,8 @@ public class AdminControllerTest {
     @Test
     void updateRole_SelfDemotion_BadRequest() throws Exception {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/app/admin/users/update-role")
-                        .session(new MockHttpSession())
-                        .param("userId", "admin")
+                        .session(getAdminSession())
+                        .with(user("admin").roles("ADMIN"))
                         .param("id", "admin")
                         .param("role", "USER"))
                 .andExpect(status().isBadRequest());
@@ -117,8 +134,8 @@ public class AdminControllerTest {
     @Test
     void viewSettlements_AsAdmin_ReturnsView() throws Exception {
         mockMvc.perform(get("/app/admin/settlements")
-                        .session(new MockHttpSession())
-                        .param("userId", "admin"))
+                        .session(getAdminSession())
+                        .with(user("admin").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/settlements"))
                 .andExpect(model().attributeExists("settlements"))
@@ -128,8 +145,8 @@ public class AdminControllerTest {
     @Test
     void viewSettlements_AsRegularUser_Forbidden() throws Exception {
         mockMvc.perform(get("/app/admin/settlements")
-                        .session(new MockHttpSession())
-                        .param("userId", "test-user"))
+                        .session(getUserSession())
+                        .with(user("test-user").roles("USER")))
                 .andExpect(status().isForbidden());
     }
 
@@ -147,8 +164,8 @@ public class AdminControllerTest {
         settlementMapper.insert(payout);
 
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/app/admin/settlements/" + id + "/approve")
-                        .session(new MockHttpSession())
-                        .param("userId", "admin"))
+                        .session(getAdminSession())
+                        .with(user("admin").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"status\":\"success\"}"));
 
@@ -173,8 +190,8 @@ public class AdminControllerTest {
         settlementMapper.insert(payout);
 
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/app/admin/settlements/" + id + "/reject")
-                        .session(new MockHttpSession())
-                        .param("userId", "admin"))
+                        .session(getAdminSession())
+                        .with(user("admin").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(content().json("{\"status\":\"success\"}"));
 
@@ -188,8 +205,8 @@ public class AdminControllerTest {
     @Test
     void viewSettings_AsAdmin_ReturnsSettingsPage() throws Exception {
         mockMvc.perform(get("/app/admin/settings")
-                        .session(new MockHttpSession())
-                        .param("userId", "admin"))
+                        .session(getAdminSession())
+                        .with(user("admin").roles("ADMIN")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("admin/settings"))
                 .andExpect(model().attributeExists("settings"))
@@ -199,16 +216,16 @@ public class AdminControllerTest {
     @Test
     void viewSettings_AsRegularUser_Forbidden() throws Exception {
         mockMvc.perform(get("/app/admin/settings")
-                        .session(new MockHttpSession())
-                        .param("userId", "test-user"))
+                        .session(getUserSession())
+                        .with(user("test-user").roles("USER")))
                 .andExpect(status().isForbidden());
     }
 
     @Test
     void updateSettings_AsAdmin_Success() throws Exception {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/app/admin/settings/update")
-                        .session(new MockHttpSession())
-                        .param("userId", "admin")
+                        .session(getAdminSession())
+                        .with(user("admin").roles("ADMIN"))
                         .param("anon_link_expiry_days", "15")
                         .param("ad_reward_per_click", "120")
                         .param("min_withdrawal_amount", "5000")
@@ -222,8 +239,8 @@ public class AdminControllerTest {
     @Test
     void updateSettings_InvalidValues_ReturnsErrorMessage() throws Exception {
         mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/app/admin/settings/update")
-                        .session(new MockHttpSession())
-                        .param("userId", "admin")
+                        .session(getAdminSession())
+                        .with(user("admin").roles("ADMIN"))
                         .param("anon_link_expiry_days", "-5"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/app/admin/settings"))

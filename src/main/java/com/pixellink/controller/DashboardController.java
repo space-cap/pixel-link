@@ -18,8 +18,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @Controller
@@ -51,40 +49,6 @@ public class DashboardController {
         return "login";
     }
 
-    @GetMapping("/app/login/mock")
-    public String mockSocialLogin(
-            @RequestParam("provider") String provider,
-            @RequestParam("id") String mockId,
-            @RequestParam("email") String mockEmail,
-            HttpServletRequest request) {
-        
-        if (!"local".equals(activeProfile)) {
-            throw new SecurityException("로컬 개발 환경에서만 허용되는 디버그 엔드포인트입니다.");
-        }
-
-        String userId = provider + "_" + mockId;
-        User user = userMapper.findById(userId);
-        if (user == null) {
-            user = new User();
-            user.setId(userId);
-            user.setEmail(mockEmail);
-            user.setSubscriptionTier("FREE");
-            user.setRole("USER");
-            userMapper.insert(user);
-        }
-
-        SessionUser sessionUser = new SessionUser(user);
-        HttpSession httpSession = request.getSession();
-        httpSession.setAttribute("user", sessionUser);
-
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_USER");
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                sessionUser, null, Collections.singletonList(authority));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        httpSession.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-
-        return "redirect:/app/dashboard";
-    }
 
     @GetMapping("/app/dashboard")
     public String showDashboard(
@@ -110,20 +74,10 @@ public class DashboardController {
         // 4. 대시보드 리스트 출력용 최신 5개 퀵뷰 링크 목록 조회
         List<LinkResponse> quickLinks = linkService.getLinksByUserIdPaged(userId, null, 1, 5, baseUrl);
 
-        // 5. 목 테스트 유저 목록 (대시보드 상단 전환기 제공용)
-        List<User> mockUsers = new java.util.ArrayList<>(Arrays.asList(
-            userMapper.findById("admin"),
-            userMapper.findById("test-user"),
-            userMapper.findById("free-user")
-        ));
-        if (user != null && !userId.equals("admin") && !userId.equals("test-user") && !userId.equals("free-user")) {
-            mockUsers.add(user);
-        }
-
-        // 6. 관리자 설정용 비회원 만료일 조회
+        // 5. 관리자 설정용 비회원 만료일 조회
         String expiryDays = linkService.getSystemSetting("anon_link_expiry_days", "30");
 
-        // 7. 정산금 잔액 조회
+        // 6. 정산금 잔액 조회
         Integer settlementBalance = settlementMapper.sumAmountByUserId(userId);
         if (settlementBalance == null) {
             settlementBalance = 0;
@@ -132,7 +86,6 @@ public class DashboardController {
         model.addAttribute("currentUser", user);
         model.addAttribute("links", quickLinks); // 대시보드 리스트에는 퀵뷰 5개만 노출
         model.addAttribute("totalClicks", totalClicks);
-        model.addAttribute("mockUsers", mockUsers);
         model.addAttribute("currentUserId", userId);
         model.addAttribute("anonLinkExpiryDays", expiryDays);
         model.addAttribute("settlementBalance", settlementBalance);
@@ -152,18 +105,8 @@ public class DashboardController {
             userId = "test-user";
         }
 
-        List<User> mockUsers = new java.util.ArrayList<>(Arrays.asList(
-            userMapper.findById("admin"),
-            userMapper.findById("test-user"),
-            userMapper.findById("free-user")
-        ));
-        if (user != null && !userId.equals("admin") && !userId.equals("test-user") && !userId.equals("free-user")) {
-            mockUsers.add(user);
-        }
-
         model.addAttribute("currentUser", user);
         model.addAttribute("currentUserId", userId);
-        model.addAttribute("mockUsers", mockUsers);
 
         return "create";
     }
@@ -194,18 +137,8 @@ public class DashboardController {
             totalPages = 1;
         }
 
-        List<User> mockUsers = new java.util.ArrayList<>(Arrays.asList(
-            userMapper.findById("admin"),
-            userMapper.findById("test-user"),
-            userMapper.findById("free-user")
-        ));
-        if (user != null && !userId.equals("admin") && !userId.equals("test-user") && !userId.equals("free-user")) {
-            mockUsers.add(user);
-        }
-
         model.addAttribute("currentUser", user);
         model.addAttribute("links", links);
-        model.addAttribute("mockUsers", mockUsers);
         model.addAttribute("currentUserId", userId);
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", totalPages);
@@ -233,20 +166,10 @@ public class DashboardController {
 
         List<com.pixellink.model.Settlement> settlements = settlementMapper.findByUserId(userId);
 
-        List<User> mockUsers = new java.util.ArrayList<>(Arrays.asList(
-            userMapper.findById("admin"),
-            userMapper.findById("test-user"),
-            userMapper.findById("free-user")
-        ));
-        if (user != null && !userId.equals("admin") && !userId.equals("test-user") && !userId.equals("free-user")) {
-            mockUsers.add(user);
-        }
-
         model.addAttribute("currentUser", user);
         model.addAttribute("currentUserId", userId);
         model.addAttribute("settlementBalance", settlementBalance);
         model.addAttribute("settlements", settlements);
-        model.addAttribute("mockUsers", mockUsers);
 
         return "monetization";
     }
@@ -263,18 +186,8 @@ public class DashboardController {
             userId = "test-user";
         }
 
-        List<User> mockUsers = new java.util.ArrayList<>(Arrays.asList(
-            userMapper.findById("admin"),
-            userMapper.findById("test-user"),
-            userMapper.findById("free-user")
-        ));
-        if (user != null && !userId.equals("admin") && !userId.equals("test-user") && !userId.equals("free-user")) {
-            mockUsers.add(user);
-        }
-
         model.addAttribute("currentUser", user);
         model.addAttribute("currentUserId", userId);
-        model.addAttribute("mockUsers", mockUsers);
 
         return "developer";
     }

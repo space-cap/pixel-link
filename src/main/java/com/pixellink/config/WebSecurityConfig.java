@@ -60,7 +60,7 @@ public class WebSecurityConfig {
                     "/api/links/*/payments/confirm"
                 ).permitAll()
                 // 로그인 페이지는 누구나 접근 가능 (보호막에 걸리기 전에 통과)
-                .requestMatchers("/app/login", "/app/login/mock").permitAll()
+                .requestMatchers("/app/login").permitAll()
                 // 관리자 경로는 ADMIN 권한 필요
                 .requestMatchers("/app/admin/**").hasRole("ADMIN")
                 // 대시보드는 무조건 보호
@@ -83,47 +83,6 @@ public class WebSecurityConfig {
                 .deleteCookies("JSESSIONID")
             );
 
-        // 로컬/테스트 환경에서 ?userId=xxx 파라미터를 넘겼을 때 로그인 세션을 자동 구성해 주는 필터 탑재
-        http.addFilterBefore(new LocalMockUserFilter(), UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
-    }
-
-    /**
-     * 로컬 개발 프로파일에서 간편하게 ?userId= 드롭다운 전환을 사용할 수 있도록 지원하는 헬퍼 필터
-     */
-    private class LocalMockUserFilter extends OncePerRequestFilter {
-        @Override
-        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-                throws ServletException, IOException {
-            String userIdParam = request.getParameter("userId");
-            if ("local".equals(activeProfile) && userIdParam != null && !userIdParam.trim().isEmpty()) {
-                User user = userMapper.findById(userIdParam);
-                if (user != null) {
-                    // 세션 정보 강제 주입
-                    SessionUser sessionUser = new SessionUser(user);
-                    httpSession.setAttribute("user", sessionUser);
-
-                    // Security Context 인증 강제 주입
-                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + user.getRole());
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            sessionUser, null, Collections.singletonList(authority));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                } else {
-                    httpSession.removeAttribute("user");
-                    SecurityContextHolder.clearContext();
-                }
-            } else {
-                // 파라미터가 없더라도 세션에 "user"가 존재한다면 시큐리티 컨텍스트에 바인딩 유지
-                SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
-                if (sessionUser != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + sessionUser.getRole());
-                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                            sessionUser, null, Collections.singletonList(authority));
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
-            }
-            filterChain.doFilter(request, response);
-        }
     }
 }

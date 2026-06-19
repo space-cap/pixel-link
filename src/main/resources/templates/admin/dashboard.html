@@ -97,7 +97,7 @@
 <body>
 
     <!-- 상단 헤더 조각 통합 -->
-    <div th:replace="~{fragments :: header(currentUser=${user}, mockUsers=${@userMapper.findAll()}, currentUserId=${user.id})}"></div>
+    <div th:replace="~{fragments :: header(currentUser=${user}, currentUserId=${user.id})}"></div>
 
     <!-- 메인 대시보드 레이아웃 -->
     <div class="dashboard-container">

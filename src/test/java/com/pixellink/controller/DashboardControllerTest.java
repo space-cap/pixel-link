@@ -1,13 +1,18 @@
 package com.pixellink.controller;
 
+import com.pixellink.dto.SessionUser;
+import com.pixellink.mapper.UserMapper;
+import com.pixellink.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockHttpSession;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -16,22 +21,33 @@ public class DashboardControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private UserMapper userMapper;
+
+    private MockHttpSession getUserSession() {
+        User user = userMapper.findById("test-user");
+        MockHttpSession session = new MockHttpSession();
+        session.setAttribute("user", new SessionUser(user));
+        return session;
+    }
+
     @Test
     void showDashboard_ReturnsDashboardView() throws Exception {
         mockMvc.perform(get("/app/dashboard")
-                        .param("userId", "test-user"))
+                        .session(getUserSession())
+                        .with(user("test-user").roles("USER")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("dashboard"))
                 .andExpect(model().attributeExists("currentUser"))
                 .andExpect(model().attributeExists("links"))
-                .andExpect(model().attributeExists("totalClicks"))
-                .andExpect(model().attributeExists("mockUsers"));
+                .andExpect(model().attributeExists("totalClicks"));
     }
 
     @Test
     void showMonetization_ReturnsMonetizationView() throws Exception {
         mockMvc.perform(get("/app/monetization")
-                        .param("userId", "test-user"))
+                        .session(getUserSession())
+                        .with(user("test-user").roles("USER")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("monetization"))
                 .andExpect(model().attributeExists("currentUser"))
@@ -42,17 +58,18 @@ public class DashboardControllerTest {
     @Test
     void showDeveloper_ReturnsDeveloperView() throws Exception {
         mockMvc.perform(get("/app/developer")
-                        .param("userId", "test-user"))
+                        .session(getUserSession())
+                        .with(user("test-user").roles("USER")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("developer"))
-                .andExpect(model().attributeExists("currentUser"))
-                .andExpect(model().attributeExists("mockUsers"));
+                .andExpect(model().attributeExists("currentUser"));
     }
 
     @Test
     void showLinks_ReturnsLinksView() throws Exception {
         mockMvc.perform(get("/app/links")
-                        .param("userId", "test-user")
+                        .session(getUserSession())
+                        .with(user("test-user").roles("USER"))
                         .param("page", "1")
                         .param("pageSize", "10"))
                 .andExpect(status().isOk())
@@ -67,7 +84,8 @@ public class DashboardControllerTest {
     @Test
     void showLinks_WithSearch_ReturnsLinksView() throws Exception {
         mockMvc.perform(get("/app/links")
-                        .param("userId", "test-user")
+                        .session(getUserSession())
+                        .with(user("test-user").roles("USER"))
                         .param("search", "promo")
                         .param("page", "1"))
                 .andExpect(status().isOk())
@@ -78,11 +96,11 @@ public class DashboardControllerTest {
     @Test
     void showAdvancedCreate_ReturnsCreateView() throws Exception {
         mockMvc.perform(get("/app/create")
-                        .param("userId", "test-user"))
+                        .session(getUserSession())
+                        .with(user("test-user").roles("USER")))
                 .andExpect(status().isOk())
                 .andExpect(view().name("create"))
                 .andExpect(model().attributeExists("currentUser"))
-                .andExpect(model().attributeExists("currentUserId"))
-                .andExpect(model().attributeExists("mockUsers"));
+                .andExpect(model().attributeExists("currentUserId"));
     }
 }

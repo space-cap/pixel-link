@@ -4,8 +4,7 @@
 </head>
 <body>
 
-    <!-- 1. 공통 헤더 조각 -->
-    <header th:fragment="header(currentUser, mockUsers, currentUserId)">
+    <header th:fragment="header(currentUser, currentUserId)">
         <div class="logo-container">
             <span class="logo">Pixel-Link</span>
             <span class="logo-badge" th:text="#{dashboard.logo_badge}">Premium Linker</span>
@@ -18,15 +17,6 @@
                 <option value="en" th:selected="${#locale.language == 'en'}">English</option>
                 <option value="ko" th:selected="${#locale.language == 'ko'}">한국어</option>
                 <option value="ja" th:selected="${#locale.language == 'ja'}">日本語</option>
-            </select>
-
-            <span th:text="#{dashboard.user_switch}">Switch Account:</span>
-            <select class="select-user" onchange="switchUser(this.value)">
-                <option th:each="user : ${mockUsers}" 
-                        th:value="${user.id}" 
-                        th:text="${user.id + ' (' + user.subscriptionTier + ')'}"
-                        th:selected="${user.id == currentUserId}">
-                </option>
             </select>
         </div>
     </header>

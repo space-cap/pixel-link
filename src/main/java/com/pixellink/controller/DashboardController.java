@@ -33,7 +33,7 @@ public class DashboardController {
         return "landing";
     }
 
-    @GetMapping("/login")
+    @GetMapping("/app/login")
     public String showLogin() {
         return "login";
     }

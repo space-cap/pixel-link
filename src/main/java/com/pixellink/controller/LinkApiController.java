@@ -2,12 +2,14 @@ package com.pixellink.controller;
 
 import com.pixellink.dto.LinkCreateRequest;
 import com.pixellink.dto.LinkResponse;
+import com.pixellink.dto.SessionUser;
 import com.pixellink.service.LinkService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
@@ -25,9 +27,10 @@ public class LinkApiController {
     @PostMapping
     public ResponseEntity<Map<String, Object>> createLink(
             @Valid @RequestBody LinkCreateRequest request,
-            @RequestParam(value = "userId", required = false) String userId,
+            @AuthenticationPrincipal SessionUser sessionUser,
             HttpServletRequest httpServletRequest) {
         
+        String userId = (sessionUser != null) ? sessionUser.getId() : null;
         String baseUrl = getBaseUrl(httpServletRequest);
         LinkResponse linkResponse = linkService.createLink(request, userId, baseUrl);
 
@@ -41,8 +44,12 @@ public class LinkApiController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> deleteLink(
             @PathVariable("id") String id,
-            @RequestParam("userId") String userId) {
+            @AuthenticationPrincipal SessionUser sessionUser) {
         
+        if (sessionUser == null) {
+            throw new SecurityException("로그인이 필요한 서비스입니다.");
+        }
+        String userId = sessionUser.getId();
         linkService.deleteLink(id, userId);
 
         Map<String, Object> response = new HashMap<>();
@@ -58,8 +65,12 @@ public class LinkApiController {
     @GetMapping("/{id}/stats")
     public ResponseEntity<Map<String, Object>> getLinkStats(
             @PathVariable("id") String id,
-            @RequestParam("userId") String userId) {
+            @AuthenticationPrincipal SessionUser sessionUser) {
         
+        if (sessionUser == null) {
+            throw new SecurityException("로그인이 필요한 서비스입니다.");
+        }
+        String userId = sessionUser.getId();
         Map<String, Object> stats = linkService.getLinkStats(id, userId);
 
         Map<String, Object> response = new HashMap<>();
@@ -128,9 +139,9 @@ public class LinkApiController {
     public ResponseEntity<Map<String, Object>> updateSetting(
             @RequestParam("key") String key,
             @RequestParam("value") String value,
-            @RequestParam("userId") String userId) {
+            @AuthenticationPrincipal SessionUser sessionUser) {
         
-        if (!"admin".equals(userId)) {
+        if (sessionUser == null || !"admin".equals(sessionUser.getId())) {
             throw new SecurityException("관리자 권한이 없습니다.");
         }
 
@@ -164,8 +175,12 @@ public class LinkApiController {
 
     @PostMapping("/withdraw")
     public ResponseEntity<Map<String, Object>> withdrawSettlements(
-            @RequestParam("userId") String userId) {
+            @AuthenticationPrincipal SessionUser sessionUser) {
         
+        if (sessionUser == null) {
+            throw new SecurityException("로그인이 필요한 서비스입니다.");
+        }
+        String userId = sessionUser.getId();
         linkService.withdrawSettlements(userId);
 
         Map<String, Object> response = new HashMap<>();

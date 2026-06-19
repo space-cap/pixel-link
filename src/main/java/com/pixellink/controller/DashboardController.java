@@ -1,11 +1,13 @@
 package com.pixellink.controller;
 
 import com.pixellink.dto.LinkResponse;
+import com.pixellink.dto.SessionUser;
 import com.pixellink.mapper.UserMapper;
 import com.pixellink.model.User;
 import com.pixellink.service.LinkService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,10 +35,11 @@ public class DashboardController {
 
     @GetMapping("/dashboard")
     public String showDashboard(
-            @RequestParam(value = "userId", defaultValue = "test-user") String userId,
+            @AuthenticationPrincipal SessionUser sessionUser,
             HttpServletRequest request,
             Model model) {
         
+        String userId = (sessionUser != null) ? sessionUser.getId() : "test-user";
         // 1. 유저 조회 (없으면 기본값 test-user 강제)
         User user = userMapper.findById(userId);
         if (user == null) {
@@ -83,9 +86,10 @@ public class DashboardController {
 
     @GetMapping("/dashboard/create")
     public String showAdvancedCreate(
-            @RequestParam(value = "userId", defaultValue = "test-user") String userId,
+            @AuthenticationPrincipal SessionUser sessionUser,
             Model model) {
         
+        String userId = (sessionUser != null) ? sessionUser.getId() : "test-user";
         User user = userMapper.findById(userId);
         if (user == null) {
             user = userMapper.findById("test-user");
@@ -107,13 +111,14 @@ public class DashboardController {
 
     @GetMapping("/dashboard/links")
     public String showLinks(
-            @RequestParam(value = "userId", defaultValue = "test-user") String userId,
+            @AuthenticationPrincipal SessionUser sessionUser,
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
             HttpServletRequest request,
             Model model) {
         
+        String userId = (sessionUser != null) ? sessionUser.getId() : "test-user";
         User user = userMapper.findById(userId);
         if (user == null) {
             user = userMapper.findById("test-user");
@@ -149,9 +154,10 @@ public class DashboardController {
 
     @GetMapping("/dashboard/monetization")
     public String showMonetization(
-            @RequestParam(value = "userId", defaultValue = "test-user") String userId,
+            @AuthenticationPrincipal SessionUser sessionUser,
             Model model) {
         
+        String userId = (sessionUser != null) ? sessionUser.getId() : "test-user";
         User user = userMapper.findById(userId);
         if (user == null) {
             user = userMapper.findById("test-user");
@@ -182,9 +188,10 @@ public class DashboardController {
 
     @GetMapping("/dashboard/developer")
     public String showDeveloper(
-            @RequestParam(value = "userId", defaultValue = "test-user") String userId,
+            @AuthenticationPrincipal SessionUser sessionUser,
             Model model) {
         
+        String userId = (sessionUser != null) ? sessionUser.getId() : "test-user";
         User user = userMapper.findById(userId);
         if (user == null) {
             user = userMapper.findById("test-user");

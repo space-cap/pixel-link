@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel-Link - 로그인</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+            --google-btn: #ffffff;
+            --google-text: #1f2937;
+            --facebook-btn: #1877f2;
+            --naver-btn: #03c75a;
+            --kakao-btn: #fee500;
+            --kakao-text: #191919;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 배경 데코레이션 그라디언트 */
+        .bg-glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
+            filter: blur(40px);
+            z-index: -1;
+        }
+        
+        .bg-glow-1 {
+            top: -100px;
+            right: -100px;
+        }
+
+        .bg-glow-2 {
+            bottom: -150px;
+            left: -100px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0) 70%);
+        }
+
+        /* 로그인 컨테이너 */
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            text-align: center;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-section {
+            margin-bottom: 32px;
+        }
+
+        .logo-title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .logo-sub {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 52px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+            cursor: pointer;
+            border: none;
+        }
+
+        .social-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .social-btn:active {
+            transform: translateY(0);
+        }
+
+        .social-btn svg {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            position: absolute;
+            left: 24px;
+        }
+
+        /* 구글 */
+        .btn-google {
+            background-color: var(--google-btn);
+            color: var(--google-text);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* 페이스북 */
+        .btn-facebook {
+            background-color: var(--facebook-btn);
+            color: #ffffff;
+        }
+
+        /* 네이버 */
+        .btn-naver {
+            background-color: var(--naver-btn);
+            color: #ffffff;
+        }
+
+        /* 카카오 */
+        .btn-kakao {
+            background-color: var(--kakao-btn);
+            color: var(--kakao-text);
+        }
+
+        .footer-links {
+            margin-top: 16px;
+            font-size: 13px;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: #6366f1;
+        }
+
+        .divider {
+            height: 1px;
+            background: var(--card-border);
+            margin: 24px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div class="login-card">
+        <div class="logo-section">
+            <h1 class="logo-title">Pixel-Link</h1>
+            <p class="logo-sub">단축 링크 생성부터 수익 창출까지 단 한 번에</p>
+        </div>
+
+        <div class="button-group">
+            <!-- Google Login -->
+            <a href="/oauth2/authorization/google" class="social-btn btn-google">
+                <!-- Google G Logo Simplified SVG -->
+                <svg viewBox="0 0 24 24" width="20" height="20">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                Google 계정으로 로그인
+            </a>
+
+            <!-- Facebook Login -->
+            <a href="/oauth2/authorization/facebook" class="social-btn btn-facebook">
+                <!-- Facebook F Logo SVG -->
+                <svg fill="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                </svg>
+                Facebook 계정으로 로그인
+            </a>
+
+            <!-- Naver Login -->
+            <a href="/oauth2/authorization/naver" class="social-btn btn-naver">
+                <!-- Naver N Logo SVG -->
+                <svg fill="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                    <path d="M16.273 1.002H24v22h-7.734L8.316 11.597v11.405H0v-22h7.727l7.95 11.418V1.002z"/>
+                </svg>
+                네이버 계정으로 로그인
+            </a>
+
+            <!-- Kakao Login -->
+            <a href="/oauth2/authorization/kakao" class="social-btn btn-kakao">
+                <!-- Kakao Speech Bubble Logo SVG -->
+                <svg fill="currentColor" viewBox="0 0 24 24" width="20" height="20">
+                    <path d="M12 3c-4.97 0-9 3.185-9 7.115 0 2.557 1.707 4.8 4.32 6.07-.17.618-.616 2.235-.705 2.585-.11.436.16.43.34.31.144-.09 2.298-1.562 3.223-2.19.6.087 1.217.132 1.84.132 4.97 0 9-3.186 9-7.116C21 6.185 16.97 3 12 3z"/>
+                </svg>
+                카카오 계정으로 로그인
+            </a>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="footer-links">
+            <a href="/">← 홈으로 돌아가기</a>
+        </div>
+    </div>
+
+</body>
+</html>

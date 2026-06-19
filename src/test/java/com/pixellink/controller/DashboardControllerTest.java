@@ -74,4 +74,15 @@ public class DashboardControllerTest {
                 .andExpect(view().name("links"))
                 .andExpect(model().attribute("searchKeyword", "promo"));
     }
+
+    @Test
+    void showAdvancedCreate_ReturnsCreateView() throws Exception {
+        mockMvc.perform(get("/dashboard/create")
+                        .param("userId", "test-user"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("create"))
+                .andExpect(model().attributeExists("currentUser"))
+                .andExpect(model().attributeExists("currentUserId"))
+                .andExpect(model().attributeExists("mockUsers"));
+    }
 }

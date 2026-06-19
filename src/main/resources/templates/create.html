@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>고급 링크 생성 - Pixel-Link</title>
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+</head>
+<body>
+
+    <!-- 상단 헤더 조각 통합 -->
+    <div th:replace="~{fragments :: header(currentUser=${currentUser}, mockUsers=${mockUsers}, currentUserId=${currentUserId})}"></div>
+
+    <!-- 대시보드 메인 본문 -->
+    <div class="dashboard-container">
+        <!-- 사이드바 조각 통합 -->
+        <div th:replace="~{fragments :: sidebar(activeMenu='create', currentUserId=${currentUserId}, currentUser=${currentUser})}"></div>
+
+        <div class="content-area">
+            <div class="content-wide">
+                <section class="card">
+                    <h2 class="card-title">
+                        <span>➕ 고급 링크 생성 (Advanced Creator)</span>
+                        <span class="logo-badge" th:text="${currentUser.subscriptionTier}">FREE</span>
+                    </h2>
+                    
+                    <form id="createLinkForm" onsubmit="handleCreateLink(event)">
+                        <!-- 기본 목적지 URL 입력 -->
+                        <div class="form-group" style="margin-bottom: 24px;">
+                            <label class="form-label" for="defaultTargetUrl" style="font-size: 1rem;">Destination URL *</label>
+                            <input class="form-input" type="text" id="defaultTargetUrl" name="defaultTargetUrl" required 
+                                   th:placeholder="#{dashboard.target_placeholder}" style="padding: 14px 18px; font-size: 0.95rem;">
+                        </div>
+
+                        <!-- 5대 고급 옵션 아코디언 그룹 -->
+                        <div class="accordion-container" style="margin-bottom: 28px;">
+                            
+                            <!-- Section 1: Custom Slug -->
+                            <div class="accordion-section">
+                                <div class="accordion-header" onclick="toggleAccordion(this)">
+                                    <span>🔗 1. 맞춤형 단축 경로 설정 (Custom Slug)</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label class="form-label" for="shortCode" th:text="#{dashboard.custom_slug}">Custom Path (Optional)</label>
+                                        <div class="form-input-slug">
+                                            <span id="host-prefix">pixel-link.com/</span>
+                                            <input type="text" id="shortCode" name="shortCode" th:placeholder="#{dashboard.slug_placeholder}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 2: SEO Social Share Preview -->
+                            <div class="accordion-section">
+                                <div class="accordion-header" onclick="toggleAccordion(this)">
+                                    <span>📝 2. 소셜 프리뷰 및 SEO 설정</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="form-group">
+                                        <label class="form-label" for="title" th:text="#{dashboard.seo_title}">SEO Share Title (Optional)</label>
+                                        <input class="form-input" type="text" id="title" name="title" th:placeholder="#{dashboard.seo_title_placeholder}">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label" for="description" th:text="#{dashboard.seo_desc}">SEO Share Description (Optional)</label>
+                                        <input class="form-input" type="text" id="description" name="description" th:placeholder="#{dashboard.seo_desc_placeholder}">
+                                    </div>
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label class="form-label" for="ogImage" th:text="#{dashboard.seo_image}">SEO OG Image URL (Optional)</label>
+                                        <input class="form-input" type="text" id="ogImage" name="ogImage" th:placeholder="#{dashboard.seo_image_placeholder}">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 3: Smart Routing -->
+                            <div class="accordion-section">
+                                <div class="accordion-header" onclick="toggleAccordion(this)">
+                                    <span>🧭 3. 기기 및 OS 기반 스마트 라우팅</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="form-group" id="routeRulesContainer" style="margin-bottom: 0;">
+                                        <label class="form-label" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                            <span>기기 및 OS별 타겟 이동 규칙</span>
+                                            <span class="logo-badge" style="font-size:0.55rem;" th:if="${currentUser.subscriptionTier == 'FREE'}">STARTER 이상 LOCK</span>
+                                            <button type="button" class="btn" style="padding: 6px 12px; font-size: 0.8rem; background: var(--accent-secondary); margin: 0; width: auto;" 
+                                                    th:if="${currentUser.subscriptionTier != 'FREE'}" onclick="addRouteRuleField()">+ 규칙 추가</button>
+                                        </label>
+                                        <div id="routeRulesList" style="display: flex; flex-direction: column; gap: 10px;">
+                                            <!-- 동적 규칙 필드 추가 영역 -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 4: Monetization (Paywall & Ads) -->
+                            <div class="accordion-section">
+                                <div class="accordion-header" onclick="toggleAccordion(this)">
+                                    <span>💰 4. 수익화 (페이월 잠금 & 광고 노출)</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <!-- 광고 활성화 -->
+                                    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; border-bottom: 1px solid var(--card-border); padding-bottom: 20px;">
+                                        <div class="form-group" style="flex: 1; display: flex; align-items: center; gap: 8px; margin-bottom: 0;">
+                                            <input type="checkbox" id="adEnabled" name="adEnabled" onchange="toggleAdTimer(this.checked)" style="width: 18px; height: 18px; cursor: pointer; margin: 0;">
+                                            <label for="adEnabled" style="font-size: 0.9rem; font-weight: 700; color: #475569; cursor: pointer;">📺 광고 노출 활성화 (광고 수익 70% 분배)</label>
+                                        </div>
+                                        <div class="form-group" id="adTimerGroup" style="flex: 1; display: none; margin-bottom: 0;">
+                                            <label class="form-label" for="adTimerSeconds" style="font-size: 0.8rem;">광고 대기 시간 (초)</label>
+                                            <input class="form-input" type="number" id="adTimerSeconds" name="adTimerSeconds" min="1" max="30" value="5" style="padding: 8px 12px;">
+                                        </div>
+                                    </div>
+                                    <!-- 페이월 잠금 -->
+                                    <div style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 0;">
+                                        <div class="form-group" style="flex: 1; display: flex; align-items: center; gap: 8px; margin-bottom: 0;">
+                                            <input type="checkbox" id="paywalled" name="paywalled" onchange="togglePaywallPrice(this.checked)" style="width: 18px; height: 18px; cursor: pointer; margin: 0;">
+                                            <label for="paywalled" style="font-size: 0.9rem; font-weight: 700; color: #475569; cursor: pointer;">🔒 페이월 콘텐츠 잠금 (수수료 5%)</label>
+                                        </div>
+                                        <div class="form-group" id="paywallPriceGroup" style="flex: 1; display: none; margin-bottom: 0;">
+                                            <label class="form-label" for="price" style="font-size: 0.8rem;">콘텐츠 해제 가격 (원)</label>
+                                            <input class="form-input" type="number" id="price" name="price" min="100" step="100" value="1000" style="padding: 8px 12px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 5: Pixels & Tracking Scripts -->
+                            <div class="accordion-section">
+                                <div class="accordion-header" onclick="toggleAccordion(this)">
+                                    <span>🎯 5. 마케팅 픽셀 및 스크립트 트래킹</span>
+                                </div>
+                                <div class="accordion-content">
+                                    <div class="form-group">
+                                        <label class="form-label" for="fbPixelId">
+                                            <span th:text="#{dashboard.fb_pixel}">Facebook Pixel ID</span>
+                                            <span class="logo-badge" style="font-size:0.55rem;" th:if="${currentUser.subscriptionTier == 'FREE'}">STARTER 이상 LOCK</span>
+                                        </label>
+                                        <input class="form-input" type="text" id="fbPixelId" name="fbPixelId" placeholder="1234567890"
+                                               th:disabled="${currentUser.subscriptionTier == 'FREE'}"
+                                               th:style="${currentUser.subscriptionTier == 'FREE'} ? 'opacity: 0.4;' : ''">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label" for="gaTrackingId">
+                                            <span th:text="#{dashboard.ga_pixel}">Google Analytics ID</span>
+                                            <span class="logo-badge" style="font-size:0.55rem;" th:if="${currentUser.subscriptionTier == 'FREE'}">STARTER 이상 LOCK</span>
+                                        </label>
+                                        <input class="form-input" type="text" id="gaTrackingId" name="gaTrackingId" placeholder="G-ABC123XYZ"
+                                               th:disabled="${currentUser.subscriptionTier == 'FREE'}"
+                                               th:style="${currentUser.subscriptionTier == 'FREE'} ? 'opacity: 0.4;' : ''">
+                                    </div>
+
+                                    <div class="form-group" style="margin-bottom: 0;">
+                                        <label class="form-label" for="customScript">
+                                            <span th:text="#{dashboard.custom_script}">Custom Script</span>
+                                            <span class="logo-badge" style="font-size:0.55rem;" th:if="${currentUser.subscriptionTier != 'PREMIUM'}">PREMIUM LOCK</span>
+                                        </label>
+                                        <textarea class="form-input" id="customScript" name="customScript" rows="3" placeholder="&lt;script&gt;console.log('Custom Logic');&lt;/script&gt;"
+                                                  th:disabled="${currentUser.subscriptionTier != 'PREMIUM'}"
+                                                  th:style="${currentUser.subscriptionTier != 'PREMIUM'} ? 'opacity: 0.4;' : ''"
+                                                  style="resize: none; font-family: monospace;"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- 전송 및 취소 버튼 -->
+                        <div style="display: flex; gap: 16px;">
+                            <a th:href="@{/dashboard(userId=${currentUserId})}" class="btn btn-secondary" style="flex: 1; padding: 14px;">취소</a>
+                            <button class="btn" type="submit" style="flex: 2;">고급 단축 링크 생성하기</button>
+                        </div>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </div>
+
+    <!-- 토스트 메시지 안내 컴포넌트 -->
+    <div class="toast" id="globalToast">
+        <span class="toast-icon"></span>
+        <span class="toast-message">Notification</span>
+    </div>
+
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const currentUserId = /*[[${currentUser.id}]]*/ 'test-user';
+        
+        const translations = {
+            copySuccess: /*[[#{toast.copy_success}]]*/ 'URL copied to clipboard.',
+            createSuccess: /*[[#{toast.create_success}]]*/ 'Short URL created.',
+            genericError: /*[[#{toast.generic_error}]]*/ 'Error occurred.'
+        };
+        
+        document.getElementById('host-prefix').innerText = window.location.host + '/';
+
+        // 아코디언 토글 제어
+        function toggleAccordion(header) {
+            const section = header.parentElement;
+            section.classList.toggle('active');
+        }
+
+        // 언어 변경 처리
+        function switchLanguage(lang) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', lang);
+            window.location.href = url.toString();
+        }
+
+        // 유저 계정 전환
+        function switchUser(userId) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('userId', userId);
+            window.location.href = url.toString();
+        }
+
+        // 광고 노출 토글
+        function toggleAdTimer(checked) {
+            const group = document.getElementById('adTimerGroup');
+            group.style.display = checked ? 'block' : 'none';
+        }
+
+        // 페이월 토글
+        function togglePaywallPrice(checked) {
+            const group = document.getElementById('paywallPriceGroup');
+            group.style.display = checked ? 'block' : 'none';
+        }
+
+        // 스마트 라우팅 동적 규칙 필드 추가
+        function addRouteRuleField() {
+            const list = document.getElementById('routeRulesList');
+            const row = document.createElement('div');
+            row.className = 'route-rule-row';
+            row.style.display = 'flex';
+            row.style.gap = '10px';
+            row.style.alignItems = 'center';
+            row.style.background = '#f1f5f9';
+            row.style.padding = '10px';
+            row.style.borderRadius = '8px';
+            row.style.border = '1px solid #e2e8f0';
+
+            row.innerHTML = `
+                <select class="form-input rule-type-select" style="flex: 0.8; padding: 8px;" onchange="handleRuleTypeChange(this)">
+                    <option value="OS">OS</option>
+                    <option value="DEVICE">DEVICE</option>
+                </select>
+                <input class="form-input rule-val-input" type="text" placeholder="예: iOS, Android, Windows, macOS" style="flex: 1; padding: 8px;">
+                <input class="form-input rule-url-input" type="url" placeholder="이동할 URL (https://...)" style="flex: 2; padding: 8px;">
+                <button type="button" class="btn" style="background:#ef4444; padding: 8px 12px; margin:0; width: auto;" onclick="removeRouteRuleField(this)">✕</button>
+            `;
+            list.appendChild(row);
+        }
+
+        function removeRouteRuleField(btn) {
+            btn.parentElement.remove();
+        }
+
+        function handleRuleTypeChange(select) {
+            const input = select.parentElement.querySelector('.rule-val-input');
+            if (select.value === 'OS') {
+                input.placeholder = '예: iOS, Android, Windows, macOS';
+            } else if (select.value === 'DEVICE') {
+                input.placeholder = '예: Mobile, Desktop, Tablet';
+            }
+        }
+
+        // 고급 링크 생성 요청 처리
+        function handleCreateLink(event) {
+            event.preventDefault();
+            const form = event.target;
+            
+            // 스마트 라우팅 규칙 수집
+            const routeRules = [];
+            const ruleRows = document.querySelectorAll('.route-rule-row');
+            ruleRows.forEach(row => {
+                const type = row.querySelector('.rule-type-select').value;
+                const val = row.querySelector('.rule-val-input').value.trim();
+                const url = row.querySelector('.rule-url-input').value.trim();
+                if (type && val && url) {
+                    routeRules.push({
+                        ruleType: type,
+                        ruleValue: val,
+                        targetUrl: url
+                    });
+                }
+            });
+
+            const data = {
+                defaultTargetUrl: form.defaultTargetUrl.value,
+                shortCode: form.shortCode ? form.shortCode.value : '',
+                title: form.title ? form.title.value : '',
+                description: form.description ? form.description.value : '',
+                ogImage: form.ogImage ? form.ogImage.value : '',
+                fbPixelId: (form.fbPixelId && !form.fbPixelId.disabled) ? form.fbPixelId.value : '',
+                gaTrackingId: (form.gaTrackingId && !form.gaTrackingId.disabled) ? form.gaTrackingId.value : '',
+                customScript: (form.customScript && !form.customScript.disabled) ? form.customScript.value : '',
+                
+                adEnabled: document.getElementById('adEnabled').checked,
+                adTimerSeconds: parseInt(document.getElementById('adTimerSeconds').value) || 5,
+                paywalled: document.getElementById('paywalled').checked,
+                price: parseInt(document.getElementById('price').value) || 0,
+                
+                routeRules: routeRules
+            };
+
+            fetch('/api/links?userId=' + currentUserId, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.json())
+            .then(json => {
+                if (json.success) {
+                    showToast(translations.createSuccess, 'success');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard/links?userId=' + currentUserId;
+                    }, 1000);
+                } else {
+                    showToast(json.error.message, 'error');
+                }
+            })
+            .catch(err => {
+                showToast(translations.genericError, 'error');
+            });
+        }
+
+        // 토스트 메시지 공통 알리미
+        function showToast(message, type) {
+            const toast = document.getElementById('globalToast');
+            toast.className = 'toast toast-' + type;
+            toast.querySelector('.toast-message').innerText = message;
+            toast.querySelector('.toast-icon').innerText = type === 'success' ? '✔' : '⚠';
+            
+            toast.classList.add('active');
+            
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+        /*]]>*/
+    </script>
+</body>
+</html>

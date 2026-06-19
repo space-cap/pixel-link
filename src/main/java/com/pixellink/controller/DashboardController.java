@@ -81,6 +81,30 @@ public class DashboardController {
         return "dashboard";
     }
 
+    @GetMapping("/dashboard/create")
+    public String showAdvancedCreate(
+            @RequestParam(value = "userId", defaultValue = "test-user") String userId,
+            Model model) {
+        
+        User user = userMapper.findById(userId);
+        if (user == null) {
+            user = userMapper.findById("test-user");
+            userId = "test-user";
+        }
+
+        List<User> mockUsers = Arrays.asList(
+            userMapper.findById("admin"),
+            userMapper.findById("test-user"),
+            userMapper.findById("free-user")
+        );
+
+        model.addAttribute("currentUser", user);
+        model.addAttribute("currentUserId", userId);
+        model.addAttribute("mockUsers", mockUsers);
+
+        return "create";
+    }
+
     @GetMapping("/dashboard/links")
     public String showLinks(
             @RequestParam(value = "userId", defaultValue = "test-user") String userId,

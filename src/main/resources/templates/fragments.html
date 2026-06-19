@@ -39,6 +39,11 @@
                 <span class="menu-icon">🧭</span>
                 <span th:text="#{menu.dashboard}">대시보드</span>
             </a>
+            <a th:href="@{/dashboard/create(userId=${currentUserId})}" 
+               th:class="${activeMenu == 'create'} ? 'menu-item active' : 'menu-item'">
+                <span class="menu-icon">➕</span>
+                <span th:text="#{menu.advanced_create}">고급 링크 생성</span>
+            </a>
             <a th:href="@{/dashboard/links(userId=${currentUserId})}" 
                th:class="${activeMenu == 'links'} ? 'menu-item active' : 'menu-item'">
                 <span class="menu-icon">🔗</span>

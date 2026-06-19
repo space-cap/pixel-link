@@ -38,6 +38,12 @@ public class AdminController {
     @Autowired
     private HttpSession httpSession;
 
+    @Autowired
+    private com.pixellink.service.LinkService linkService;
+
+    @Autowired
+    private com.pixellink.mapper.SystemSettingMapper systemSettingMapper;
+
     @GetMapping("/dashboard")
     public String viewDashboard(Model model) {
         SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
@@ -153,5 +159,41 @@ public class AdminController {
 
         settlementMapper.updateStatus(id, "REJECTED");
         return ResponseEntity.ok().body("{\"status\":\"success\"}");
+    }
+
+    @GetMapping("/settings")
+    public String viewSettings(Model model) {
+        SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
+        if (sessionUser == null || !"ADMIN".equalsIgnoreCase(sessionUser.getRole())) {
+            return "redirect:/app/dashboard";
+        }
+
+        List<com.pixellink.model.SystemSetting> settings = systemSettingMapper.findAll();
+        model.addAttribute("settings", settings);
+        model.addAttribute("user", sessionUser);
+
+        return "admin/settings";
+    }
+
+    @PostMapping("/settings/update")
+    public String updateSettings(
+            @RequestParam java.util.Map<String, String> params,
+            org.springframework.web.servlet.mvc.support.RedirectAttributes redirectAttributes) {
+        SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
+        if (sessionUser == null || !"ADMIN".equalsIgnoreCase(sessionUser.getRole())) {
+            return "redirect:/app/dashboard";
+        }
+
+        try {
+            java.util.Map<String, String> settings = new java.util.HashMap<>(params);
+            settings.remove("_csrf");
+            
+            linkService.updateSystemSettings(settings);
+            redirectAttributes.addFlashAttribute("successMessage", "시스템 설정이 성공적으로 저장되었습니다.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:/app/admin/settings";
     }
 }

@@ -282,11 +282,20 @@ public class LinkService {
         String ipHash = hashIpAddress(clientIp);
         clickLogMapper.updateAdClicked(linkId, ipHash);
 
-        // 광고 클릭 70% 쉐어액 (70원) 적재
+        // 광고 클릭 적립 단가 가져오기
+        String adRewardStr = getSystemSetting("ad_reward_per_click", "70");
+        int adReward = 70;
+        try {
+            adReward = Integer.parseInt(adRewardStr);
+        } catch (NumberFormatException e) {
+            // 기본값 유지
+        }
+
+        // 광고 클릭 쉐어액 적재
         com.pixellink.model.Settlement settlement = new com.pixellink.model.Settlement();
         settlement.setId(UUID.randomUUID().toString());
         settlement.setUserId(link.getUserId());
-        settlement.setAmount(70);
+        settlement.setAmount(adReward);
         settlement.setStatus("PENDING");
         settlementMapper.insert(settlement);
     }
@@ -313,8 +322,17 @@ public class LinkService {
     @Transactional
     public void withdrawSettlements(String userId, String bankName, String accountNumber, String accountHolder) {
         Integer balance = settlementMapper.sumAmountByUserId(userId);
-        if (balance == null || balance < 10000) {
-            throw new IllegalStateException("출금 신청 가능한 정산금이 부족합니다. (최소 10,000원)");
+        
+        String minWithdrawStr = getSystemSetting("min_withdrawal_amount", "10000");
+        int minWithdraw = 10000;
+        try {
+            minWithdraw = Integer.parseInt(minWithdrawStr);
+        } catch (NumberFormatException e) {
+            // 기본값 유지
+        }
+        
+        if (balance == null || balance < minWithdraw) {
+            throw new IllegalStateException("출금 신청 가능한 정산금이 부족합니다. (최소 " + String.format("%,d", minWithdraw) + "원)");
         }
         settlementMapper.updateStatusByUserId(userId, "COMPLETED");
 
@@ -363,6 +381,57 @@ public class LinkService {
     public boolean isLinkPaidByClient(String linkId, String clientIp) {
         String ipHash = hashIpAddress(clientIp);
         return paymentMapper.findByLinkIdAndIpHash(linkId, ipHash) != null;
+    }
+
+    @Transactional
+    public void updateSystemSettings(java.util.Map<String, String> settings) {
+        if (settings == null) return;
+        for (java.util.Map.Entry<String, String> entry : settings.entrySet()) {
+            String key = entry.getKey();
+            String value = entry.getValue();
+            if (value == null) continue;
+            
+            // 검증 로직
+            if ("anon_link_expiry_days".equals(key)) {
+                try {
+                    int days = Integer.parseInt(value);
+                    if (days <= 0) {
+                        throw new IllegalArgumentException("만료 기간은 1일 이상이어야 합니다.");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("만료 기간은 숫자 형식이어야 합니다.");
+                }
+            } else if ("ad_reward_per_click".equals(key)) {
+                try {
+                    int reward = Integer.parseInt(value);
+                    if (reward < 0) {
+                        throw new IllegalArgumentException("클릭당 적립 단가는 0원 이상이어야 합니다.");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("적립 단가는 숫자 형식이어야 합니다.");
+                }
+            } else if ("min_withdrawal_amount".equals(key)) {
+                try {
+                    int minAmount = Integer.parseInt(value);
+                    if (minAmount < 1000) {
+                        throw new IllegalArgumentException("최소 출금 가능액은 1,000원 이상이어야 합니다.");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("최소 출금 가능액은 숫자 형식이어야 합니다.");
+                }
+            } else if ("starter_monthly_fee".equals(key) || "premium_monthly_fee".equals(key)) {
+                try {
+                    int fee = Integer.parseInt(value);
+                    if (fee < 0) {
+                        throw new IllegalArgumentException("요금은 0원 이상이어야 합니다.");
+                    }
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("요금은 숫자 형식이어야 합니다.");
+                }
+            }
+            
+            systemSettingMapper.updateValue(key, value);
+        }
     }
 }
 

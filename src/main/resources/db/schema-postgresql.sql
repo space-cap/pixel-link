@@ -94,6 +94,22 @@ INSERT INTO system_settings (setting_key, setting_value, description)
 VALUES ('anon_link_expiry_days', '30', '비회원 단축 링크 만료 기간 (일)')
 ON CONFLICT (setting_key) DO NOTHING;
 
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('ad_reward_per_click', '70', '광고 클릭당 적립 단가 (원)')
+ON CONFLICT (setting_key) DO NOTHING;
+
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('min_withdrawal_amount', '10000', '최소 출금 신청 금액 (원)')
+ON CONFLICT (setting_key) DO NOTHING;
+
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('starter_monthly_fee', '9900', '스타터 요금제 가격 (원)')
+ON CONFLICT (setting_key) DO NOTHING;
+
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('premium_monthly_fee', '19900', '프리미엄 요금제 가격 (원)')
+ON CONFLICT (setting_key) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS api_keys (
     id VARCHAR(50) PRIMARY KEY,
     user_id VARCHAR(50) NOT NULL REFERENCES users(id),

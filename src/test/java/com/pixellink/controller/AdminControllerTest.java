@@ -184,4 +184,49 @@ public class AdminControllerTest {
         org.junit.jupiter.api.Assertions.assertNotNull(updated);
         org.junit.jupiter.api.Assertions.assertEquals("REJECTED", updated.getStatus());
     }
+
+    @Test
+    void viewSettings_AsAdmin_ReturnsSettingsPage() throws Exception {
+        mockMvc.perform(get("/app/admin/settings")
+                        .session(new MockHttpSession())
+                        .param("userId", "admin"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("admin/settings"))
+                .andExpect(model().attributeExists("settings"))
+                .andExpect(model().attributeExists("user"));
+    }
+
+    @Test
+    void viewSettings_AsRegularUser_Forbidden() throws Exception {
+        mockMvc.perform(get("/app/admin/settings")
+                        .session(new MockHttpSession())
+                        .param("userId", "test-user"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    void updateSettings_AsAdmin_Success() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/app/admin/settings/update")
+                        .session(new MockHttpSession())
+                        .param("userId", "admin")
+                        .param("anon_link_expiry_days", "15")
+                        .param("ad_reward_per_click", "120")
+                        .param("min_withdrawal_amount", "5000")
+                        .param("starter_monthly_fee", "9900")
+                        .param("premium_monthly_fee", "19900"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/app/admin/settings"))
+                .andExpect(flash().attributeExists("successMessage"));
+    }
+
+    @Test
+    void updateSettings_InvalidValues_ReturnsErrorMessage() throws Exception {
+        mockMvc.perform(org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post("/app/admin/settings/update")
+                        .session(new MockHttpSession())
+                        .param("userId", "admin")
+                        .param("anon_link_expiry_days", "-5"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/app/admin/settings"))
+                .andExpect(flash().attributeExists("errorMessage"));
+    }
 }

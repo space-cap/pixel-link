@@ -19,4 +19,12 @@
     WHERE setting_key = #{key}
   </update>
 
+  <select id="findAll" resultType="com.pixellink.model.SystemSetting">
+    SELECT 
+      setting_key AS settingKey,
+      setting_value AS settingValue,
+      description
+    FROM system_settings
+  </select>
+
 </mapper>

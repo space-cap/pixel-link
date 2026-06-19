@@ -77,6 +77,7 @@ public class DashboardController {
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 sessionUser, null, Collections.singletonList(authority));
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        httpSession.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
         return "redirect:/app/dashboard";
     }

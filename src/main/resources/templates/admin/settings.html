@@ -259,6 +259,46 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <!-- 고급 기능 제어 설정 -->
+                            <div class="settings-group">
+                                <div class="settings-title">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                                    <span>고급 기능 노출 설정</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 10px;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox" id="feature_custom_slug_enabled" name="feature_custom_slug_enabled" value="true" 
+                                               th:checked="${customSlugEnabled}"
+                                               style="width: 18px; height: 18px; accent-color: #3b82f6; cursor: pointer;">
+                                        <label for="feature_custom_slug_enabled" class="form-label" style="margin-bottom: 0; cursor: pointer; text-transform: none;">Custom Slug 기능 노출</label>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox" id="feature_seo_preview_enabled" name="feature_seo_preview_enabled" value="true" 
+                                               th:checked="${seoPreviewEnabled}"
+                                               style="width: 18px; height: 18px; accent-color: #3b82f6; cursor: pointer;">
+                                        <label for="feature_seo_preview_enabled" class="form-label" style="margin-bottom: 0; cursor: pointer; text-transform: none;">SEO Social Preview 노출</label>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox" id="feature_smart_routing_enabled" name="feature_smart_routing_enabled" value="true" 
+                                               th:checked="${smartRoutingEnabled}"
+                                               style="width: 18px; height: 18px; accent-color: #3b82f6; cursor: pointer;">
+                                        <label for="feature_smart_routing_enabled" class="form-label" style="margin-bottom: 0; cursor: pointer; text-transform: none;">스마트 라우팅 기능 노출</label>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox" id="feature_monetization_enabled" name="feature_monetization_enabled" value="true" 
+                                               th:checked="${monetizationEnabled}"
+                                               style="width: 18px; height: 18px; accent-color: #3b82f6; cursor: pointer;">
+                                        <label for="feature_monetization_enabled" class="form-label" style="margin-bottom: 0; cursor: pointer; text-transform: none;">수익화(광고/페이월) 노출</label>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox" id="feature_marketing_pixel_enabled" name="feature_marketing_pixel_enabled" value="true" 
+                                               th:checked="${marketingPixelEnabled}"
+                                               style="width: 18px; height: 18px; accent-color: #3b82f6; cursor: pointer;">
+                                        <label for="feature_marketing_pixel_enabled" class="form-label" style="margin-bottom: 0; cursor: pointer; text-transform: none;">마케팅 픽셀 기능 노출</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- 저장 버튼 -->

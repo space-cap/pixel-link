@@ -32,11 +32,12 @@
                                    th:placeholder="#{dashboard.target_placeholder}" style="padding: 14px 18px; font-size: 0.95rem;">
                         </div>
 
-                        <!-- 5대 고급 옵션 아코디언 그룹 -->
-                        <div class="accordion-container" style="margin-bottom: 28px;">
+                        <!-- 5대 고급 옵션 아코디언 그룹 (활성화된 고급 기능이 최소 1개 이상 있는 경우에만 노출) -->
+                        <div class="accordion-container" style="margin-bottom: 28px;"
+                             th:if="${customSlugEnabled || seoPreviewEnabled || smartRoutingEnabled || monetizationEnabled || marketingPixelEnabled}">
                             
                             <!-- Section 1: Custom Slug -->
-                            <div class="accordion-section">
+                            <div class="accordion-section" th:if="${customSlugEnabled}">
                                 <div class="accordion-header" onclick="toggleAccordion(this)">
                                     <span>🔗 1. 맞춤형 단축 경로 설정 (Custom Slug)</span>
                                 </div>
@@ -52,7 +53,7 @@
                             </div>
 
                             <!-- Section 2: SEO Social Share Preview -->
-                            <div class="accordion-section">
+                            <div class="accordion-section" th:if="${seoPreviewEnabled}">
                                 <div class="accordion-header" onclick="toggleAccordion(this)">
                                     <span>📝 2. 소셜 프리뷰 및 SEO 설정</span>
                                 </div>
@@ -73,7 +74,7 @@
                             </div>
 
                             <!-- Section 3: Smart Routing -->
-                            <div class="accordion-section">
+                            <div class="accordion-section" th:if="${smartRoutingEnabled}">
                                 <div class="accordion-header" onclick="toggleAccordion(this)">
                                     <span>🧭 3. 기기 및 OS 기반 스마트 라우팅</span>
                                 </div>
@@ -93,7 +94,7 @@
                             </div>
 
                             <!-- Section 4: Monetization (Paywall & Ads) -->
-                            <div class="accordion-section">
+                            <div class="accordion-section" th:if="${monetizationEnabled}">
                                 <div class="accordion-header" onclick="toggleAccordion(this)">
                                     <span>💰 4. 수익화 (페이월 잠금 & 광고 노출)</span>
                                 </div>
@@ -124,7 +125,7 @@
                             </div>
 
                             <!-- Section 5: Pixels & Tracking Scripts -->
-                            <div class="accordion-section">
+                            <div class="accordion-section" th:if="${marketingPixelEnabled}">
                                 <div class="accordion-header" onclick="toggleAccordion(this)">
                                     <span>🎯 5. 마케팅 픽셀 및 스크립트 트래킹</span>
                                 </div>

@@ -34,7 +34,8 @@
                         </div>
 
                         <button class="btn" type="submit" th:text="#{dashboard.submit_btn}">Create Link</button>
-                        <div style="margin-top: 16px; text-align: center;">
+                        <div style="margin-top: 16px; text-align: center;"
+                             th:if="${customSlugEnabled || seoPreviewEnabled || smartRoutingEnabled || monetizationEnabled || marketingPixelEnabled}">
                             <a th:href="@{/app/create(userId=${currentUserId})}" style="font-size: 0.85rem; color: var(--accent-secondary); font-weight: 600; text-decoration: underline;">➕ 고급 설정(맞춤 경로, 스마트 라우팅 등) 추가하여 생성하기</a>
                         </div>
                     </form>

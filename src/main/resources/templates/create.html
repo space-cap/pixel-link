@@ -9,7 +9,7 @@
 <body>
 
     <!-- 상단 헤더 조각 통합 -->
-    <div th:replace="~{fragments :: header(currentUser=${currentUser}, currentUserId=${currentUserId})}"></div>
+    <div th:replace="~{fragments :: dashboardHeader(currentUser=${currentUser}, currentUserId=${currentUserId})}"></div>
 
     <!-- 대시보드 메인 본문 -->
     <div class="dashboard-container">

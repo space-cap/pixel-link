@@ -4,6 +4,58 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="#{faq.title}">FAQ - Pixel-Link</title>
+    <meta name="description" th:content="#{seo.faq.description}">
+    <meta name="keywords" th:content="#{seo.faq.keywords}">
+    
+    <!-- Open Graph (소셜 공유 최적화) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" th:content="#{faq.title}">
+    <meta property="og:description" th:content="#{seo.faq.description}">
+    
+    <!-- Google FAQPage 구조화 데이터 (SEO) -->
+    <script type="application/ld+json" th:inline="javascript">
+    /*<![CDATA[*/
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": /*[[#{faq.general.q1}]]*/ "회원가입은 어떻게 하나요?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": /*[[#{faq.general.a1}]]*/ "회원가입 방법..."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": /*[[#{faq.general.q2}]]*/ "비밀번호 분실...",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": /*[[#{faq.general.a2}]]*/ "비밀번호 해결방법..."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": /*[[#{faq.links.q1}]]*/ "링크 만료...",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": /*[[#{faq.links.a1}]]*/ "링크 만료 해결방법..."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": /*[[#{faq.links.q2}]]*/ "맞춤 숏코드...",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": /*[[#{faq.links.a2}]]*/ "맞춤 숏코드 해결방법..."
+          }
+        }
+      ]
+    }
+    /*]]>*/
+    </script>
+    
     <!-- global.css 스타일 연동 -->
     <link rel="stylesheet" th:href="@{/css/global.css}">
     <style>
@@ -188,7 +240,7 @@
                             <!-- 일반 카테고리 질문 -->
                             <div class="faq-item faq-cat-general" style="display: block;">
                                 <button class="faq-question-btn" onclick="toggleFaqItem(this)">
-                                    <span th:text="#{faq.general.q1}">How do I sign up?</span>
+                                    <h3 style="font-size: inherit; font-weight: inherit; margin: 0; display: inline;" th:text="#{faq.general.q1}">How do I sign up?</h3>
                                     <span class="arrow-icon">▼</span>
                                 </button>
                                 <div class="faq-answer-panel">
@@ -200,7 +252,7 @@
                             
                             <div class="faq-item faq-cat-general" style="display: block;">
                                 <button class="faq-question-btn" onclick="toggleFaqItem(this)">
-                                    <span th:text="#{faq.general.q2}">Forgot password?</span>
+                                    <h3 style="font-size: inherit; font-weight: inherit; margin: 0; display: inline;" th:text="#{faq.general.q2}">Forgot password?</h3>
                                     <span class="arrow-icon">▼</span>
                                 </button>
                                 <div class="faq-answer-panel">
@@ -213,7 +265,7 @@
                             <!-- 단축 링크 카테고리 질문 -->
                             <div class="faq-item faq-cat-links" style="display: none;">
                                 <button class="faq-question-btn" onclick="toggleFaqItem(this)">
-                                    <span th:text="#{faq.links.q1}">When do links expire?</span>
+                                    <h3 style="font-size: inherit; font-weight: inherit; margin: 0; display: inline;" th:text="#{faq.links.q1}">When do links expire?</h3>
                                     <span class="arrow-icon">▼</span>
                                 </button>
                                 <div class="faq-answer-panel">
@@ -225,7 +277,7 @@
 
                             <div class="faq-item faq-cat-links" style="display: none;">
                                 <button class="faq-question-btn" onclick="toggleFaqItem(this)">
-                                    <span th:text="#{faq.links.q2}">Can I customize slugs?</span>
+                                    <h3 style="font-size: inherit; font-weight: inherit; margin: 0; display: inline;" th:text="#{faq.links.q2}">Can I customize slugs?</h3>
                                     <span class="arrow-icon">▼</span>
                                 </button>
                                 <div class="faq-answer-panel">
@@ -263,7 +315,7 @@
                 <!-- 일반 카테고리 질문 -->
                 <div class="faq-item faq-cat-general" style="display: block;">
                     <button class="faq-question-btn" onclick="toggleFaqItem(this)">
-                        <span th:text="#{faq.general.q1}">How do I sign up?</span>
+                        <h3 style="font-size: inherit; font-weight: inherit; margin: 0; display: inline;" th:text="#{faq.general.q1}">How do I sign up?</h3>
                         <span class="arrow-icon">▼</span>
                     </button>
                     <div class="faq-answer-panel">
@@ -275,7 +327,7 @@
                 
                 <div class="faq-item faq-cat-general" style="display: block;">
                     <button class="faq-question-btn" onclick="toggleFaqItem(this)">
-                        <span th:text="#{faq.general.q2}">Forgot password?</span>
+                        <h3 style="font-size: inherit; font-weight: inherit; margin: 0; display: inline;" th:text="#{faq.general.q2}">Forgot password?</h3>
                         <span class="arrow-icon">▼</span>
                     </button>
                     <div class="faq-answer-panel">
@@ -288,7 +340,7 @@
                 <!-- 단축 링크 카테고리 질문 -->
                 <div class="faq-item faq-cat-links" style="display: none;">
                     <button class="faq-question-btn" onclick="toggleFaqItem(this)">
-                        <span th:text="#{faq.links.q1}">When do links expire?</span>
+                        <h3 style="font-size: inherit; font-weight: inherit; margin: 0; display: inline;" th:text="#{faq.links.q1}">When do links expire?</h3>
                         <span class="arrow-icon">▼</span>
                     </button>
                     <div class="faq-answer-panel">
@@ -300,7 +352,7 @@
 
                 <div class="faq-item faq-cat-links" style="display: none;">
                     <button class="faq-question-btn" onclick="toggleFaqItem(this)">
-                        <span th:text="#{faq.links.q2}">Can I customize slugs?</span>
+                        <h3 style="font-size: inherit; font-weight: inherit; margin: 0; display: inline;" th:text="#{faq.links.q2}">Can I customize slugs?</h3>
                         <span class="arrow-icon">▼</span>
                     </button>
                     <div class="faq-answer-panel">

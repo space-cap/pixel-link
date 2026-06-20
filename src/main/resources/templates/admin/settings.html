@@ -225,6 +225,40 @@
                                            min="0" required>
                                 </div>
                             </div>
+
+                            <!-- 소셜 로그인 설정 -->
+                            <div class="settings-group">
+                                <div class="settings-title">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                                    <span>소셜 로그인 노출 설정</span>
+                                </div>
+                                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 10px;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox" id="oauth_google_enabled" name="oauth_google_enabled" value="true" 
+                                               th:checked="${#strings.toString(settings.?[settingKey == 'oauth_google_enabled'][0]?.settingValue) == 'true'}"
+                                               style="width: 18px; height: 18px; accent-color: #3b82f6; cursor: pointer;">
+                                        <label for="oauth_google_enabled" class="form-label" style="margin-bottom: 0; cursor: pointer; text-transform: none;">Google 로그인 활성화</label>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox" id="oauth_facebook_enabled" name="oauth_facebook_enabled" value="true" 
+                                               th:checked="${#strings.toString(settings.?[settingKey == 'oauth_facebook_enabled'][0]?.settingValue) == 'true'}"
+                                               style="width: 18px; height: 18px; accent-color: #3b82f6; cursor: pointer;">
+                                        <label for="oauth_facebook_enabled" class="form-label" style="margin-bottom: 0; cursor: pointer; text-transform: none;">Facebook 로그인 활성화</label>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox" id="oauth_naver_enabled" name="oauth_naver_enabled" value="true" 
+                                               th:checked="${#strings.toString(settings.?[settingKey == 'oauth_naver_enabled'][0]?.settingValue) == 'true'}"
+                                               style="width: 18px; height: 18px; accent-color: #3b82f6; cursor: pointer;">
+                                        <label for="oauth_naver_enabled" class="form-label" style="margin-bottom: 0; cursor: pointer; text-transform: none;">Naver 로그인 활성화</label>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <input type="checkbox" id="oauth_kakao_enabled" name="oauth_kakao_enabled" value="true" 
+                                               th:checked="${#strings.toString(settings.?[settingKey == 'oauth_kakao_enabled'][0]?.settingValue) == 'true'}"
+                                               style="width: 18px; height: 18px; accent-color: #3b82f6; cursor: pointer;">
+                                        <label for="oauth_kakao_enabled" class="form-label" style="margin-bottom: 0; cursor: pointer; text-transform: none;">Kakao 로그인 활성화</label>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <!-- 저장 버튼 -->

@@ -386,6 +386,15 @@ public class LinkService {
     @Transactional
     public void updateSystemSettings(java.util.Map<String, String> settings) {
         if (settings == null) return;
+
+        // OAuth 활성화 여부 기본값 보완 (체크되지 않으면 false로 세팅)
+        String[] oauthKeys = {"oauth_google_enabled", "oauth_facebook_enabled", "oauth_naver_enabled", "oauth_kakao_enabled"};
+        for (String k : oauthKeys) {
+            if (!settings.containsKey(k)) {
+                settings.put(k, "false");
+            }
+        }
+
         for (java.util.Map.Entry<String, String> entry : settings.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();

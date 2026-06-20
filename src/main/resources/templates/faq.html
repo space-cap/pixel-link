@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="#{faq.title}">FAQ - Pixel-Link</title>
+    <!-- global.css 스타일 연동 -->
+    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <style>
+        /* FAQ 전용 추가 모던 스타일링 */
+        .faq-outer-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        .faq-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .faq-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+        .faq-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+        /* 카테고리 탭 스위처 */
+        .faq-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding-bottom: 15px;
+        }
+        .faq-tab-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: var(--text-muted);
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .faq-tab-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-dark);
+        }
+        .faq-tab-btn.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);
+        }
+        /* 아코디언 리스트 */
+        .faq-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .faq-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .faq-item:hover {
+            border-color: rgba(59, 130, 246, 0.2);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .faq-question-btn {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            background: transparent;
+            border: none;
+            color: var(--text-dark);
+            font-size: 1.05rem;
+            font-weight: 600;
+            text-align: left;
+            cursor: pointer;
+        }
+        .faq-question-btn .arrow-icon {
+            font-size: 0.9rem;
+            transition: transform 0.3s ease;
+            color: var(--text-muted);
+        }
+        .faq-item.active .arrow-icon {
+            transform: rotate(180deg);
+            color: var(--accent-primary);
+        }
+        .faq-answer-panel {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.01);
+            border-top: 1px solid transparent;
+        }
+        .faq-item.active .faq-answer-panel {
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        .faq-answer-content {
+            padding: 20px 24px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+        
+        /* 메인 랜딩페이지와 동일한 헤더 버튼 및 액션 스타일 */
+        .header-action {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn-login-header {
+            text-decoration: none;
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #475569;
+            transition: all 0.2s;
+        }
+        .btn-login-header:hover {
+            color: #0f172a;
+            background-color: #f1f5f9;
+        }
+        .btn-signup-header {
+            text-decoration: none;
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            background: #2563eb;
+            color: white !important;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+        .btn-signup-header:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+        }
+        .btn-signup-header:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. 로그인 상태 레이아웃 (대시보드 조각 통합) -->
+    <div th:if="${currentUser != null}">
+        <!-- 상단 헤더 조각 통합 -->
+        <div th:replace="~{fragments :: header(currentUser=${currentUser}, currentUserId=${currentUserId})}"></div>
+
+        <div class="dashboard-container">
+            <!-- 사이드바 조각 통합 -->
+            <div th:replace="~{fragments :: sidebar(activeMenu='faq', currentUserId=${currentUserId}, currentUser=${currentUser})}"></div>
+
+            <div class="content-area">
+                <div class="content-wide">
+                    <!-- FAQ 메인 본문 -->
+                    <div class="card" style="padding: 40px; width: 100%;">
+                        <div class="faq-header">
+                            <h1 class="faq-title" th:text="#{faq.title}">Frequently Asked Questions</h1>
+                            <p class="faq-subtitle" th:text="#{faq.subtitle}">Find answers to common questions about using our service.</p>
+                        </div>
+
+                        <!-- 카테고리 탭 -->
+                        <div class="faq-tabs">
+                            <button class="faq-tab-btn active" onclick="switchFaqTab('general')" th:text="#{faq.cat.general}">General</button>
+                            <button class="faq-tab-btn" onclick="switchFaqTab('links')" th:text="#{faq.cat.links}">Short Links</button>
+                        </div>
+
+                        <!-- FAQ 질문 리스트 -->
+                        <div class="faq-list">
+                            <!-- 일반 카테고리 질문 -->
+                            <div class="faq-item faq-cat-general" style="display: block;">
+                                <button class="faq-question-btn" onclick="toggleFaqItem(this)">
+                                    <span th:text="#{faq.general.q1}">How do I sign up?</span>
+                                    <span class="arrow-icon">▼</span>
+                                </button>
+                                <div class="faq-answer-panel">
+                                    <div class="faq-answer-content" th:text="#{faq.general.a1}">
+                                        Sign up details...
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="faq-item faq-cat-general" style="display: block;">
+                                <button class="faq-question-btn" onclick="toggleFaqItem(this)">
+                                    <span th:text="#{faq.general.q2}">Forgot password?</span>
+                                    <span class="arrow-icon">▼</span>
+                                </button>
+                                <div class="faq-answer-panel">
+                                    <div class="faq-answer-content" th:text="#{faq.general.a2}">
+                                        Forgot password details...
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 단축 링크 카테고리 질문 -->
+                            <div class="faq-item faq-cat-links" style="display: none;">
+                                <button class="faq-question-btn" onclick="toggleFaqItem(this)">
+                                    <span th:text="#{faq.links.q1}">When do links expire?</span>
+                                    <span class="arrow-icon">▼</span>
+                                </button>
+                                <div class="faq-answer-panel">
+                                    <div class="faq-answer-content" th:text="#{faq.links.a1}">
+                                        Expiration details...
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="faq-item faq-cat-links" style="display: none;">
+                                <button class="faq-question-btn" onclick="toggleFaqItem(this)">
+                                    <span th:text="#{faq.links.q2}">Can I customize slugs?</span>
+                                    <span class="arrow-icon">▼</span>
+                                </button>
+                                <div class="faq-answer-panel">
+                                    <div class="faq-answer-content" th:text="#{faq.links.a2}">
+                                        Custom slug details...
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 비로그인 상태 레이아웃 (메인 랜딩페이지와 동일한 헤더 및 푸터 적용) -->
+    <div th:if="${currentUser == null}">
+        <!-- 상단 헤더 (공용 조각 적용) -->
+        <header th:replace="~{fragments :: landingHeader}"></header>
+
+        <div class="faq-outer-container">
+            <div class="faq-header">
+                <h1 class="faq-title" th:text="#{faq.title}">Frequently Asked Questions</h1>
+                <p class="faq-subtitle" th:text="#{faq.subtitle}">Find answers to common questions about using our service.</p>
+            </div>
+
+            <!-- 카테고리 탭 -->
+            <div class="faq-tabs">
+                <button class="faq-tab-btn active" onclick="switchFaqTab('general')" th:text="#{faq.cat.general}">General</button>
+                <button class="faq-tab-btn" onclick="switchFaqTab('links')" th:text="#{faq.cat.links}">Short Links</button>
+            </div>
+
+            <!-- FAQ 질문 리스트 -->
+            <div class="faq-list">
+                <!-- 일반 카테고리 질문 -->
+                <div class="faq-item faq-cat-general" style="display: block;">
+                    <button class="faq-question-btn" onclick="toggleFaqItem(this)">
+                        <span th:text="#{faq.general.q1}">How do I sign up?</span>
+                        <span class="arrow-icon">▼</span>
+                    </button>
+                    <div class="faq-answer-panel">
+                        <div class="faq-answer-content" th:text="#{faq.general.a1}">
+                            Sign up details...
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="faq-item faq-cat-general" style="display: block;">
+                    <button class="faq-question-btn" onclick="toggleFaqItem(this)">
+                        <span th:text="#{faq.general.q2}">Forgot password?</span>
+                        <span class="arrow-icon">▼</span>
+                    </button>
+                    <div class="faq-answer-panel">
+                        <div class="faq-answer-content" th:text="#{faq.general.a2}">
+                            Forgot password details...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 단축 링크 카테고리 질문 -->
+                <div class="faq-item faq-cat-links" style="display: none;">
+                    <button class="faq-question-btn" onclick="toggleFaqItem(this)">
+                        <span th:text="#{faq.links.q1}">When do links expire?</span>
+                        <span class="arrow-icon">▼</span>
+                    </button>
+                    <div class="faq-answer-panel">
+                        <div class="faq-answer-content" th:text="#{faq.links.a1}">
+                            Expiration details...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="faq-item faq-cat-links" style="display: none;">
+                    <button class="faq-question-btn" onclick="toggleFaqItem(this)">
+                        <span th:text="#{faq.links.q2}">Can I customize slugs?</span>
+                        <span class="arrow-icon">▼</span>
+                    </button>
+                    <div class="faq-answer-panel">
+                        <div class="faq-answer-content" th:text="#{faq.links.a2}">
+                            Custom slug details...
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 50px; text-align: center;">
+                <a th:href="@{/}" class="btn-secondary" style="display: inline-block; width: auto; padding: 12px 30px; border-radius: 8px;" th:text="#{faq.btn.back_home}">홈페이지로 돌아가기</a>
+            </div>
+        </div>
+        <!-- 푸터 (공용 조각 적용) -->
+        <footer th:replace="~{fragments :: landingFooter}"></footer>
+
+    <!-- JavaScript 비동기 제어 로직 -->
+    <script th:inline="javascript">
+        // 1. 카테고리 탭 전환 처리
+        function switchFaqTab(category) {
+            // 버튼 활성화 처리
+            const buttons = document.querySelectorAll('.faq-tab-btn');
+            buttons.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(category)) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // 해당 카테고리 질문 필터링
+            const items = document.querySelectorAll('.faq-item');
+            items.forEach(item => {
+                // 아코디언 상태 닫기 초기화
+                item.classList.remove('active');
+                const panel = item.querySelector('.faq-answer-panel');
+                if (panel) {
+                    panel.style.maxHeight = null;
+                }
+
+                if (item.classList.contains('faq-cat-' + category)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // 2. 아코디언 접이식 토글 기능
+        function toggleFaqItem(btn) {
+            const item = btn.parentElement;
+            const panel = item.querySelector('.faq-answer-panel');
+            
+            // 다른 활성화된 아코디언은 닫기 (원할 시 토글 독립성을 위해 제거 가능)
+            const activeItems = document.querySelectorAll('.faq-item.active');
+            activeItems.forEach(ai => {
+                if (ai !== item) {
+                    ai.classList.remove('active');
+                    ai.querySelector('.faq-answer-panel').style.maxHeight = null;
+                }
+            });
+
+            // 현재 선택한 요소 토글
+            item.classList.toggle('active');
+            if (item.classList.contains('active')) {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+            } else {
+                panel.style.maxHeight = null;
+            }
+        }
+
+        // 3. 언어 변경 처리
+        function switchLanguage(lang) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('lang', lang);
+            window.location.href = url.toString();
+        }
+    </script>
+</body>
+</html>

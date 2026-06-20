@@ -62,10 +62,11 @@ public class WebSecurityConfig {
                     "/monetization/**", 
                     "/api/links", 
                     "/api/links/*/ad-click", 
-                    "/api/links/*/payments/confirm"
+                    "/api/links/*/payments/confirm",
+                    "/info/faq"
                 ).permitAll()
-                // 로그인 및 회원가입 페이지는 누구나 접근 가능 (보호막에 걸리기 전에 통과)
-                .requestMatchers("/app/login", "/app/signup", "/app/signup/process").permitAll()
+                // 로그인, 회원가입 및 설치 페이지는 누구나 접근 가능 (보호막에 걸리기 전에 통과)
+                .requestMatchers("/app/login", "/app/signup", "/app/signup/process", "/app/install", "/app/install/process").permitAll()
                 // 관리자 경로는 ADMIN 권한 필요
                 .requestMatchers("/app/admin/**").hasRole("ADMIN")
                 // 대시보드는 무조건 보호

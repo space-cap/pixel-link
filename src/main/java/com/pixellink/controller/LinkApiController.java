@@ -27,10 +27,11 @@ public class LinkApiController {
     @PostMapping
     public ResponseEntity<Map<String, Object>> createLink(
             @Valid @RequestBody LinkCreateRequest request,
+            @RequestParam(value = "userId", required = false) String queryUserId,
             @AuthenticationPrincipal SessionUser sessionUser,
             HttpServletRequest httpServletRequest) {
         
-        String userId = (sessionUser != null) ? sessionUser.getId() : null;
+        String userId = (sessionUser != null) ? sessionUser.getId() : queryUserId;
         String baseUrl = getBaseUrl(httpServletRequest);
         LinkResponse linkResponse = linkService.createLink(request, userId, baseUrl);
 

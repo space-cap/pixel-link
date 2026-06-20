@@ -51,6 +51,15 @@ CREATE TABLE IF NOT EXISTS system_settings (
     description TEXT
 );
 
+CREATE TABLE IF NOT EXISTS system_audit_logs (
+    id TEXT PRIMARY KEY,
+    event_type TEXT NOT NULL,
+    actor_id TEXT,
+    ip_address TEXT,
+    user_agent TEXT,
+    created_at TEXT DEFAULT (datetime('now', 'localtime'))
+);
+
 CREATE TABLE IF NOT EXISTS route_rules (
     id TEXT PRIMARY KEY,
     link_id TEXT NOT NULL,
@@ -83,8 +92,6 @@ CREATE TABLE IF NOT EXISTS payments (
 
 
 -- 초기 마스터 회원 등록 (1단계 SaaS 구독 기능 테스트를 위한 기본 계정)
-INSERT OR IGNORE INTO users (id, email, subscription_tier, subscription_ends_at, role)
-VALUES ('admin', 'admin@pixel-link.com', 'PREMIUM', '2030-12-31T23:59:59', 'ADMIN');
 
 INSERT OR IGNORE INTO users (id, email, subscription_tier, subscription_ends_at, role)
 VALUES ('test-user', 'user@pixel-link.com', 'STARTER', '2030-12-31T23:59:59', 'USER');
@@ -96,6 +103,21 @@ INSERT OR IGNORE INTO users (id, email, subscription_tier, subscription_ends_at,
 VALUES ('anonymous', 'anonymous@pixel-link.com', 'FREE', NULL, 'USER');
 
 -- 초기 설정값 등록
+INSERT OR IGNORE INTO system_settings (setting_key, setting_value, description)
+VALUES ('is_installed', 'false', '최초 시스템 설치 여부 (true/false)');
+
+INSERT OR IGNORE INTO system_settings (setting_key, setting_value, description)
+VALUES ('oauth_google_enabled', 'true', 'Google 소셜 로그인 노출 여부 (true/false)');
+
+INSERT OR IGNORE INTO system_settings (setting_key, setting_value, description)
+VALUES ('oauth_facebook_enabled', 'true', 'Facebook 소셜 로그인 노출 여부 (true/false)');
+
+INSERT OR IGNORE INTO system_settings (setting_key, setting_value, description)
+VALUES ('oauth_naver_enabled', 'true', 'Naver 소셜 로그인 노출 여부 (true/false)');
+
+INSERT OR IGNORE INTO system_settings (setting_key, setting_value, description)
+VALUES ('oauth_kakao_enabled', 'true', 'Kakao 소셜 로그인 노출 여부 (true/false)');
+
 INSERT OR IGNORE INTO system_settings (setting_key, setting_value, description)
 VALUES ('anon_link_expiry_days', '30', '비회원 단축 링크 만료 기간 (일)');
 

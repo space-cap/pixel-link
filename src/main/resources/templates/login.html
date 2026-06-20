@@ -275,15 +275,15 @@
             </div>
         </form>
 
-        <div style="display: flex; align-items: center; justify-content: center; margin: 20px 0; color: var(--text-muted); font-size: 13px;">
+        <div th:if="${googleEnabled || facebookEnabled || naverEnabled || kakaoEnabled}" style="display: flex; align-items: center; justify-content: center; margin: 20px 0; color: var(--text-muted); font-size: 13px;">
             <span style="height: 1px; flex: 1; background: var(--card-border);"></span>
             <span style="padding: 0 12px; font-size: 12px;">또는 소셜 계정으로 로그인</span>
             <span style="height: 1px; flex: 1; background: var(--card-border);"></span>
         </div>
 
-        <div class="button-group">
+        <div class="button-group" th:if="${googleEnabled || facebookEnabled || naverEnabled || kakaoEnabled}">
             <!-- Google Login -->
-            <a href="/oauth2/authorization/google" class="social-btn btn-google">
+            <a th:if="${googleEnabled}" href="/oauth2/authorization/google" class="social-btn btn-google">
                 <!-- Google G Logo Simplified SVG -->
                 <svg viewBox="0 0 24 24" width="20" height="20">
                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -295,7 +295,7 @@
             </a>
 
             <!-- Facebook Login -->
-            <a href="/oauth2/authorization/facebook" class="social-btn btn-facebook">
+            <a th:if="${facebookEnabled}" href="/oauth2/authorization/facebook" class="social-btn btn-facebook">
                 <!-- Facebook F Logo SVG -->
                 <svg fill="currentColor" viewBox="0 0 24 24" width="20" height="20">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -304,7 +304,7 @@
             </a>
 
             <!-- Naver Login -->
-            <a href="/oauth2/authorization/naver" class="social-btn btn-naver">
+            <a th:if="${naverEnabled}" href="/oauth2/authorization/naver" class="social-btn btn-naver">
                 <!-- Naver N Logo SVG -->
                 <svg fill="currentColor" viewBox="0 0 24 24" width="20" height="20">
                     <path d="M16.273 1.002H24v22h-7.734L8.316 11.597v11.405H0v-22h7.727l7.95 11.418V1.002z"/>
@@ -313,7 +313,7 @@
             </a>
 
             <!-- Kakao Login -->
-            <a href="/oauth2/authorization/kakao" class="social-btn btn-kakao">
+            <a th:if="${kakaoEnabled}" href="/oauth2/authorization/kakao" class="social-btn btn-kakao">
                 <!-- Kakao Speech Bubble Logo SVG -->
                 <svg fill="currentColor" viewBox="0 0 24 24" width="20" height="20">
                     <path d="M12 3c-4.97 0-9 3.185-9 7.115 0 2.557 1.707 4.8 4.32 6.07-.17.618-.616 2.235-.705 2.585-.11.436.16.43.34.31.144-.09 2.298-1.562 3.223-2.19.6.087 1.217.132 1.84.132 4.97 0 9-3.186 9-7.116C21 6.185 16.97 3 12 3z"/>

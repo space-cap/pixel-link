@@ -60,6 +60,13 @@
                 </span>
                 <span th:text="#{menu.developer}">개발자 센터</span>
             </a>
+            <a th:href="@{/info/faq}" 
+               th:class="${activeMenu == 'faq'} ? 'menu-item active' : 'menu-item'">
+                <span class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </span>
+                <span th:text="#{menu.faq}">FAQ</span>
+            </a>
             <a th:href="@{/app/admin/dashboard(userId=${currentUserId})}" 
                th:if="${currentUser != null && currentUser.role == 'ADMIN'}"
                th:class="${activeMenu == 'admin'} ? 'menu-item active' : 'menu-item'">
@@ -122,6 +129,45 @@
             </a>
         </div>
     </aside>
+
+    <!-- 3. 비회원/랜딩용 공용 헤더 조각 -->
+    <header th:fragment="landingHeader">
+        <div class="logo-container">
+            <a th:href="@{/}" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+                <span class="logo">Pixel-Link</span>
+                <span class="logo-badge" th:text="#{dashboard.logo_badge}">Premium Linker</span>
+            </a>
+        </div>
+        
+        <div class="header-action">
+            <!-- 언어 선택기 -->
+            <span th:text="#{dashboard.lang_select}">Language</span>
+            <select class="select-user" onchange="switchLanguage(this.value)" style="margin-right: 15px;">
+                <option value="en" th:selected="${#locale.language == 'en'}">English</option>
+                <option value="ko" th:selected="${#locale.language == 'ko'}">한국어</option>
+                <option value="ja" th:selected="${#locale.language == 'ja'}">日本語</option>
+            </select>
+
+            <!-- 비로그인 상태: 로그인, 회원가입 -->
+            <th:block th:if="${session.user == null}">
+                <a th:href="@{/app/login}" class="btn-login-header" th:text="#{landing.btn_login}">로그인</a>
+                <a th:href="@{/app/signup}" class="btn-signup-header" th:text="#{landing.btn_signup}">회원가입</a>
+            </th:block>
+            <!-- 로그인 상태: 대시보드 보기, 로그아웃 -->
+            <th:block th:if="${session.user != null}">
+                <a th:href="@{/app/dashboard}" class="btn-signup-header" th:text="#{dashboard.title}">대시보드 보기</a>
+                <a th:href="@{/logout}" class="btn-login-header" th:text="#{landing.btn_logout}">로그아웃</a>
+            </th:block>
+        </div>
+    </header>
+
+    <!-- 4. 비회원/랜딩용 공용 푸터 조각 -->
+    <footer th:fragment="landingFooter" style="background: #0f172a; color: #475569; padding: 40px 20px; text-align: center; border-top: 1px solid #1e293b; font-size: 0.9rem;">
+        <div style="margin-bottom: 15px; display: flex; justify-content: center; gap: 20px;">
+            <a th:href="@{/info/faq}" style="color: #64748b; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'" th:text="#{menu.faq}">FAQ / 고객지원</a>
+        </div>
+        <p style="margin: 0; font-size: 0.85rem;">&copy; 2026 Pixel-Link. All rights reserved.</p>
+    </footer>
 
 </body>
 </html>

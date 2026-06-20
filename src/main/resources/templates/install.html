@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pixel-Link - 관리자 설정 마법사</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(226, 232, 240, 0.8);
+            --text-color: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        /* 배경 데코레이션 그라디언트 (랜딩페이지 매칭용 연한 퍼플/블루 오라) */
+        .bg-glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0) 70%);
+            filter: blur(40px);
+            z-index: -1;
+        }
+        
+        .bg-glow-1 {
+            top: -100px;
+            right: -100px;
+        }
+
+        .bg-glow-2 {
+            bottom: -150px;
+            left: -100px;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.1) 0%, rgba(37, 99, 235, 0) 70%);
+        }
+
+        /* 카드 (라이트 글라스모피즘 스타일) */
+        .install-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 40px 32px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05), 
+                        0 0 0 1px rgba(0, 0, 0, 0.02);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo-section {
+            margin-bottom: 28px;
+            text-align: center;
+        }
+
+        .logo-title {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .logo-sub {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 400;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 48px;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 0 16px;
+            color: #0f172a;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+        }
+
+        .info-box {
+            background: rgba(79, 70, 229, 0.04);
+            border: 1px solid rgba(79, 70, 229, 0.1);
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 12px;
+            color: #475569;
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .submit-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 48px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #4f46e5 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(135deg, #4338ca 0%, #1d4ed8 100%);
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.08);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div class="install-card">
+        <div class="logo-section">
+            <h1 class="logo-title">Pixel-Link</h1>
+            <p class="logo-sub">최초 시스템 설치 및 최고 관리자(ADMIN) 설정</p>
+        </div>
+
+        <!-- 에러 메시지 -->
+        <div class="alert-error" th:if="${errorMessage}" th:text="${errorMessage}">
+            에러 메시지 내용
+        </div>
+
+        <form id="installForm" th:action="@{/app/install/process}" method="post" onsubmit="return validateForm()">
+            <!-- 관리자 이름 / 기관명 (필수) -->
+            <div class="form-group">
+                <label for="name" class="form-label">관리자 이름 / 기관명 <span style="color: #ef4444;">*</span></label>
+                <input type="text" id="name" name="name" required placeholder="관리자 이름을 입력하세요" class="form-input">
+            </div>
+
+            <!-- 관리자 아이디 (필수) -->
+            <div class="form-group">
+                <label for="username" class="form-label">관리자 로그인 ID <span style="color: #ef4444;">*</span></label>
+                <input type="text" id="username" name="username" required placeholder="영문 및 숫자 4~20자" class="form-input">
+            </div>
+
+            <!-- 비밀번호 (필수) -->
+            <div class="form-group">
+                <label for="password" class="form-label">관리자 비밀번호 <span style="color: #ef4444;">*</span></label>
+                <input type="password" id="password" name="password" required placeholder="비밀번호(8자 이상)" class="form-input">
+            </div>
+
+            <!-- 비밀번호 확인 (필수) -->
+            <div class="form-group">
+                <label for="passwordConfirm" class="form-label">비밀번호 확인 <span style="color: #ef4444;">*</span></label>
+                <input type="password" id="passwordConfirm" required placeholder="비밀번호를 한 번 더 입력하세요" class="form-input">
+            </div>
+
+            <!-- 이메일 (선택) -->
+            <div class="form-group">
+                <label for="email" class="form-label">관리자 이메일 (선택)</label>
+                <input type="email" id="email" name="email" placeholder="admin@company.com" class="form-input">
+            </div>
+
+            <!-- 휴대폰번호 (선택) -->
+            <div class="form-group">
+                <label for="phone" class="form-label">휴대폰 번호 (선택)</label>
+                <input type="text" id="phone" name="phone" placeholder="010-0000-0000" class="form-input">
+            </div>
+
+            <!-- 설치 주의사항 및 동의 -->
+            <div class="form-group" style="margin-top: 24px;">
+                <label class="form-label">설치 진행 동의 <span style="color: #ef4444;">*</span></label>
+                
+                <div class="info-box">
+                    <strong>[설치 진행 가이드]</strong><br>
+                    1. 설치가 완료되면 시스템 상태 테이블(`system_settings`)의 초기 플래그가 `is_installed = 'true'`로 업데이트됩니다.<br>
+                    2. 설치 완료 이후에는 보안을 위해 본 설치 화면(`/app/install`)에는 **다시는 접속할 수 없도록 원천 차단**됩니다.<br>
+                    3. 설치와 관련된 메타데이터(IP 주소, 브라우저 환경, 시간)는 보안 감사 로그 테이블(`system_audit_logs`)에 기록으로 보관됩니다.
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 8px; margin-top: 8px;">
+                    <input type="checkbox" id="installAgreed" name="installAgreed" value="true" style="width: 18px; height: 18px; accent-color: #4f46e5; cursor: pointer;">
+                    <label for="installAgreed" style="font-size: 13px; color: var(--text-muted); cursor: pointer; user-select: none;">위 안내 사항을 확인했으며, 설치를 진행합니다.</label>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn">관리자 등록 및 설치 완료</button>
+        </form>
+    </div>
+
+    <script>
+        function validateForm() {
+            const username = document.getElementById('username').value.trim();
+            const name = document.getElementById('name').value.trim();
+            const password = document.getElementById('password').value;
+            const passwordConfirm = document.getElementById('passwordConfirm').value;
+            const installAgreed = document.getElementById('installAgreed').checked;
+
+            if (name.length < 2) {
+                alert('이름은 2자 이상이어야 합니다.');
+                return false;
+            }
+
+            if (username.length < 4 || username.length > 20) {
+                alert('아이디는 4자 이상 20자 이하이어야 합니다.');
+                return false;
+            }
+
+            if (password.length < 8) {
+                alert('비밀번호는 최소 8자 이상이어야 합니다.');
+                return false;
+            }
+
+            if (password !== passwordConfirm) {
+                alert('비밀번호가 일치하지 않습니다.');
+                return false;
+            }
+
+            if (!installAgreed) {
+                alert('설치 진행 안내 사항에 동의하셔야 설치가 가능합니다.');
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+</body>
+</html>

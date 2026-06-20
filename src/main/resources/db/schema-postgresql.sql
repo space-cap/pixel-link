@@ -49,6 +49,15 @@ CREATE TABLE IF NOT EXISTS system_settings (
     description VARCHAR(255)
 );
 
+CREATE TABLE IF NOT EXISTS system_audit_logs (
+    id VARCHAR(50) PRIMARY KEY,
+    event_type VARCHAR(50) NOT NULL,
+    actor_id VARCHAR(50),
+    ip_address VARCHAR(50),
+    user_agent TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 CREATE TABLE IF NOT EXISTS route_rules (
     id VARCHAR(50) PRIMARY KEY,
     link_id VARCHAR(50) NOT NULL REFERENCES links(id) ON DELETE CASCADE,
@@ -78,9 +87,6 @@ CREATE TABLE IF NOT EXISTS payments (
 
 
 -- 초기 마스터 회원 등록
-INSERT INTO users (id, email, subscription_tier, subscription_ends_at)
-VALUES ('admin', 'admin@pixel-link.com', 'PREMIUM', '2030-12-31T23:59:59+09:00')
-ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO users (id, email, subscription_tier, subscription_ends_at)
 VALUES ('test-user', 'user@pixel-link.com', 'STARTER', '2030-12-31T23:59:59+09:00')
@@ -95,6 +101,26 @@ VALUES ('anonymous', 'anonymous@pixel-link.com', 'FREE', NULL)
 ON CONFLICT (id) DO NOTHING;
 
 -- 초기 설정값 등록
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('is_installed', 'false', '최초 시스템 설치 여부 (true/false)')
+ON CONFLICT (setting_key) DO NOTHING;
+
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('oauth_google_enabled', 'true', 'Google 소셜 로그인 노출 여부 (true/false)')
+ON CONFLICT (setting_key) DO NOTHING;
+
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('oauth_facebook_enabled', 'true', 'Facebook 소셜 로그인 노출 여부 (true/false)')
+ON CONFLICT (setting_key) DO NOTHING;
+
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('oauth_naver_enabled', 'true', 'Naver 소셜 로그인 노출 여부 (true/false)')
+ON CONFLICT (setting_key) DO NOTHING;
+
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('oauth_kakao_enabled', 'true', 'Kakao 소셜 로그인 노출 여부 (true/false)')
+ON CONFLICT (setting_key) DO NOTHING;
+
 INSERT INTO system_settings (setting_key, setting_value, description)
 VALUES ('anon_link_expiry_days', '30', '비회원 단축 링크 만료 기간 (일)')
 ON CONFLICT (setting_key) DO NOTHING;

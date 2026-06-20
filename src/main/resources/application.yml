@@ -12,6 +12,8 @@ spring:
       mode: always
   messages:
     fallback-to-system-locale: false
+  thymeleaf:
+    cache: false
   security:
     oauth2:
       client:

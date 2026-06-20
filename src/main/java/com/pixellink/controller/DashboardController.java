@@ -52,6 +52,13 @@ public class DashboardController {
     @GetMapping("/app/login")
     public String showLogin(Model model) {
         model.addAttribute("activeProfile", activeProfile);
+        
+        // OAuth 활성화 여부 조회 (기본값 true)
+        model.addAttribute("googleEnabled", "true".equals(linkService.getSystemSetting("oauth_google_enabled", "true")));
+        model.addAttribute("facebookEnabled", "true".equals(linkService.getSystemSetting("oauth_facebook_enabled", "true")));
+        model.addAttribute("naverEnabled", "true".equals(linkService.getSystemSetting("oauth_naver_enabled", "true")));
+        model.addAttribute("kakaoEnabled", "true".equals(linkService.getSystemSetting("oauth_kakao_enabled", "true")));
+
         return "login";
     }
 
@@ -245,6 +252,17 @@ public class DashboardController {
         model.addAttribute("currentUserId", userId);
 
         return "developer";
+    }
+
+    @GetMapping("/info/faq")
+    public String showFaq(HttpServletRequest request, Model model) {
+        SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
+        if (sessionUser != null) {
+            User user = userMapper.findById(sessionUser.getId());
+            model.addAttribute("currentUser", user);
+            model.addAttribute("currentUserId", sessionUser.getId());
+        }
+        return "faq";
     }
 
     private String getBaseUrl(HttpServletRequest request) {

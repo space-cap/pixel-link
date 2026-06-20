@@ -141,6 +141,26 @@ INSERT INTO system_settings (setting_key, setting_value, description)
 VALUES ('premium_monthly_fee', '19900', '프리미엄 요금제 가격 (원)')
 ON CONFLICT (setting_key) DO NOTHING;
 
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('feature_custom_slug_enabled', 'true', 'Custom Slug 기능 활성화 여부 (true/false)')
+ON CONFLICT (setting_key) DO NOTHING;
+
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('feature_seo_preview_enabled', 'true', 'SEO Social Preview 기능 활성화 여부 (true/false)')
+ON CONFLICT (setting_key) DO NOTHING;
+
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('feature_smart_routing_enabled', 'true', '스마트 라우팅 기능 활성화 여부 (true/false)')
+ON CONFLICT (setting_key) DO NOTHING;
+
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('feature_monetization_enabled', 'true', '수익화 기능 활성화 여부 (true/false)')
+ON CONFLICT (setting_key) DO NOTHING;
+
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('feature_marketing_pixel_enabled', 'true', '마케팅 픽셀 기능 활성화 여부 (true/false)')
+ON CONFLICT (setting_key) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS api_keys (
     id VARCHAR(50) PRIMARY KEY,
     user_id VARCHAR(50) NOT NULL REFERENCES users(id),

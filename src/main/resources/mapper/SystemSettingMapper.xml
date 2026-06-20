@@ -19,6 +19,11 @@
     WHERE setting_key = #{key}
   </update>
 
+  <insert id="insert">
+    INSERT INTO system_settings (setting_key, setting_value, description)
+    VALUES (#{key}, #{value}, #{description})
+  </insert>
+
   <select id="findAll" resultType="com.pixellink.model.SystemSetting">
     SELECT 
       setting_key AS settingKey,

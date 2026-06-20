@@ -443,7 +443,12 @@ public class LinkService {
                 }
             }
             
-            systemSettingMapper.updateValue(key, value);
+            com.pixellink.model.SystemSetting existing = systemSettingMapper.findByKey(key);
+            if (existing == null) {
+                systemSettingMapper.insert(key, value, "System Setting: " + key);
+            } else {
+                systemSettingMapper.updateValue(key, value);
+            }
         }
     }
 }

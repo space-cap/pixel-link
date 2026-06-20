@@ -10,5 +10,6 @@ import java.util.List;
 public interface SystemSettingMapper {
     SystemSetting findByKey(@Param("key") String key);
     void updateValue(@Param("key") String key, @Param("value") String value);
+    void insert(@Param("key") String key, @Param("value") String value, @Param("description") String description);
     List<SystemSetting> findAll();
 }

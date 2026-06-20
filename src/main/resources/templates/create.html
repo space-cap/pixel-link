@@ -343,10 +343,10 @@
                 gaTrackingId: (form.gaTrackingId && !form.gaTrackingId.disabled) ? form.gaTrackingId.value : '',
                 customScript: (form.customScript && !form.customScript.disabled) ? form.customScript.value : '',
                 
-                adEnabled: document.getElementById('adEnabled').checked,
-                adTimerSeconds: parseInt(document.getElementById('adTimerSeconds').value) || 5,
-                paywalled: document.getElementById('paywalled').checked,
-                price: parseInt(document.getElementById('price').value) || 0,
+                adEnabled: document.getElementById('adEnabled') ? document.getElementById('adEnabled').checked : false,
+                adTimerSeconds: (document.getElementById('adTimerSeconds') ? parseInt(document.getElementById('adTimerSeconds').value) : 5) || 5,
+                paywalled: document.getElementById('paywalled') ? document.getElementById('paywalled').checked : false,
+                price: (document.getElementById('price') ? parseInt(document.getElementById('price').value) : 0) || 0,
                 
                 routeRules: routeRules
             };

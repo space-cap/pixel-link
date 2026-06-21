@@ -66,7 +66,7 @@ jobs:
           # 0. 만약 깃허브 화면에서 DB 초기화(reset_db)를 켰다면 기존 live db 파일 삭제
           if [ "${{ github.event.inputs.reset_db }}" = "true" ]; then
             echo "Resetting SQLite database as requested..."
-            rm -f /home/ubuntu/pixel-link-db/pixel-link-live.db
+            rm -f /home/ubuntu/pixel-link-local.db
           fi
 
           # 1. 임시 디렉토리에서 메인 구동 위치로 배포본 이동 및 명칭 단일화

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /info/faq
+Allow: /info/privacy
+Allow: /info/terms
+Disallow: /app/
+Disallow: /api/
+
+Sitemap: https://pl3.kr/sitemap.xml

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+    <!-- 공통 개인정보처리방침 본문 조각 -->
+    <div th:fragment="privacyContent">
+        <!-- 한국어 약관 -->
+        <div th:if="${#locale.language == 'ko'}">
+            <div class="legal-section">
+                <h2>1. 수집하는 개인정보 항목 및 수집 방법</h2>
+                <p>회사는 서비스 회원가입, 고객상담, 서비스 제공을 위해 아래와 같은 개인정보를 수집하고 있습니다.</p>
+                <ul>
+                    <li><strong>수집 항목:</strong> 이름, 이메일 주소, 비밀번호, 서비스 이용 기록, 접속 IP 정보, 쿠키, 브라우저 정보.</li>
+                    <li><strong>수집 방법:</strong> 웹사이트 회원가입 폼 및 서비스 이용 과정에서 자동으로 수집.</li>
+                </ul>
+            </div>
+            <div class="legal-section">
+                <h2>2. 개인정보의 수집 및 이용 목적</h2>
+                <p>회사는 수집한 개인정보를 다음의 목적을 위해 활용합니다.</p>
+                <ul>
+                    <li>서비스 제공에 관한 계약 이행 및 서비스 제공에 따른 요금정산, 콘텐츠 제공, 단축 링크 생성 및 관리.</li>
+                    <li>회원 가입 의사 확인, 연령확인, 불만처리 등 민원처리, 고지사항 전달.</li>
+                    <li>신규 서비스 개발 및 맞춤 서비스 제공, 인구통계학적 특성에 따른 서비스 제공 및 광고 게재.</li>
+                </ul>
+            </div>
+            <div class="legal-section">
+                <h2>3. 개인정보의 보유 및 이용기간</h2>
+                <p>회사는 회원탈퇴 시 혹은 위 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. 단, 다음의 정보에 대해서는 아래의 이유로 명시한 기간 동안 보존합니다.</p>
+                <ul>
+                    <li><strong>보존 항목:</strong> 이메일 및 가입 회원 식별 정보</li>
+                    <li><strong>보존 기간:</strong> 탈퇴 후 3개월 (부정 가입 방지 및 소송 대응)</li>
+                </ul>
+            </div>
+            <div class="legal-section">
+                <h2>4. 개인정보의 파기절차 및 방법</h2>
+                <p>회사는 원칙적으로 개인정보 수집 및 이용목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. 파기절차 및 방법은 다음과 같습니다.</p>
+                <ul>
+                    <li><strong>파기절차:</strong> 목적이 달성된 개인정보는 별도의 DB로 옮겨져 관련 법령에 의한 정보보호 사유에 따라 일정 기간 저장된 후 파기됩니다.</li>
+                    <li><strong>파기방법:</strong> 전자적 파일형태로 저장된 개인정보는 기록을 재생할 수 없는 기술적 방법을 사용하여 삭제합니다.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 영문 약관 -->
+        <div th:if="${#locale.language != 'ko'}">
+            <div class="legal-section">
+                <h2>1. Information We Collect</h2>
+                <p>We collect information to provide better services to all our users. The types of personal information we collect include:</p>
+                <ul>
+                    <li><strong>Provided by you:</strong> Name, Email address, Password.</li>
+                    <li><strong>Collected automatically:</strong> Service usage logs, Access IP, Cookies, Browser details.</li>
+                </ul>
+            </div>
+            <div class="legal-section">
+                <h2>2. How We Use Information</h2>
+                <p>We use the collected information for the following purposes:</p>
+                <ul>
+                    <li>To provide, maintain, protect and improve our services, including link shortening and analytics.</li>
+                    <li>To protect our users and prevent fraudulent sign-ups.</li>
+                    <li>To provide customized content and advertising suitable for user demographics.</li>
+                </ul>
+            </div>
+            <div class="legal-section">
+                <h2>3. Information Retention and Erasure</h2>
+                <p>We delete or anonymize your personal information once it is no longer needed for the purposes for which we collected it, unless we are required by law to retain it.</p>
+                <ul>
+                    <li><strong>Retention Item:</strong> Identification Info and Email.</li>
+                    <li><strong>Retention Period:</strong> 3 months after account withdrawal (to prevent abuse).</li>
+                </ul>
+            </div>
+            <div class="legal-section">
+                <h2>4. Security of Your Information</h2>
+                <p>We work hard to protect our users from unauthorized access to or unauthorized alteration, disclosure or destruction of information we hold.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 공통 이용약관 본문 조각 -->
+    <div th:fragment="termsContent">
+        <!-- 한국어 약관 -->
+        <div th:if="${#locale.language == 'ko'}">
+            <div class="legal-section">
+                <h2>1. 목적 및 약관의 적용</h2>
+                <p>본 약관은 회사가 제공하는 단축 링크 생성 및 마케팅 관리 툴 서비스(이하 '서비스')의 이용과 관련하여 회사와 회원 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+            </div>
+            <div class="legal-section">
+                <h2>2. 회원 가입 및 계정 관리</h2>
+                <p>회원은 회사가 제시하는 절차에 따라 정확한 정보를 기입하여 회원가입을 신청해야 합니다. 가입 후 계정 정보(이메일, 패스워드)에 대한 관리 책임은 회원 본인에게 있으며, 양도하거나 대여할 수 없습니다.</p>
+            </div>
+            <div class="legal-section">
+                <h2>3. 서비스 이용 및 링크 규제 정책</h2>
+                <p>회원은 다음과 같은 목적으로 본 서비스를 이용할 수 없으며, 적발 시 사전 통보 없이 해당 단축 링크가 삭제되거나 계정이 영구 정지될 수 있습니다.</p>
+                <ul>
+                    <li>도박, 음란물, 불법 프로그램 배포, 사기성 피싱(Phishing) 웹사이트 등으로 유인하는 단축 링크 생성.</li>
+                    <li>불법 스팸 메일, 비정상적인 트래픽 어뷰징 매크로 동작 시도.</li>
+                    <li>기타 타인의 지식재산권 및 법적 권리를 침해하는 목적의 이용.</li>
+                </ul>
+            </div>
+            <div class="legal-section">
+                <h2>4. 회사의 책임 및 면책조항</h2>
+                <p>회사는 안정적인 서비스 제공을 위해 노력하지만, 천재지변, 기간통신사업자의 회선 장애 등 불가항력적인 외부 요인으로 인한 서비스 장애 또는 유저의 목적지 링크 자체 결함에 대해서는 면책됩니다.</p>
+            </div>
+        </div>
+
+        <!-- 영문 약관 -->
+        <div th:if="${#locale.language != 'ko'}">
+            <div class="legal-section">
+                <h2>1. Purpose of Agreement</h2>
+                <p>These Terms of Service govern your use of the link shortening and marketing utility tools (the 'Service') provided by our company. By accessing our services, you agree to comply with these terms.</p>
+            </div>
+            <div class="legal-section">
+                <h2>2. Registration and Account Security</h2>
+                <p>You must provide accurate and complete information when registering an account. You are responsible for keeping your login credentials secure and are prohibited from sharing your account with others.</p>
+            </div>
+            <div class="legal-section">
+                <h2>3. Acceptable Use and Link Regulation Policy</h2>
+                <p>We reserve the right to suspend accounts or delete shortened links without prior notice if they are used for prohibited activities, including:</p>
+                <ul>
+                    <li>Redirecting to gambling, pornography, distribution of malware, or phishing websites.</li>
+                    <li>Generating spam traffic or utilizing automated bot traffic scripts.</li>
+                    <li>Infringing upon any third party's intellectual property or legal rights.</li>
+                </ul>
+            </div>
+            <div class="legal-section">
+                <h2>4. Limitation of Liability</h2>
+                <p>We are not liable for any service interruptions caused by natural disasters, telecommunications outages, or faults within the user's target destination URLs.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

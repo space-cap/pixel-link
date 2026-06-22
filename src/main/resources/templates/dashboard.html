@@ -6,6 +6,15 @@
     <title th:text="#{dashboard.title}">Pixel-Link Dashboard</title>
     <!-- global.css 스타일 연동 -->
     <link rel="stylesheet" th:href="@{/css/global.css}">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @media (max-width: 768px) {
+            .analytics-layout {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -41,20 +50,7 @@
                     </form>
                 </section>
 
-                <!-- [관리자 전용] 시스템 설정 변경 카드 -->
-                <section class="card" th:if="${currentUserId == 'admin'}">
-                    <h2 class="card-title">
-                        <span>⚙️ 시스템 설정 (관리자 전용)</span>
-                    </h2>
-                    <form id="adminSettingsForm" onsubmit="handleSaveSettings(event)">
-                        <div class="form-group">
-                            <label class="form-label" for="anonLinkExpiryDays">비회원 링크 만료 기간 (일)</label>
-                            <input class="form-input" type="number" id="anonLinkExpiryDays" name="anonLinkExpiryDays" min="1" required 
-                                   th:value="${anonLinkExpiryDays}">
-                        </div>
-                        <button class="btn" type="submit" style="background: var(--accent-secondary);">설정 저장하기</button>
-                    </form>
-                </section>
+
 
                 <!-- 2. 통계 요약 카드 그리드 -->
                 <div class="stats-grid">
@@ -107,9 +103,9 @@
                             </div>
 
                             <div class="link-actions">
-                                <button class="action-btn" th:title="#{dashboard.action_copy}" th:onclick="copyToClipboard([[${link.shortenedUrl}]], this)">📋</button>
-                                <button class="action-btn" th:title="#{dashboard.action_stats}" th:onclick="openStatsModal([[${link.id}]])">📊</button>
-                                <button class="action-btn btn-delete" th:title="#{dashboard.action_delete}" th:onclick="deleteLink([[${link.id}]])">🗑️</button>
+                                <button class="action-btn" th:title="#{dashboard.action_copy}" th:data-url="${link.shortenedUrl}" onclick="copyToClipboard(this.getAttribute('data-url'), this)">📋</button>
+                                <button class="action-btn" th:title="#{dashboard.action_stats}" th:data-id="${link.id}" onclick="openStatsModal(this.getAttribute('data-id'))">📊</button>
+                                <button class="action-btn btn-delete" th:title="#{dashboard.action_delete}" th:data-id="${link.id}" onclick="deleteLink(this.getAttribute('data-id'))">🗑️</button>
                             </div>
                         </div>
                     </div>
@@ -126,42 +122,59 @@
 
     <!-- 통계 디테일 모달창 Overlay -->
     <div class="modal-overlay" id="statsModal" onclick="closeStatsModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 900px; width: 95%;">
             <button class="close-btn" onclick="toggleModal(false)">&times;</button>
             <h3 class="card-title" id="modalLinkTitle" th:text="#{modal.stats_title}">Detailed Link Analytics</h3>
             
-            <div class="stats-container">
-                <!-- 유입 기기 분포 -->
-                <div class="stats-card-mini">
-                    <h4 th:text="#{modal.device}">Device Distribution</h4>
-                    <div class="stats-list" id="deviceStatsList">
-                        <!-- 동적 주입 -->
+            <!-- 그래프 시각화 구역 -->
+            <div class="analytics-layout" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; margin-top: 24px; margin-bottom: 24px;">
+                <!-- 1. 일별 클릭/광고/전환 추이 차트 -->
+                <div class="analytics-chart-card" style="background: var(--bg-main); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 20px; min-height: 320px; display: flex; flex-direction: column;">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; color: var(--text-main);">📈 일자별 통계 추이 (최근 30일)</h4>
+                    <div style="flex: 1; position: relative; height: 260px;">
+                        <canvas id="dailyChart"></canvas>
                     </div>
                 </div>
 
-                <!-- 운영체제 분포 -->
-                <div class="stats-card-mini">
-                    <h4 th:text="#{modal.os}">OS Distribution</h4>
-                    <div class="stats-list" id="osStatsList">
-                        <!-- 동적 주입 -->
+                <!-- 2. 점유율 분포 차트 (디바이스/OS 탭 스위칭) -->
+                <div class="analytics-chart-card" style="background: var(--bg-main); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 20px; min-height: 320px; display: flex; flex-direction: column;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h4 id="distributionChartTitle" style="font-size: 0.95rem; font-weight: 700; color: var(--text-main);">📱 기기별 점유율</h4>
+                        <div style="display: flex; gap: 4px; background: rgba(15,23,42,0.05); padding: 2px; border-radius: 6px;">
+                            <button id="btnDeviceTab" onclick="switchDistributionTab('device')" style="border: none; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; border-radius: 4px; cursor: pointer; background: white; color: var(--text-main); transition: 0.2s;">기기</button>
+                            <button id="btnOsTab" onclick="switchDistributionTab('os')" style="border: none; padding: 4px 10px; font-size: 0.75rem; font-weight: 700; border-radius: 4px; cursor: pointer; background: transparent; color: var(--text-muted); transition: 0.2s;">OS</button>
+                        </div>
+                    </div>
+                    <div style="flex: 1; position: relative; height: 260px; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="distributionChart" style="max-height: 240px; max-width: 240px;"></canvas>
                     </div>
                 </div>
+            </div>
 
-                <!-- 레퍼러 유입처 분포 -->
-                <div class="stats-card-mini">
-                    <h4 th:text="#{modal.referrer}">Traffic Referrer</h4>
-                    <div class="stats-list" id="referrerStatsList">
-                        <!-- 동적 주입 -->
-                    </div>
-                </div>
+            <!-- 기존 텍스트 로그 요약 상세 (하단 접이식) -->
+            <div style="margin-top: 16px;">
+                <details style="background: var(--bg-main); border: 1px solid var(--card-border); border-radius: var(--radius-md); padding: 12px 16px;">
+                    <summary style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); cursor: pointer; outline: none; user-select: none;">📋 상세 원천 로그 수치 보기 (텍스트 리스트)</summary>
+                    <div class="stats-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 16px;">
+                        <!-- 유입 기기 분포 -->
+                        <div class="stats-card-mini" style="background: white; border: 1px solid var(--card-border); padding: 16px; border-radius: var(--radius-sm);">
+                            <h4 th:text="#{modal.device}" style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">Device Distribution</h4>
+                            <div class="stats-list" id="deviceStatsList" style="font-size: 0.8rem; line-height: 1.6;"></div>
+                        </div>
 
-                <!-- 최근 클릭 추이 -->
-                <div class="stats-card-mini">
-                    <h4 th:text="#{modal.daily}">Recent Daily Clicks</h4>
-                    <div class="stats-list" id="dailyStatsList">
-                        <!-- 동적 주입 -->
+                        <!-- 운영체제 분포 -->
+                        <div class="stats-card-mini" style="background: white; border: 1px solid var(--card-border); padding: 16px; border-radius: var(--radius-sm);">
+                            <h4 th:text="#{modal.os}" style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">OS Distribution</h4>
+                            <div class="stats-list" id="osStatsList" style="font-size: 0.8rem; line-height: 1.6;"></div>
+                        </div>
+
+                        <!-- -레퍼러 유입처 분포 -->
+                        <div class="stats-card-mini" style="background: white; border: 1px solid var(--card-border); padding: 16px; border-radius: var(--radius-sm);">
+                            <h4 th:text="#{modal.referrer}" style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); margin-bottom: 8px;">Traffic Referrer</h4>
+                            <div class="stats-list" id="referrerStatsList" style="font-size: 0.8rem; line-height: 1.6;"></div>
+                        </div>
                     </div>
-                </div>
+                </details>
             </div>
         </div>
     </div>
@@ -220,7 +233,10 @@
         };
         
         // 로컬 호스트 도메인을 입력 폼 주소창 접두사로 동적 바인딩
-        document.getElementById('host-prefix').innerText = window.location.host + '/';
+        const hostPrefixEl = document.getElementById('host-prefix');
+        if (hostPrefixEl) {
+            hostPrefixEl.innerText = window.location.host + '/';
+        }
 
         // 1. 언어 변경 처리
         function switchLanguage(lang) {
@@ -352,52 +368,261 @@
         }
 
         // 5. 통계 모달 열기 및 비동기 수집 데이터 매핑
+        let dailyChartInstance = null;
+        let distributionChartInstance = null;
+        let analyticsData = null;
+        let activeDistributionTab = 'device';
+
         function openStatsModal(linkId) {
-            fetch(`/api/links/${linkId}/stats?userId=${currentUserId}`)
-            .then(res => res.json())
+            activeDistributionTab = 'device';
+            updateTabButtons();
+
+            // 차트 타이틀 초기화
+            const titleEl = document.getElementById('distributionChartTitle');
+            if (titleEl) {
+                titleEl.innerText = '📱 기기별 점유율';
+            }
+
+            fetch(`/api/links/${linkId}/analytics?userId=${currentUserId}`)
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+                return res.json();
+            })
             .then(json => {
                 if (json.success) {
-                    const stats = json.data;
+                    analyticsData = json.data;
                     
-                    // 모달 리스트 내용 동적 렌더링
-                    renderStatsList('deviceStatsList', stats.devices);
-                    renderStatsList('osStatsList', stats.operatingSystems);
-                    renderStatsList('referrerStatsList', stats.referrers);
-                    
-                    // 일별 추이 목록 렌더링
-                    const dailyContainer = document.getElementById('dailyStatsList');
-                    dailyContainer.innerHTML = '';
-                    if (stats.recentDailyClicks && stats.recentDailyClicks.length > 0) {
-                        stats.recentDailyClicks.forEach(item => {
-                            const row = document.createElement('div');
-                            row.className = 'stats-row';
-                            row.innerHTML = `<span class="stat-name">${item.date}</span><span class="stat-value">${item.clicks}</span>`;
-                            dailyContainer.appendChild(row);
-                        });
-                    } else {
-                        dailyContainer.innerHTML = `<div style="color:var(--text-dark); text-align:center;">${/*[[#{modal.empty_data}]]*/ 'No data'}</div>`;
-                    }
+                    // 1. 하단 상세 텍스트 목록 동적 렌더링
+                    renderTextStatsList('deviceStatsList', analyticsData.devices);
+                    renderTextStatsList('osStatsList', analyticsData.operatingSystems);
+                    renderTextStatsList('referrerStatsList', analyticsData.referrers);
 
+                    // 2. 모달 노출 (Chart.js 캔버스 렌더링을 위해 DOM 활성화 필요)
                     toggleModal(true);
+
+                    // 3. 차트 드로잉 (DOM 렌더링 후 수행)
+                    setTimeout(() => {
+                        try {
+                            renderDailyChart(analyticsData.dailyClicks);
+                            renderDistributionChart();
+                        } catch (chartErr) {
+                            console.error("차트 렌더링 에러: ", chartErr);
+                            showToast("차트 그리기에 실패했습니다. (라이브러리 로드 실패 등)", "error");
+                        }
+                    }, 50);
                 } else {
-                    showToast(json.error.message, 'error');
+                    showToast(json.error ? json.error.message : "알 수 없는 오류가 발생했습니다.", 'error');
+                }
+            })
+            .catch(err => {
+                console.error("통계 API 조회 실패: ", err);
+                showToast("통계 조회를 실패했습니다: " + err.message, "error");
+            });
+        }
+
+        function renderTextStatsList(elementId, dataList) {
+            const container = document.getElementById(elementId);
+            container.innerHTML = '';
+            if (dataList && dataList.length > 0) {
+                [...dataList].sort((a, b) => b.value - a.value).forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'stats-row';
+                    row.innerHTML = `<span class="stat-name">${item.name}</span><span class="stat-value">${item.value}</span>`;
+                    container.appendChild(row);
+                });
+            } else {
+                container.innerHTML = `<div style="color:var(--text-dark); text-align:center;">No data</div>`;
+            }
+        }
+
+        function renderDailyChart(dailyData) {
+            if (dailyChartInstance) {
+                dailyChartInstance.destroy();
+            }
+
+            const canvas = document.getElementById('dailyChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            if (!dailyData || dailyData.length === 0) {
+                dailyData = [{date: 'No data', clicks: 0, adClicks: 0, conversions: 0}];
+            }
+
+            const labels = dailyData.map(d => d.date);
+            const clicks = dailyData.map(d => d.clicks);
+            const adClicks = dailyData.map(d => d.adClicks);
+            const conversions = dailyData.map(d => d.conversions);
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, 240);
+            gradient.addColorStop(0, 'rgba(29, 78, 216, 0.15)');
+            gradient.addColorStop(1, 'rgba(29, 78, 216, 0.0)');
+
+            dailyChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '전체 클릭',
+                            data: clicks,
+                            borderColor: '#1d4ed8',
+                            backgroundColor: gradient,
+                            fill: true,
+                            tension: 0.3,
+                            borderWidth: 2,
+                            pointBackgroundColor: '#1d4ed8',
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: '광고 클릭',
+                            data: adClicks,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'transparent',
+                            fill: false,
+                            tension: 0.3,
+                            borderWidth: 1.5,
+                            pointBackgroundColor: '#ef4444'
+                        },
+                        {
+                            label: '페이월 전환',
+                            data: conversions,
+                            borderColor: '#10b981',
+                            backgroundColor: 'transparent',
+                            fill: false,
+                            tension: 0.3,
+                            borderWidth: 1.5,
+                            pointBackgroundColor: '#10b981'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                boxWidth: 10,
+                                font: { size: 10, weight: '600' }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(15,23,42,0.05)' },
+                            ticks: { font: { size: 9 } }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 9 } }
+                        }
+                    }
                 }
             });
         }
 
-        function renderStatsList(elementId, data) {
-            const container = document.getElementById(elementId);
-            container.innerHTML = '';
-            const entries = Object.entries(data);
-            if (entries.length > 0) {
-                entries.sort((a,b) => b[1] - a[1]).forEach(([name, val]) => {
-                    const row = document.createElement('div');
-                    row.className = 'stats-row';
-                    row.innerHTML = `<span class="stat-name">${name}</span><span class="stat-value">${val}</span>`;
-                    container.appendChild(row);
+        function renderDistributionChart() {
+            if (distributionChartInstance) {
+                distributionChartInstance.destroy();
+            }
+
+            const canvas = document.getElementById('distributionChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const dataList = activeDistributionTab === 'device' ? analyticsData.devices : analyticsData.operatingSystems;
+
+            if (!dataList || dataList.length === 0) {
+                distributionChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['No data'],
+                        datasets: [{ data: [1], backgroundColor: ['#e2e8f0'] }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false }
                 });
+                return;
+            }
+
+            const labels = dataList.map(item => item.name);
+            const values = dataList.map(item => item.value);
+
+            const colors = ['#1d4ed8', '#4f46e5', '#0ea5e9', '#f59e0b', '#10b981', '#94a3b8'];
+
+            distributionChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: colors.slice(0, labels.length),
+                        borderWidth: 1.5,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                font: { size: 10, weight: '600' },
+                                padding: 8
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const val = context.raw;
+                                    const pct = ((val / total) * 100).toFixed(1);
+                                    return ` ${context.label}: ${val}회 (${pct}%)`;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        }
+
+        function switchDistributionTab(tab) {
+            activeDistributionTab = tab;
+            updateTabButtons();
+
+            const titleEl = document.getElementById('distributionChartTitle');
+            if (titleEl) {
+                titleEl.innerText = tab === 'device' ? '📱 기기별 점유율' : '💻 OS별 점유율';
+            }
+
+            renderDistributionChart();
+        }
+
+        function updateTabButtons() {
+            const btnDevice = document.getElementById('btnDeviceTab');
+            const btnOs = document.getElementById('btnOsTab');
+            if (!btnDevice || !btnOs) return;
+
+            if (activeDistributionTab === 'device') {
+                btnDevice.style.background = 'white';
+                btnDevice.style.color = 'var(--text-main)';
+                btnDevice.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                
+                btnOs.style.background = 'transparent';
+                btnOs.style.color = 'var(--text-muted)';
+                btnOs.style.boxShadow = 'none';
             } else {
-                container.innerHTML = `<div style="color:var(--text-dark); text-align:center;">${/*[[#{modal.empty_data}]]*/ 'No data'}</div>`;
+                btnOs.style.background = 'white';
+                btnOs.style.color = 'var(--text-main)';
+                btnOs.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+                
+                btnDevice.style.background = 'transparent';
+                btnDevice.style.color = 'var(--text-muted)';
+                btnDevice.style.boxShadow = 'none';
             }
         }
 
@@ -449,28 +674,7 @@
             }, 3000);
         }
 
-        // 8. 관리자 시스템 설정 변경 요청 처리
-        function handleSaveSettings(event) {
-            event.preventDefault();
-            const inputVal = document.getElementById('anonLinkExpiryDays').value;
-            const currentUserId = /*[[${currentUserId}]]*/ 'admin';
 
-            fetch(`/api/links/admin/settings?key=anon_link_expiry_days&value=${inputVal}&userId=${currentUserId}`, {
-                method: 'POST'
-            })
-            .then(res => res.json())
-            .then(json => {
-                if (json.success) {
-                    showToast(json.data.message, 'success');
-                } else {
-                    showToast(json.error.message, 'error');
-                }
-            })
-            .catch(err => {
-                console.error(err);
-                showToast(translations.genericError || '통신 오류가 발생했습니다.', 'error');
-            });
-        }
 
         // 9. 광고 노출 토글 제어
         function toggleAdTimer(checked) {

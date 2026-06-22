@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pixellink.mapper.BoardAttachmentMapper">
+
+  <select id="findById" resultType="com.pixellink.model.BoardAttachment">
+    SELECT * FROM board_attachments WHERE id = #{id}
+  </select>
+
+  <select id="findByArticleId" resultType="com.pixellink.model.BoardAttachment">
+    SELECT * FROM board_attachments WHERE article_id = #{articleId}
+  </select>
+
+  <insert id="insert">
+    INSERT INTO board_attachments (id, article_id, original_filename, stored_filename, file_path, file_size, file_type, created_at)
+    VALUES (
+      #{id}, 
+      #{articleId}, 
+      #{originalFilename}, 
+      #{storedFilename}, 
+      #{filePath}, 
+      #{fileSize}, 
+      #{fileType}, 
+      #{createdAt}
+    )
+  </insert>
+
+  <delete id="delete">
+    DELETE FROM board_attachments WHERE id = #{id}
+  </delete>
+
+</mapper>

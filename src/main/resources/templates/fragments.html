@@ -67,6 +67,37 @@
                 </span>
                 <span th:text="#{menu.faq}">FAQ</span>
             </a>
+            
+            <!-- 공통 게시판 메뉴 -->
+            <a th:href="@{/board/list?boardType=NOTICE}" 
+               th:class="${boardType == 'NOTICE'} ? 'menu-item active' : 'menu-item'">
+                <span class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>
+                </span>
+                <span>공지사항</span>
+            </a>
+            <a th:href="@{/board/list?boardType=FREE}" 
+               th:class="${boardType == 'FREE'} ? 'menu-item active' : 'menu-item'">
+                <span class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                </span>
+                <span>자유게시판</span>
+            </a>
+            <a th:href="@{/board/list?boardType=QNA}" 
+               th:class="${boardType == 'QNA'} ? 'menu-item active' : 'menu-item'">
+                <span class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </span>
+                <span>1:1 문의</span>
+            </a>
+            <a th:href="@{/board/list?boardType=PARTNERSHIP}" 
+               th:class="${boardType == 'PARTNERSHIP'} ? 'menu-item active' : 'menu-item'">
+                <span class="menu-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </span>
+                <span>제휴제안</span>
+            </a>
+
             <a th:href="@{/app/admin/dashboard(userId=${currentUserId})}" 
                th:if="${currentUser != null && currentUser.role == 'ADMIN'}"
                th:class="${activeMenu == 'admin'} ? 'menu-item active' : 'menu-item'">
@@ -76,6 +107,7 @@
                 <span style="color: #f59e0b;" th:text="#{menu.admin}">관리자 콘솔</span>
             </a>
         </div>
+
 
         <!-- 2-2. 관리자 전용 메뉴 리스트 (어드민 모드일 때) -->
         <div class="sidebar-menu" th:if="${#strings.startsWith(activeMenu, 'admin')}">
@@ -161,9 +193,12 @@
         </div>
     </header>
 
-    <!-- 4. 비회원/랜딩용 공용 푸터 조각 -->
     <footer th:fragment="landingFooter" style="background: #0f172a; color: #475569; padding: 40px 20px; text-align: center; border-top: 1px solid #1e293b; font-size: 0.9rem;">
-        <div style="margin-bottom: 15px; display: flex; justify-content: center; gap: 20px;">
+        <div style="margin-bottom: 15px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <a th:href="@{/board/list?boardType=NOTICE}" style="color: #64748b; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">공지사항</a>
+            <a th:href="@{/board/list?boardType=FREE}" style="color: #64748b; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">자유게시판</a>
+            <a th:href="@{/board/list?boardType=QNA}" style="color: #64748b; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">1:1 문의</a>
+            <a th:href="@{/board/list?boardType=PARTNERSHIP}" style="color: #64748b; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">제휴제안</a>
             <a th:href="@{/info/faq}" style="color: #64748b; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'" th:text="#{menu.faq}">FAQ / 고객지원</a>
         </div>
         <p style="margin: 0; font-size: 0.85rem;">&copy; 2026 Pixel-Link. All rights reserved.</p>

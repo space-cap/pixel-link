@@ -228,6 +228,63 @@ public class LinkService {
         return stats;
     }
 
+    public com.pixellink.dto.LinkAnalyticsResponse getLinkAnalytics(String id, String userId) {
+        Link link = linkMapper.findById(id);
+        if (link == null) {
+            throw new IllegalArgumentException("존재하지 않는 링크입니다.");
+        }
+        if (!link.getUserId().equals(userId)) {
+            throw new SecurityException("통계 조회 권한이 없습니다.");
+        }
+
+        com.pixellink.dto.LinkAnalyticsResponse response = new com.pixellink.dto.LinkAnalyticsResponse();
+        response.setLinkId(id);
+
+        // 1. 일별 통계 바인딩
+        List<Map<String, Object>> dailyList = clickLogMapper.getDailyClicks(id);
+        List<com.pixellink.dto.LinkAnalyticsResponse.DailyClickStat> dailyStats = dailyList.stream().map(m -> {
+            com.pixellink.dto.LinkAnalyticsResponse.DailyClickStat stat = new com.pixellink.dto.LinkAnalyticsResponse.DailyClickStat();
+            stat.setDate((String) m.get("date"));
+            stat.setClicks(m.get("clicks") != null ? ((Number) m.get("clicks")).intValue() : 0);
+            stat.setAdClicks(m.get("adClicks") != null ? ((Number) m.get("adClicks")).intValue() : 0);
+            stat.setConversions(m.get("conversions") != null ? ((Number) m.get("conversions")).intValue() : 0);
+            return stat;
+        }).collect(Collectors.toList());
+        response.setDailyClicks(dailyStats);
+
+        // 2. 디바이스 통계 바인딩
+        List<Map<String, Object>> deviceList = clickLogMapper.getClicksByDevice(id);
+        List<com.pixellink.dto.LinkAnalyticsResponse.DeviceStat> deviceStats = deviceList.stream().map(m -> {
+            com.pixellink.dto.LinkAnalyticsResponse.DeviceStat stat = new com.pixellink.dto.LinkAnalyticsResponse.DeviceStat();
+            stat.setName(m.get("name") != null ? (String) m.get("name") : "UNKNOWN");
+            stat.setValue(m.get("value") != null ? ((Number) m.get("value")).intValue() : 0);
+            return stat;
+        }).collect(Collectors.toList());
+        response.setDevices(deviceStats);
+
+        // 3. OS 통계 바인딩
+        List<Map<String, Object>> osList = clickLogMapper.getClicksByOs(id);
+        List<com.pixellink.dto.LinkAnalyticsResponse.OsStat> osStats = osList.stream().map(m -> {
+            com.pixellink.dto.LinkAnalyticsResponse.OsStat stat = new com.pixellink.dto.LinkAnalyticsResponse.OsStat();
+            stat.setName(m.get("name") != null ? (String) m.get("name") : "UNKNOWN");
+            stat.setValue(m.get("value") != null ? ((Number) m.get("value")).intValue() : 0);
+            return stat;
+        }).collect(Collectors.toList());
+        response.setOperatingSystems(osStats);
+
+        // 4. 레퍼러 통계 바인딩
+        List<Map<String, Object>> referrerList = clickLogMapper.getClicksByReferrer(id);
+        List<com.pixellink.dto.LinkAnalyticsResponse.ReferrerStat> referrerStats = referrerList.stream().map(m -> {
+            com.pixellink.dto.LinkAnalyticsResponse.ReferrerStat stat = new com.pixellink.dto.LinkAnalyticsResponse.ReferrerStat();
+            stat.setName(m.get("name") != null ? (String) m.get("name") : "DIRECT");
+            stat.setValue(m.get("value") != null ? ((Number) m.get("value")).intValue() : 0);
+            return stat;
+        }).collect(Collectors.toList());
+        response.setReferrers(referrerStats);
+
+        return response;
+    }
+
     private Map<String, Integer> mapListToMap(List<Map<String, Object>> list) {
         Map<String, Integer> result = new HashMap<>();
         for (Map<String, Object> m : list) {
@@ -441,7 +498,12 @@ public class LinkService {
                 } catch (NumberFormatException e) {
                     throw new IllegalArgumentException("요금은 숫자 형식이어야 합니다.");
                 }
+            } else if (key.endsWith("_comment_policy")) {
+                if (!java.util.Arrays.asList("ALL", "MEMBER_ONLY", "OWNER_AND_ADMIN", "ADMIN_ONLY", "DISABLED").contains(value)) {
+                    throw new IllegalArgumentException("유효하지 않은 댓글 작성 정책입니다: " + value);
+                }
             }
+            
             
             com.pixellink.model.SystemSetting existing = systemSettingMapper.findByKey(key);
             if (existing == null) {

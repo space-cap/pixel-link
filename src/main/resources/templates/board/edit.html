@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>글수정 - Pixel-Link</title>
+    <link rel="stylesheet" th:href="@{/css/global.css(v=2)}">
+    <style>
+        .board-container {
+            width: 100%;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .form-card {
+            background: var(--bg-card);
+            border: 1px solid var(--card-border);
+            box-shadow: var(--card-shadow);
+            border-radius: var(--radius-lg);
+            padding: 40px;
+        }
+        .form-header {
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 20px;
+            margin-bottom: 32px;
+        }
+        .form-header h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        .form-header p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        .form-label {
+            display: block;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition-fast);
+            background: var(--bg-main);
+        }
+        .form-control:focus {
+            border-color: var(--accent-primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.1);
+        }
+        textarea.form-control {
+            height: 250px;
+            resize: none;
+            font-family: inherit;
+            line-height: 1.6;
+        }
+        
+        /* 기존 첨부파일 목록 */
+        .existing-attachments {
+            background: var(--bg-main);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        .existing-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+        .existing-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-sm);
+            background: white;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+        .existing-item:last-child {
+            margin-bottom: 0;
+        }
+        .existing-name {
+            font-weight: 600;
+            color: var(--text-main);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 400px;
+        }
+        .btn-delete-attach {
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+            color: #ef4444;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .btn-delete-attach:hover {
+            background: #fee2e2;
+        }
+        .deleted-badge {
+            color: #ef4444;
+            font-weight: 700;
+            font-size: 0.8rem;
+        }
+        
+        /* 비회원용 */
+        .guest-pwd-section {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .checkbox-control {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        /* 파일 입력 구역 */
+        .file-upload-box {
+            border: 2px dashed var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            text-align: center;
+            background: var(--bg-main);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+        .file-upload-box:hover {
+            border-color: var(--accent-primary);
+            background: #ffffff;
+        }
+        .file-upload-icon {
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        .file-upload-text {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .file-list {
+            margin-top: 12px;
+            text-align: left;
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+        
+        /* 버튼 구역 */
+        .buttons-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 32px;
+            border-top: 1px solid var(--card-border);
+            padding-top: 24px;
+        }
+        .btn-submit {
+            background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: var(--transition-normal);
+            box-shadow: 0 4px 6px -1px rgba(29, 78, 216, 0.15);
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px -2px rgba(29, 78, 216, 0.25);
+        }
+        .btn-cancel {
+            background: var(--bg-main);
+            border: 1px solid var(--card-border);
+            color: var(--text-muted);
+            padding: 12px 28px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+        .btn-cancel:hover {
+            background: var(--card-border);
+            color: var(--text-main);
+        }
+        
+        /* 레이아웃 구조 */
+        .dashboard-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+        .dashboard-main {
+            background: var(--bg-main);
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- [1] 로그인 회원 전용 레이아웃 -->
+    <th:block th:if="${sessionUser != null}">
+        <div th:replace="~{fragments :: dashboardHeader(currentUser=${sessionUser}, currentUserId=${sessionUser.id})}"></div>
+        <div class="dashboard-container">
+            <aside th:replace="~{fragments :: sidebar(activeMenu=${article.boardType == 'NOTICE' ? 'notice' : (article.boardType == 'FREE' ? 'free' : (article.boardType == 'QNA' ? 'qna' : 'partnership'))}, currentUserId=${sessionUser.id}, currentUser=${sessionUser})}"></aside>
+            <div class="content-area">
+                <div class="card" style="width: 100%;">
+                    <div class="form-header">
+                        <h2>글 수정</h2>
+                        <p>게시글 제목과 본문, 첨부파일을 편집할 수 있습니다.</p>
+                    </div>
+
+                    <form id="editForm" enctype="multipart/form-data">
+                        <input type="hidden" id="articleId" th:value="${article.id}">
+
+                        <div class="form-group">
+                            <label class="form-label">제목</label>
+                            <input type="text" name="title" class="form-control" placeholder="제목을 입력하세요" th:value="${article.title}" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">내용</label>
+                            <textarea name="content" class="form-control" placeholder="내용을 입력하세요" th:text="${article.content}" required></textarea>
+                        </div>
+
+                        <!-- 비밀글 옵션 (NOTICE가 아닐 때 제공) -->
+                        <div class="form-group checkbox-group" th:if="${article.boardType != 'NOTICE'}">
+                            <input type="checkbox" id="isSecret" name="isSecret" class="checkbox-control" value="true" th:checked="${article.isSecret}">
+                            <label for="isSecret" class="form-label" style="margin-bottom: 0; cursor: pointer;">비밀글로 설정</label>
+                        </div>
+
+                        <!-- 기존 첨부파일 영역 -->
+                        <div class="existing-attachments" th:if="${not #lists.isEmpty(attachments)}">
+                            <div class="existing-title">기존 첨부파일 목록</div>
+                            <div th:each="attach : ${attachments}" class="existing-item" th:id="'attach-item-' + ${attach.id}">
+                                <span class="existing-name" th:text="${attach.originalFilename}">file.txt</span>
+                                <button type="button" class="btn-delete-attach" th:onclick="markAttachmentForDelete([[${attach.id}]])">삭제</button>
+                            </div>
+                        </div>
+
+                        <!-- 첨부파일 업로드 -->
+                        <div class="form-group">
+                            <label class="form-label">새 첨부파일 추가</label>
+                            <div class="file-upload-box" onclick="document.getElementById('fileInput').click()">
+                                <div class="file-upload-icon">
+                                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                </div>
+                                <span class="file-upload-text">추가로 첨부할 파일을 선택하세요. (다중 선택 가능)</span>
+                                <input type="file" id="fileInput" name="files" style="display: none;" multiple onchange="updateFileList(this)">
+                                <div id="selectedFileList" class="file-list"></div>
+                            </div>
+                        </div>
+
+                        <div class="buttons-group">
+                            <a th:href="@{/board/detail/{id}(id=${article.id})}" class="btn-cancel">취소</a>
+                            <button type="button" class="btn-submit" onclick="submitEdit()">수정 완료</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </th:block>
+
+    <!-- [2] 비회원 전용 레이아웃 -->
+    <th:block th:if="${sessionUser == null}">
+        <div th:replace="~{fragments :: landingHeader}"></div>
+        <div class="board-container">
+            <div class="form-card">
+                <div class="form-header">
+                    <h2>글 수정 (비회원)</h2>
+                    <p>비회원 글 수정 화면입니다. 비밀번호를 변경하고자 할 때만 하단 패스워드 필드에 새로 작성해 주십시오. (기본적으로 기존 비밀번호 유지)</p>
+                </div>
+
+                <form id="editForm" enctype="multipart/form-data">
+                    <input type="hidden" id="articleId" th:value="${article.id}">
+
+                    <!-- 비회원 비밀번호 관리 -->
+                    <div class="guest-pwd-section">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label class="form-label">비밀번호 변경 (미입력 시 기존 비밀번호 유지)</label>
+                            <input type="password" name="password" class="form-control" placeholder="새 비밀번호 입력 시 변경" style="background: white;">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">제목</label>
+                        <input type="text" name="title" class="form-control" placeholder="제목을 입력하세요" th:value="${article.title}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">내용</label>
+                        <textarea name="content" class="form-control" placeholder="내용을 입력하세요" th:text="${article.content}" required></textarea>
+                    </div>
+
+                    <!-- 비밀글 옵션 (NOTICE가 아닐 때 제공) -->
+                    <div class="form-group checkbox-group" th:if="${article.boardType != 'NOTICE'}">
+                        <input type="checkbox" id="isSecret" name="isSecret" class="checkbox-control" value="true" th:checked="${article.isSecret}">
+                        <label for="isSecret" class="form-label" style="margin-bottom: 0; cursor: pointer;">비밀글로 설정</label>
+                    </div>
+
+                    <!-- 기존 첨부파일 영역 -->
+                    <div class="existing-attachments" th:if="${not #lists.isEmpty(attachments)}">
+                        <div class="existing-title">기존 첨부파일 목록</div>
+                        <div th:each="attach : ${attachments}" class="existing-item" th:id="'attach-item-' + ${attach.id}">
+                            <span class="existing-name" th:text="${attach.originalFilename}">file.txt</span>
+                            <button type="button" class="btn-delete-attach" th:onclick="markAttachmentForDelete([[${attach.id}]])">삭제</button>
+                        </div>
+                    </div>
+
+                    <!-- 첨부파일 업로드 -->
+                    <div class="form-group">
+                        <label class="form-label">새 첨부파일 추가</label>
+                        <div class="file-upload-box" onclick="document.getElementById('fileInput').click()">
+                            <div class="file-upload-icon">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            </div>
+                            <span class="file-upload-text">추가로 첨부할 파일을 선택하세요. (다중 선택 가능)</span>
+                            <input type="file" id="fileInput" name="files" style="display: none;" multiple onchange="updateFileList(this)">
+                            <div id="selectedFileList" class="file-list"></div>
+                        </div>
+                    </div>
+
+                    <div class="buttons-group">
+                        <a th:href="@{/board/detail/{id}(id=${article.id})}" class="btn-cancel">취소</a>
+                        <button type="button" class="btn-submit" onclick="submitEdit()">수정 완료</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div th:replace="~{fragments :: landingFooter}"></div>
+    </th:block>
+
+    <script th:inline="javascript">
+        const deleteAttachmentIds = [];
+
+        function markAttachmentForDelete(id) {
+            deleteAttachmentIds.push(id);
+            const element = document.getElementById("attach-item-" + id);
+            if (element) {
+                element.innerHTML = `<span class="deleted-badge">삭제 대기 중</span>`;
+            }
+        }
+
+        function updateFileList(input) {
+            const listDiv = document.getElementById("selectedFileList");
+            listDiv.innerHTML = "";
+            if (input.files.length === 0) {
+                return;
+            }
+            
+            const titleSpan = document.createElement("span");
+            titleSpan.style.fontWeight = "700";
+            titleSpan.innerText = "추가 선택된 파일 목록:";
+            listDiv.appendChild(titleSpan);
+            
+            const ul = document.createElement("ul");
+            ul.style.listStyleType = "none";
+            ul.style.paddingLeft = "0";
+            ul.style.marginTop = "6px";
+            
+            for (let i = 0; i < input.files.length; i++) {
+                const li = document.createElement("li");
+                li.style.display = "flex";
+                li.style.alignItems = "center";
+                li.style.gap = "6px";
+                li.style.marginBottom = "4px";
+                li.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg> ${input.files[i].name} (${(input.files[i].size / 1024).toFixed(1)} KB)`;
+                ul.appendChild(li);
+            }
+            listDiv.appendChild(ul);
+        }
+
+        function submitEdit() {
+            const articleId = document.getElementById("articleId").value;
+            const form = document.getElementById("editForm");
+            const formData = new FormData(form);
+
+            // 삭제 대기 중인 파일 ID 목록 주입
+            deleteAttachmentIds.forEach(id => {
+                formData.append("deleteAttachmentIds", id);
+            });
+
+            // 비밀글 체크박스 값 보완
+            const secretCheckbox = document.getElementById("isSecret");
+            if (secretCheckbox) {
+                formData.set("isSecret", secretCheckbox.checked ? "true" : "false");
+            }
+
+            fetch("/api/board/articles/" + articleId + "/edit", {
+                method: "POST",
+                body: formData
+            })
+            .then(res => {
+                if (res.ok) {
+                    return res.json();
+                } else {
+                    return res.text().then(text => { throw new Error(text) });
+                }
+            })
+            .then(data => {
+                if (data.success) {
+                    alert("글이 성공적으로 수정되었습니다.");
+                    location.href = "/board/detail/" + articleId;
+                } else {
+                    alert("글 수정 실패: " + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert("에러 발생: " + err.message);
+            });
+        }
+    </script>
+</body>
+</html>

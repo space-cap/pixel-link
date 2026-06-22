@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pixellink.mapper.BoardArticleMapper">
+
+  <select id="findById" resultType="com.pixellink.model.BoardArticle">
+    SELECT * FROM board_articles WHERE id = #{id}
+  </select>
+
+  <select id="findAllPaged" resultType="com.pixellink.model.BoardArticle">
+    SELECT * FROM board_articles
+    WHERE board_type = #{boardType}
+    <if test="searchKeyword != null and searchKeyword != ''">
+      AND (title LIKE '%' || #{searchKeyword} || '%' OR content LIKE '%' || #{searchKeyword} || '%' OR author_name LIKE '%' || #{searchKeyword} || '%')
+    </if>
+    ORDER BY created_at DESC
+    LIMIT #{limit} OFFSET #{offset}
+  </select>
+
+  <select id="countAll" resultType="int">
+    SELECT COUNT(*) FROM board_articles
+    WHERE board_type = #{boardType}
+    <if test="searchKeyword != null and searchKeyword != ''">
+      AND (title LIKE '%' || #{searchKeyword} || '%' OR content LIKE '%' || #{searchKeyword} || '%' OR author_name LIKE '%' || #{searchKeyword} || '%')
+    </if>
+  </select>
+
+  <insert id="insert">
+    INSERT INTO board_articles (id, board_type, title, content, author_id, author_name, is_secret, password, status, view_count, created_at, updated_at)
+    VALUES (
+      #{id}, 
+      #{boardType}, 
+      #{title}, 
+      #{content}, 
+      #{authorId, jdbcType=VARCHAR}, 
+      #{authorName}, 
+      #{isSecret}, 
+      #{password, jdbcType=VARCHAR}, 
+      #{status, jdbcType=VARCHAR}, 
+      #{viewCount}, 
+      #{createdAt}, 
+      #{updatedAt}
+    )
+  </insert>
+
+  <update id="update">
+    UPDATE board_articles
+    SET 
+      title = #{title},
+      content = #{content},
+      is_secret = #{isSecret},
+      password = #{password, jdbcType=VARCHAR},
+      status = #{status, jdbcType=VARCHAR},
+      updated_at = #{updatedAt}
+    WHERE id = #{id}
+  </update>
+
+  <update id="updateStatus">
+    UPDATE board_articles
+    SET status = #{status}
+    WHERE id = #{id}
+  </update>
+
+  <update id="incrementViewCount">
+    UPDATE board_articles
+    SET view_count = view_count + 1
+    WHERE id = #{id}
+  </update>
+
+  <delete id="delete">
+    DELETE FROM board_articles WHERE id = #{id}
+  </delete>
+
+</mapper>

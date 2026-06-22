@@ -13,7 +13,7 @@
     <meta property="og:description" th:content="#{seo.landing.description}">
     
     <!-- global.css 스타일 연동 -->
-    <link rel="stylesheet" th:href="@{/css/global.css}">
+    <link rel="stylesheet" th:href="@{/css/global.css(v=2)}">
     <style>
         /* 랜딩 페이지 전용 커스텀 스타일 (글라스모피즘 & 블루 하이라이트) */
         body {
@@ -460,40 +460,6 @@
             gap: 12px;
         }
 
-        .btn-login-header {
-            text-decoration: none;
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: #475569;
-            transition: all 0.2s;
-        }
-
-        .btn-login-header:hover {
-            color: #0f172a;
-            background-color: #f1f5f9;
-        }
-
-        .btn-signup-header {
-            text-decoration: none;
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            background: #2563eb;
-            color: white !important;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
-        }
-
-        .btn-signup-header:hover {
-            background: #1d4ed8;
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
-        }
 
         .btn-signup-header:active {
             transform: translateY(0);

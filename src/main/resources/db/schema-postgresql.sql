@@ -161,6 +161,23 @@ INSERT INTO system_settings (setting_key, setting_value, description)
 VALUES ('feature_marketing_pixel_enabled', 'true', '마케팅 픽셀 기능 활성화 여부 (true/false)')
 ON CONFLICT (setting_key) DO NOTHING;
 
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('board_notice_comment_policy', 'ADMIN_ONLY', '공지사항 댓글 쓰기 정책')
+ON CONFLICT (setting_key) DO NOTHING;
+
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('board_free_comment_policy', 'ALL', '자유게시판 댓글 쓰기 정책')
+ON CONFLICT (setting_key) DO NOTHING;
+
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('board_qna_comment_policy', 'OWNER_AND_ADMIN', '1:1 문의 댓글 쓰기 정책')
+ON CONFLICT (setting_key) DO NOTHING;
+
+INSERT INTO system_settings (setting_key, setting_value, description)
+VALUES ('board_partnership_comment_policy', 'OWNER_AND_ADMIN', '제휴제안 댓글 쓰기 정책')
+ON CONFLICT (setting_key) DO NOTHING;
+
+
 CREATE TABLE IF NOT EXISTS api_keys (
     id VARCHAR(50) PRIMARY KEY,
     user_id VARCHAR(50) NOT NULL REFERENCES users(id),
@@ -179,4 +196,40 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS phone VARCHAR(50);
 ALTER TABLE users ADD COLUMN IF NOT EXISTS terms_agreed BOOLEAN DEFAULT FALSE;
 ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'USER';
 ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
+
+CREATE TABLE IF NOT EXISTS board_articles (
+    id VARCHAR(50) PRIMARY KEY,
+    board_type VARCHAR(50) NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    content TEXT NOT NULL,
+    author_id VARCHAR(50) REFERENCES users(id),
+    author_name VARCHAR(100) NOT NULL,
+    is_secret BOOLEAN DEFAULT FALSE,
+    password VARCHAR(255),
+    status VARCHAR(50) DEFAULT 'OPEN',
+    view_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS board_comments (
+    id VARCHAR(50) PRIMARY KEY,
+    article_id VARCHAR(50) NOT NULL REFERENCES board_articles(id) ON DELETE CASCADE,
+    author_id VARCHAR(50) REFERENCES users(id),
+    author_name VARCHAR(100) NOT NULL,
+    content TEXT NOT NULL,
+    is_admin_reply BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS board_attachments (
+    id VARCHAR(50) PRIMARY KEY,
+    article_id VARCHAR(50) NOT NULL REFERENCES board_articles(id) ON DELETE CASCADE,
+    original_filename VARCHAR(255) NOT NULL,
+    stored_filename VARCHAR(255) NOT NULL,
+    file_path VARCHAR(500) NOT NULL,
+    file_size BIGINT NOT NULL,
+    file_type VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
 

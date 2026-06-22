@@ -301,6 +301,58 @@
                             </div>
                         </div>
 
+                        <!-- 게시판별 댓글 권한 설정 영역 -->
+                        <div style="margin-top: 32px; border-top: 1px solid var(--card-border); padding-top: 32px;">
+                            <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 20px; color: var(--text-main);">💬 게시판 댓글 쓰기 권한 설정</h3>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                                <div class="form-row">
+                                    <label class="form-label" for="board_notice_comment_policy">공지사항 댓글 정책</label>
+                                    <span class="form-desc">공지사항 게시판의 댓글 작성 권한 정책입니다.</span>
+                                    <select id="board_notice_comment_policy" name="board_notice_comment_policy" class="select-user" style="width: 100%; height: 46px;">
+                                        <option value="ALL" th:selected="${#strings.toString(settings.?[settingKey == 'board_notice_comment_policy'][0]?.settingValue) == 'ALL'}">전체 허용 (회원+비회원)</option>
+                                        <option value="MEMBER_ONLY" th:selected="${#strings.toString(settings.?[settingKey == 'board_notice_comment_policy'][0]?.settingValue) == 'MEMBER_ONLY'}">로그인 회원 전용</option>
+                                        <option value="OWNER_AND_ADMIN" th:selected="${#strings.toString(settings.?[settingKey == 'board_notice_comment_policy'][0]?.settingValue) == 'OWNER_AND_ADMIN'}">작성자 본인 및 관리자만</option>
+                                        <option value="ADMIN_ONLY" th:selected="${#strings.toString(settings.?[settingKey == 'board_notice_comment_policy'][0]?.settingValue) == 'ADMIN_ONLY'}">관리자 전용</option>
+                                        <option value="DISABLED" th:selected="${#strings.toString(settings.?[settingKey == 'board_notice_comment_policy'][0]?.settingValue) == 'DISABLED'}">댓글 사용 안 함 (비활성화)</option>
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <label class="form-label" for="board_free_comment_policy">자유게시판 댓글 정책</label>
+                                    <span class="form-desc">자유게시판의 댓글 작성 권한 정책입니다.</span>
+                                    <select id="board_free_comment_policy" name="board_free_comment_policy" class="select-user" style="width: 100%; height: 46px;">
+                                        <option value="ALL" th:selected="${#strings.toString(settings.?[settingKey == 'board_free_comment_policy'][0]?.settingValue) == 'ALL'}">전체 허용 (회원+비회원)</option>
+                                        <option value="MEMBER_ONLY" th:selected="${#strings.toString(settings.?[settingKey == 'board_free_comment_policy'][0]?.settingValue) == 'MEMBER_ONLY'}">로그인 회원 전용</option>
+                                        <option value="OWNER_AND_ADMIN" th:selected="${#strings.toString(settings.?[settingKey == 'board_free_comment_policy'][0]?.settingValue) == 'OWNER_AND_ADMIN'}">작성자 본인 및 관리자만</option>
+                                        <option value="ADMIN_ONLY" th:selected="${#strings.toString(settings.?[settingKey == 'board_free_comment_policy'][0]?.settingValue) == 'ADMIN_ONLY'}">관리자 전용</option>
+                                        <option value="DISABLED" th:selected="${#strings.toString(settings.?[settingKey == 'board_free_comment_policy'][0]?.settingValue) == 'DISABLED'}">댓글 사용 안 함 (비활성화)</option>
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <label class="form-label" for="board_qna_comment_policy">1:1 문의 댓글 정책</label>
+                                    <span class="form-desc">1:1 문의 게시판의 댓글 작성 권한 정책입니다.</span>
+                                    <select id="board_qna_comment_policy" name="board_qna_comment_policy" class="select-user" style="width: 100%; height: 46px;">
+                                        <option value="ALL" th:selected="${#strings.toString(settings.?[settingKey == 'board_qna_comment_policy'][0]?.settingValue) == 'ALL'}">전체 허용 (회원+비회원)</option>
+                                        <option value="MEMBER_ONLY" th:selected="${#strings.toString(settings.?[settingKey == 'board_qna_comment_policy'][0]?.settingValue) == 'MEMBER_ONLY'}">로그인 회원 전용</option>
+                                        <option value="OWNER_AND_ADMIN" th:selected="${#strings.toString(settings.?[settingKey == 'board_qna_comment_policy'][0]?.settingValue) == 'OWNER_AND_ADMIN'}">작성자 본인 및 관리자만</option>
+                                        <option value="ADMIN_ONLY" th:selected="${#strings.toString(settings.?[settingKey == 'board_qna_comment_policy'][0]?.settingValue) == 'ADMIN_ONLY'}">관리자 전용</option>
+                                        <option value="DISABLED" th:selected="${#strings.toString(settings.?[settingKey == 'board_qna_comment_policy'][0]?.settingValue) == 'DISABLED'}">댓글 사용 안 함 (비활성화)</option>
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <label class="form-label" for="board_partnership_comment_policy">제휴제안 댓글 정책</label>
+                                    <span class="form-desc">제휴제안 게시판의 댓글 작성 권한 정책입니다.</span>
+                                    <select id="board_partnership_comment_policy" name="board_partnership_comment_policy" class="select-user" style="width: 100%; height: 46px;">
+                                        <option value="ALL" th:selected="${#strings.toString(settings.?[settingKey == 'board_partnership_comment_policy'][0]?.settingValue) == 'ALL'}">전체 허용 (회원+비회원)</option>
+                                        <option value="MEMBER_ONLY" th:selected="${#strings.toString(settings.?[settingKey == 'board_partnership_comment_policy'][0]?.settingValue) == 'MEMBER_ONLY'}">로그인 회원 전용</option>
+                                        <option value="OWNER_AND_ADMIN" th:selected="${#strings.toString(settings.?[settingKey == 'board_partnership_comment_policy'][0]?.settingValue) == 'OWNER_AND_ADMIN'}">작성자 본인 및 관리자만</option>
+                                        <option value="ADMIN_ONLY" th:selected="${#strings.toString(settings.?[settingKey == 'board_partnership_comment_policy'][0]?.settingValue) == 'ADMIN_ONLY'}">관리자 전용</option>
+                                        <option value="DISABLED" th:selected="${#strings.toString(settings.?[settingKey == 'board_partnership_comment_policy'][0]?.settingValue) == 'DISABLED'}">댓글 사용 안 함 (비활성화)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+
                         <!-- 저장 버튼 -->
                         <div style="margin-top: 35px; text-align: right;">
                             <button type="submit" class="btn-submit">

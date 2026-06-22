@@ -41,7 +41,11 @@
 
   <!-- SQLite용 일별 클릭 수 집계 -->
   <select id="getDailyClicks" resultType="map" databaseId="sqlite">
-    SELECT SUBSTR(timestamp, 1, 10) as date, COUNT(*) as clicks
+    SELECT 
+      SUBSTR(timestamp, 1, 10) as date, 
+      COUNT(*) as clicks,
+      SUM(CASE WHEN is_ad_clicked = 1 THEN 1 ELSE 0 END) as adClicks,
+      SUM(CASE WHEN is_converted = 1 THEN 1 ELSE 0 END) as conversions
     FROM click_logs
     WHERE link_id = #{linkId}
     GROUP BY SUBSTR(timestamp, 1, 10)
@@ -51,7 +55,11 @@
 
   <!-- PostgreSQL용 일별 클릭 수 집계 -->
   <select id="getDailyClicks" resultType="map" databaseId="postgresql">
-    SELECT TO_CHAR(timestamp, 'YYYY-MM-DD') as date, COUNT(*) as clicks
+    SELECT 
+      TO_CHAR(timestamp, 'YYYY-MM-DD') as date, 
+      COUNT(*) as clicks,
+      SUM(CASE WHEN is_ad_clicked = true THEN 1 ELSE 0 END) as adClicks,
+      SUM(CASE WHEN is_converted = true THEN 1 ELSE 0 END) as conversions
     FROM click_logs
     WHERE link_id = #{linkId}
     GROUP BY TO_CHAR(timestamp, 'YYYY-MM-DD')

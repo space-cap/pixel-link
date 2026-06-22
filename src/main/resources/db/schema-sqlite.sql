@@ -148,6 +148,19 @@ VALUES ('feature_monetization_enabled', 'true', '수익화 기능 활성화 여�
 INSERT OR IGNORE INTO system_settings (setting_key, setting_value, description)
 VALUES ('feature_marketing_pixel_enabled', 'true', '마케팅 픽셀 기능 활성화 여부 (true/false)');
 
+INSERT OR IGNORE INTO system_settings (setting_key, setting_value, description)
+VALUES ('board_notice_comment_policy', 'ADMIN_ONLY', '공지사항 댓글 쓰기 정책');
+
+INSERT OR IGNORE INTO system_settings (setting_key, setting_value, description)
+VALUES ('board_free_comment_policy', 'ALL', '자유게시판 댓글 쓰기 정책');
+
+INSERT OR IGNORE INTO system_settings (setting_key, setting_value, description)
+VALUES ('board_qna_comment_policy', 'OWNER_AND_ADMIN', '1:1 문의 댓글 쓰기 정책');
+
+INSERT OR IGNORE INTO system_settings (setting_key, setting_value, description)
+VALUES ('board_partnership_comment_policy', 'OWNER_AND_ADMIN', '제휴제안 댓글 쓰기 정책');
+
+
 CREATE TABLE IF NOT EXISTS api_keys (
     id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL,
@@ -159,4 +172,44 @@ CREATE TABLE IF NOT EXISTS api_keys (
 );
 
 CREATE INDEX IF NOT EXISTS idx_api_keys_token ON api_keys(api_key);
+
+CREATE TABLE IF NOT EXISTS board_articles (
+    id TEXT PRIMARY KEY,
+    board_type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    author_id TEXT,
+    author_name TEXT NOT NULL,
+    is_secret INTEGER DEFAULT 0,
+    password TEXT,
+    status TEXT DEFAULT 'OPEN',
+    view_count INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    updated_at TEXT DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY(author_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS board_comments (
+    id TEXT PRIMARY KEY,
+    article_id TEXT NOT NULL,
+    author_id TEXT,
+    author_name TEXT NOT NULL,
+    content TEXT NOT NULL,
+    is_admin_reply INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY(article_id) REFERENCES board_articles(id) ON DELETE CASCADE,
+    FOREIGN KEY(author_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS board_attachments (
+    id TEXT PRIMARY KEY,
+    article_id TEXT NOT NULL,
+    original_filename TEXT NOT NULL,
+    stored_filename TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    file_size INTEGER NOT NULL,
+    file_type TEXT NOT NULL,
+    created_at TEXT DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY(article_id) REFERENCES board_articles(id) ON DELETE CASCADE
+);
 

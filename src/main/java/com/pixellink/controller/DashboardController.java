@@ -265,6 +265,28 @@ public class DashboardController {
         return "faq";
     }
 
+    @GetMapping("/info/privacy")
+    public String showPrivacy(HttpServletRequest request, Model model) {
+        SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
+        if (sessionUser != null) {
+            User user = userMapper.findById(sessionUser.getId());
+            model.addAttribute("currentUser", user);
+            model.addAttribute("currentUserId", sessionUser.getId());
+        }
+        return "privacy";
+    }
+
+    @GetMapping("/info/terms")
+    public String showTerms(HttpServletRequest request, Model model) {
+        SessionUser sessionUser = (SessionUser) httpSession.getAttribute("user");
+        if (sessionUser != null) {
+            User user = userMapper.findById(sessionUser.getId());
+            model.addAttribute("currentUser", user);
+            model.addAttribute("currentUserId", sessionUser.getId());
+        }
+        return "terms";
+    }
+
     private String getBaseUrl(HttpServletRequest request) {
         String scheme = request.getScheme(); // http or https
         String serverName = request.getServerName(); // localhost or domain

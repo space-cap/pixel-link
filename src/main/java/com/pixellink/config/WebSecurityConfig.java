@@ -63,7 +63,9 @@ public class WebSecurityConfig {
                     "/api/links", 
                     "/api/links/*/ad-click", 
                     "/api/links/*/payments/confirm",
-                    "/info/faq"
+                    "/info/faq",
+                    "/info/privacy",
+                    "/info/terms"
                 ).permitAll()
                 // 로그인, 회원가입 및 설치 페이지는 누구나 접근 가능 (보호막에 걸리기 전에 통과)
                 .requestMatchers("/app/login", "/app/signup", "/app/signup/process", "/app/install", "/app/install/process").permitAll()

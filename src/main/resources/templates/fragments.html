@@ -200,6 +200,8 @@
             <a th:href="@{/board/list?boardType=QNA}" style="color: #64748b; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">1:1 문의</a>
             <a th:href="@{/board/list?boardType=PARTNERSHIP}" style="color: #64748b; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'">제휴제안</a>
             <a th:href="@{/info/faq}" style="color: #64748b; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'" th:text="#{menu.faq}">FAQ / 고객지원</a>
+            <a th:href="@{/info/privacy}" style="color: #64748b; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'" th:text="${#locale.language == 'ko' ? '개인정보처리방침' : 'Privacy Policy'}">개인정보처리방침</a>
+            <a th:href="@{/info/terms}" style="color: #64748b; text-decoration: none; font-weight: 600; transition: color 0.2s;" onmouseover="this.style.color='#94a3b8'" onmouseout="this.style.color='#64748b'" th:text="${#locale.language == 'ko' ? '서비스 이용약관' : 'Terms of Service'}">서비스 이용약관</a>
         </div>
         <p style="margin: 0; font-size: 0.85rem;">&copy; 2026 Pixel-Link. All rights reserved.</p>
     </footer>

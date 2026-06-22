@@ -18,7 +18,7 @@ public class RedirectionController {
     @Autowired
     private com.pixellink.service.LinkService linkService;
 
-    @GetMapping("/{code}")
+    @GetMapping("/{code:[a-zA-Z0-9]+}")
     public String handleRedirection(
             @PathVariable("code") String code,
             HttpServletRequest request,
